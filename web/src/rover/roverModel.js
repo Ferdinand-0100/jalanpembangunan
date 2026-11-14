@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { getNasaWormTexture, getNasaMeatballTexture, getNasaContainerTexture } from './nasaDecals.js';
 
 /**
  * Creates a specialized NASA Mars Rover 3D model for one of 3 distinct mission roles:
@@ -115,6 +116,26 @@ export function createRoverModel(opts = {}) {
    * --------------------------------------------------------- */
   // Main hull central structure
   addMesh(new THREE.BoxGeometry(1.6, 0.55, 2.3), bodyWhite, 0, 0.88, 0);
+
+  // Official NASA Insignia Plaques on Warm Electronics Box (WEB)
+  const nasaWormMat = new THREE.MeshStandardMaterial({
+    map: getNasaWormTexture(),
+    roughness: 0.3,
+    metalness: 0.15,
+  });
+  const nasaMeatballMat = new THREE.MeshStandardMaterial({
+    map: getNasaMeatballTexture(),
+    transparent: true,
+    roughness: 0.3,
+    metalness: 0.1,
+  });
+
+  // Left & Right Chassis Side Panels (NASA Worm Logo)
+  addMesh(new THREE.PlaneGeometry(0.72, 0.22), nasaWormMat, -0.806, 0.9, -0.1, 0, -Math.PI / 2, 0);
+  addMesh(new THREE.PlaneGeometry(0.72, 0.22), nasaWormMat, 0.806, 0.9, -0.1, 0, Math.PI / 2, 0);
+
+  // Front Chassis Bumper Badge (NASA Meatball Insignia)
+  addMesh(new THREE.PlaneGeometry(0.28, 0.28), nasaMeatballMat, 0, 0.88, -1.455, 0, Math.PI, 0);
 
   // Undercarriage skid plate (tapered bottom armor)
   addMesh(new THREE.BoxGeometry(1.3, 0.15, 2.1), darkTitanium, 0, 0.56, 0);
@@ -368,16 +389,24 @@ export function createRoverModel(opts = {}) {
       roughness: 0.2,
     });
 
+    const nasaContainerMat = new THREE.MeshStandardMaterial({
+      map: getNasaContainerTexture(),
+      roughness: 0.35,
+      metalness: 0.2,
+    });
+
     // Kontainer Utama (Panjang 2.4m, Lebar 1.8m, Tinggi 1.1m)
     addMesh(new THREE.BoxGeometry(1.75, 1.05, 2.3), containerMat, 0, 1.4, 0.2);
 
-    // Panel Samping Kontainer Bergaris Industri
+    // Panel Samping Kontainer Bergaris Industri & NASA Logistics Livery
     for (const sign of [-1, 1]) {
       addMesh(new THREE.BoxGeometry(0.08, 0.85, 2.1), containerPanelMat, sign * 0.9, 1.4, 0.2);
       // Strip Garis Peringatan Hazard Kuning
       addMesh(new THREE.BoxGeometry(0.09, 0.12, 2.1), hazardMat, sign * 0.91, 1.65, 0.2);
       // Strip Lampu LED Status Kargo
       addMesh(new THREE.BoxGeometry(0.09, 0.06, 1.9), containerGlowMat, sign * 0.91, 1.1, 0.2);
+      // NASA Logistics Specimen Carrier Banner on Container Flanks
+      addMesh(new THREE.PlaneGeometry(1.6, 0.42), nasaContainerMat, sign * 0.946, 1.38, 0.2, 0, (sign === -1 ? -Math.PI / 2 : Math.PI / 2), 0);
     }
 
     // Pintu Kargo Belakang Berengsel Hidrolik
@@ -432,10 +461,84 @@ export function createRoverModel(opts = {}) {
     addMesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6, 8), darkTitanium, -0.75, 0.6, -1.5, 0.3, 0, 0);
     addMesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6, 8), darkTitanium, 0.75, 0.6, -1.5, 0.3, 0, 0);
 
+    /* ---------------------------------------------------------
+     * 5. ARTICULATED ROBOTIC SAMPLING ARM (DUAL TOOL: CLAW & SCOOP)
+     * - Mengambil benda padat dengan MENCAPIT (Hydraulic Claw Gripper)
+     * - Mengambil benda cair dengan MENYEROK (Suction Dipper Scoop)
+     * --------------------------------------------------------- */
+    const samplingArmGroup = new THREE.Group();
+    samplingArmGroup.position.set(0.68, 0.95, -1.35); // Depan kanan kabin
+
+    // Sendi Bahu Lengan (Turret Base)
+    addMesh(new THREE.CylinderGeometry(0.12, 0.14, 0.2, 12), darkTitanium, 0, 0.05, 0, 0, 0, 0, samplingArmGroup);
+    addMesh(new THREE.SphereGeometry(0.1, 10, 10), chromeStrut, 0, 0.16, 0, 0, 0, 0, samplingArmGroup);
+
+    // Lengan Atas (Upper Arm)
+    const upperArm = new THREE.Group();
+    upperArm.position.set(0, 0.16, 0);
+    addMesh(new THREE.CylinderGeometry(0.05, 0.06, 0.9, 10), bodyWhite, 0, 0.42, 0, 0, 0, 0, upperArm);
+    addMesh(new THREE.CylinderGeometry(0.025, 0.025, 0.7, 8), chromeStrut, 0.06, 0.42, 0.04, 0, 0, 0, upperArm); // Silinder hidrolik
+    upperArm.rotation.x = -0.4; // Posisi standby melipat ke belakang
+    samplingArmGroup.add(upperArm);
+
+    // Sendi Siku & Lengan Bawah (Forearm)
+    const forearmGroup = new THREE.Group();
+    forearmGroup.position.set(0, 0.85, 0);
+    addMesh(new THREE.SphereGeometry(0.08, 10, 10), darkTitanium, 0, 0, 0, 0, 0, 0, forearmGroup);
+    addMesh(new THREE.CylinderGeometry(0.04, 0.045, 0.75, 10), darkTitanium, 0, 0.38, 0, 0, 0, 0, forearmGroup);
+    upperArm.add(forearmGroup);
+
+    // Kepala Ujung Alat Ganda (Dual-End Effector Head)
+    const toolHead = new THREE.Group();
+    toolHead.position.set(0, 0.75, 0);
+    addMesh(new THREE.BoxGeometry(0.18, 0.12, 0.16), darkTitanium, 0, 0.06, 0, 0, 0, 0, toolHead);
+    addMesh(new THREE.SphereGeometry(0.04, 8, 8), containerGlowMat, 0, 0.14, 0, 0, 0, 0, toolHead); // Status LED alat
+    forearmGroup.add(toolHead);
+
+    // A. MODUL CAPIT BENDA PADAT (Hydraulic Robotic Claw Gripper)
+    const clawGroup = new THREE.Group();
+    clawGroup.position.set(0, 0.12, 0);
+
+    const clawLeft = new THREE.Group();
+    clawLeft.position.set(-0.07, 0, 0);
+    addMesh(new THREE.BoxGeometry(0.03, 0.22, 0.06), chromeStrut, 0, 0.1, 0, 0, 0, -0.2, clawLeft);
+    addMesh(new THREE.ConeGeometry(0.035, 0.1, 4), accentMat, 0.02, 0.24, 0, 0, 0, Math.PI / 1.5, clawLeft); // Ujung cakar
+    clawGroup.add(clawLeft);
+
+    const clawRight = new THREE.Group();
+    clawRight.position.set(0.07, 0, 0);
+    addMesh(new THREE.BoxGeometry(0.03, 0.22, 0.06), chromeStrut, 0, 0.1, 0, 0, 0, 0.2, clawRight);
+    addMesh(new THREE.ConeGeometry(0.035, 0.1, 4), accentMat, -0.02, 0.24, 0, 0, 0, -Math.PI / 1.5, clawRight); // Ujung cakar
+    clawGroup.add(clawRight);
+    toolHead.add(clawGroup);
+
+    // B. MODUL SEROK BENDA CAIR (Suction Dipper Scoop)
+    const scoopGroup = new THREE.Group();
+    scoopGroup.position.set(0, 0.1, 0.12);
+    // Sendok mangkuk serokan fluida
+    const scoopBowl = addMesh(new THREE.CylinderGeometry(0.12, 0.06, 0.16, 16, 1, false, 0, Math.PI), chromeStrut, 0, 0.08, 0, -Math.PI / 2, 0, 0, scoopGroup);
+    // Selang hisap fluida ke kontainer
+    addMesh(new THREE.CylinderGeometry(0.025, 0.025, 0.35, 8), containerGlowMat, 0, -0.08, -0.06, 0.4, 0, 0, scoopGroup);
+    toolHead.add(scoopGroup);
+
+    group.add(samplingArmGroup);
+
     roleHooks.radarDish = radarDish;
     roleHooks.containerGlow = containerGlowMat;
     roleHooks.cargoSpecimen = cargoSpecimen;
     roleHooks.boosterFlames = boosterFlames;
+
+    // Hooks Animasi Lengan Sampling Hermes
+    roleHooks.samplingArmGroup = samplingArmGroup;
+    roleHooks.upperArm = upperArm;
+    roleHooks.forearmGroup = forearmGroup;
+    roleHooks.toolHead = toolHead;
+    roleHooks.clawGroup = clawGroup;
+    roleHooks.clawLeft = clawLeft;
+    roleHooks.clawRight = clawRight;
+    roleHooks.scoopGroup = scoopGroup;
+    roleHooks.samplingMode = 'idle'; // 'idle' | 'claw' | 'scoop'
+    roleHooks.samplingProgress = 0;
   }
 
   /* ---------------------------------------------------------

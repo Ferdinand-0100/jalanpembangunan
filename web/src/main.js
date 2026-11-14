@@ -12,8 +12,13 @@ import { Hud } from './ui/hud.js';
 import { MapPortal } from './ui/mapPortal.js';
 import { RegionMarkers } from './terrain/regionMarkers.js';
 import { MissionSystem } from './mission/missionSystem.js';
+import { VisualPerceptionSystem } from './mission/visualPerception.js';
+import { VisualPerceptionPanel } from './ui/visualPerceptionPanel.js';
+import { HistoryTracker } from './rover/historyTracker.js';
+import { LabBackpackWorkbench } from './ui/labBackpack.js';
 
 let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal, regionMarkers, missionSystem;
+let vpms, vpPanel, historyTracker, labBackpack;
 
 const hud = new Hud({
   onExaggeration: v => { frame.setExaggeration(v); terrain.build(); },
@@ -31,6 +36,16 @@ const hud = new Hud({
   onOpenMapPortal: () => {
     if (mapPortal) mapPortal.show();
   },
+  onToggleHistory: (visible) => {
+    if (historyTracker) historyTracker.setShowHistory(visible);
+  },
+  onOpenBackpack: () => {
+    if (labBackpack) {
+      labBackpack.toggle();
+    } else {
+      hud.showToast('🎒 Laboratorium sedang menyiapkan Meja Riset...');
+    }
+  },
 });
 
 function selectRover(idx) {
@@ -43,6 +58,7 @@ function selectRover(idx) {
   if (missionSystem) {
     hud.updateWorkflow(missionSystem, rover);
   }
+  if (vpms) vpms._activeIdx = idx;
 }
 
 function triggerMainTask() {
@@ -60,6 +76,20 @@ function triggerMainTask() {
     } else {
       swarm.triggerActiveTask();
       hud.showToast(`[GeoLab] Laser Raman & Pengeboran aktif pada singkapan batuan!`);
+      if (vpms) {
+        vpms.captureOnTaskComplete({
+          taskId: `DRILL-LASER-${Date.now()}`,
+          roverId: '02',
+          roverName: 'Curiosity GeoLab',
+          roverRole: 'geological-investigation',
+          description: `Pengeboran Inti & Spektrometri Laser Raman Singkapan Batuan Mars`,
+          regionId: 'rock-core',
+          regionName: 'Field Outcrop Matrix',
+          roverPhysics: { ...active.physics },
+          mineral: 'Basaltik Martis Silikat & Logam Magnetik',
+          analysisResult: 'Pola reflektansi laser terdeteksi: 62% Basalt, 24% Piroksen, 14% Olivin.',
+        });
+      }
     }
   } else if (active.role === 'transport-support') {
     // 3. Hermes Transport: Jika ada kargo -> antar ke lab, jika belum -> jemput ke waypoint
@@ -94,7 +124,7 @@ function triggerSecondaryTask() {
 }
 
 async function main() {
-  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setSize(innerWidth, innerHeight);
   renderer.shadowMap.enabled = true;
@@ -148,6 +178,44 @@ async function main() {
     hud.updateWorkflow(missionSystem, swarm.getActiveRover());
   };
 
+  // === Visual Perception & Mission Documentation System ===
+  try {
+    vpms = new VisualPerceptionSystem(
+      renderer, scene, camera, frame, hf,
+      (X, Y) => regionMarkers ? regionMarkers.getReliefAt(X, Y) : 0
+    );
+    vpms._rovers = swarm.rovers;
+    vpms._activeIdx = 0;
+    missionSystem.onTaskComplete = (taskMeta) => vpms.captureOnTaskComplete(taskMeta);
+    vpPanel = new VisualPerceptionPanel(vpms);
+    window.vpPanel = vpPanel;
+    window.vpms = vpms;
+  } catch (e) {
+    console.warn('[VPMS] Visual Perception init failed (non-fatal):', e.message);
+  }
+
+  // === Lab Backpack & Interactive 3D Examination Workbench ===
+  try {
+    labBackpack = new LabBackpackWorkbench(missionSystem, vpms);
+    window.labBackpack = labBackpack;
+  } catch (e) {
+    console.warn('[LabBackpack] Init failed:', e.message);
+  }
+
+  // === History Tracker ===
+  try {
+    historyTracker = new HistoryTracker(
+      scene, frame,
+      (X, Y) => {
+        let e = hf.sample(X, Y);
+        if (regionMarkers) e += regionMarkers.getReliefAt(X, Y);
+        return e;
+      }
+    );
+  } catch (e) {
+    console.warn('[HistoryTracker] Init failed (non-fatal):', e.message);
+  }
+
   marker = new THREE.Mesh(new THREE.ConeGeometry(25, 120, 12), new THREE.MeshBasicMaterial({ color: 0x00e0ff }));
   marker.visible = false;
   scene.add(marker);
@@ -191,6 +259,9 @@ async function main() {
     } else if (e.code === 'KeyC') {
       // Shortcut C: Panggil Hermes Transport (Shift+C untuk Pendaratan Ekspres Instan)
       missionSystem.callTransportToWaypoint(e.shiftKey);
+    } else if (e.code === 'KeyE') {
+      // Shortcut E: Buka / Tutup Backpack Laboratorium
+      if (labBackpack) labBackpack.toggle();
     }
   });
 
@@ -247,6 +318,15 @@ async function main() {
 
     rig.update(dt, activeMeshPos);
     renderer.render(scene, camera);
+
+    // Update history tracker
+    if (historyTracker) {
+      historyTracker.update(swarm.activeIndex, swarm.rovers);
+      if (typeof hud.updateHistory === 'function') {
+        const stats = historyTracker.getTrackStats(swarm.activeIndex);
+        hud.updateHistory(stats);
+      }
+    }
 
     const [lon, lat] = frame.projToLonLat(active.physics.X, active.physics.Y);
     hud.update({

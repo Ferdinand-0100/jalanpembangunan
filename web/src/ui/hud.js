@@ -1,12 +1,108 @@
+import { RoverViewer } from './roverViewer.js';
+
 const $ = id => document.getElementById(id);
 
 export class Hud {
+  /**
+   * @param {Object} handlers
+   */
   constructor(handlers) {
     const h = handlers;
+    this.handlers = h;
     this.toastTimer = null;
     this.showDetails = false;
+    this.showHistLog = false;
+    this.historyTrackEnabled = true;
 
-    // Sliders & controls
+    // 1. Initialize Interactive 3D Rover Viewer
+    const viewerContainer = $('roverViewerContainer');
+    if (viewerContainer) {
+      this.roverViewer = new RoverViewer(viewerContainer);
+    }
+
+    // Interactive 3D Viewer Toolbar Controls
+    if ($('viewerResetBtn')) {
+      $('viewerResetBtn').onclick = () => {
+        if (this.roverViewer) this.roverViewer.resetView();
+      };
+    }
+    if ($('viewerZoomInBtn')) {
+      $('viewerZoomInBtn').onclick = () => {
+        if (this.roverViewer) this.roverViewer.zoomIn();
+      };
+    }
+    if ($('viewerZoomOutBtn')) {
+      $('viewerZoomOutBtn').onclick = () => {
+        if (this.roverViewer) this.roverViewer.zoomOut();
+      };
+    }
+    if ($('viewerRotateBtn')) {
+      $('viewerRotateBtn').onclick = () => {
+        if (this.roverViewer) {
+          const auto = this.roverViewer.toggleAutoRotate();
+          $('viewerRotateBtn').classList.toggle('active', auto);
+          $('viewerRotateBtn').textContent = auto ? '⟳ Auto: ON' : '⟳ Auto';
+        }
+      };
+    }
+
+    // 2. SHOW HISTORY TRACK Toggle Button
+    if ($('historyToggleBtn')) {
+      $('historyToggleBtn').onclick = () => {
+        this.historyTrackEnabled = !this.historyTrackEnabled;
+        const btn = $('historyToggleBtn');
+        const stateTag = $('histToggleState');
+        btn.classList.toggle('active', this.historyTrackEnabled);
+        if (stateTag) {
+          stateTag.textContent = this.historyTrackEnabled ? '[ ON ]' : '[ OFF ]';
+          stateTag.style.color = this.historyTrackEnabled ? 'var(--data-cyan)' : 'var(--text-dim)';
+        }
+        if (h.onToggleHistory) {
+          h.onToggleHistory(this.historyTrackEnabled);
+        }
+        this.showToast(this.historyTrackEnabled ? 'History Track: Ditampilkan di medan Mars' : 'History Track: Disembunyikan');
+      };
+    }
+
+    // Toggle Collapsible Movement History Log
+    if ($('toggleHistLogBtn')) {
+      $('toggleHistLogBtn').onclick = () => {
+        this.showHistLog = !this.showHistLog;
+        const c = $('histLogContainer');
+        if (c) c.style.display = this.showHistLog ? 'block' : 'none';
+        $('toggleHistLogBtn').textContent = this.showHistLog ? '▲ Sembunyikan Riwayat Lintasan' : '📜 Buka Riwayat Lintasan (Log Telemetri) ▼';
+      };
+    }
+
+    // Buka Meja Riset & Backpack Laboratorium Spesimen Mars
+    if ($('toggleBackpackBtn')) {
+      $('toggleBackpackBtn').onclick = () => {
+        if (typeof h.onOpenBackpack === 'function') {
+          h.onOpenBackpack();
+        } else if (window.labBackpack && typeof window.labBackpack.toggle === 'function') {
+          window.labBackpack.toggle();
+        }
+      };
+    }
+
+    // 3. Top-Left Simulation Settings Modal Toggle
+    if ($('toggleSettingsBtn')) {
+      $('toggleSettingsBtn').onclick = () => {
+        const modal = $('simSettingsModal');
+        if (modal) {
+          const isShown = modal.style.display === 'block';
+          modal.style.display = isShown ? 'none' : 'block';
+        }
+      };
+    }
+    if ($('closeSettingsBtn')) {
+      $('closeSettingsBtn').onclick = () => {
+        const modal = $('simSettingsModal');
+        if (modal) modal.style.display = 'none';
+      };
+    }
+
+    // Simulation Sliders & Controls
     if ($('exag')) {
       $('exag').oninput = e => { $('exagV').textContent = (+e.target.value).toFixed(1) + '×'; };
       $('exag').onchange = e => h.onExaggeration(+e.target.value);
@@ -28,17 +124,17 @@ export class Hud {
     if ($('mainActionBtn')) $('mainActionBtn').onclick = () => h.onTriggerTask();
     if ($('secActionBtn')) $('secActionBtn').onclick = () => h.onSecondaryAction();
 
-    // Toggle Telemetry Details Modal/Drawer
+    // Toggle Telemetry Sources Drawer
     if ($('toggleDetailsBtn')) {
       $('toggleDetailsBtn').onclick = () => {
         this.showDetails = !this.showDetails;
         const panel = $('telemetryDetails');
         if (panel) panel.style.display = this.showDetails ? 'block' : 'none';
-        $('toggleDetailsBtn').textContent = this.showDetails ? '▲ Sembunyikan Detail' : '📊 Lihat Detail Telemetri';
+        $('toggleDetailsBtn').textContent = this.showDetails ? '▲ Sembunyikan Sumber Data' : '📊 Sumber Data NASA & USGS Geologi ▼';
       };
     }
 
-    // Robot selection buttons (0: Mapper, 1: GeoLab, 2: Transport)
+    // Robot selection tabs (0: Mapper, 1: GeoLab, 2: Transport)
     const btns = document.querySelectorAll('#robotSelector .r-btn');
     btns.forEach(btn => {
       btn.onclick = () => {
@@ -70,8 +166,52 @@ export class Hud {
       if (badge) {
         badge.textContent = `ROV-${rover.callsign}`;
         badge.style.color = rover.accentHex;
-        badge.style.backgroundColor = `${rover.accentHex}22`;
       }
+      // Update interactive 3D viewer model
+      if (this.roverViewer) {
+        this.roverViewer.setRover(rover);
+      }
+    }
+  }
+
+  /**
+   * Updates History Track statistics and movement log list
+   * @param {Object} stats
+   */
+  updateHistory(stats) {
+    if (!stats) return;
+
+    if ($('histTotalDist')) $('histTotalDist').textContent = stats.totalDistanceFormatted;
+    if ($('histElapsedTime')) $('histElapsedTime').textContent = stats.elapsedFormatted;
+
+    if ($('histStartCoord')) {
+      $('histStartCoord').textContent = stats.startPoint
+        ? `${stats.startPoint.lon}°E, ${stats.startPoint.lat}°N (${stats.startPoint.elevation}m)`
+        : 'Menunggu Posisi Awal...';
+    }
+
+    if ($('histCurrentCoord')) {
+      $('histCurrentCoord').textContent = stats.currentPoint
+        ? `${stats.currentPoint.lon}°E, ${stats.currentPoint.lat}°N (${stats.currentPoint.elevation}m)`
+        : 'Standby';
+    }
+
+    if ($('histWaypointCount')) {
+      $('histWaypointCount').textContent = `${stats.waypointCount} Titik`;
+    }
+
+    // Update log list if drawer is open
+    const list = $('histLogList');
+    if (list && this.showHistLog && stats.waypoints) {
+      const recent = stats.waypoints.slice(-15).reverse();
+      list.innerHTML = recent.map(w => `
+        <div class="hist-log-row">
+          <span>#${w.index}</span>
+          <span>${w.timeStr}</span>
+          <span>${w.lon.toFixed(4)}°E, ${w.lat.toFixed(4)}°N</span>
+          <span>${w.speed.toFixed(1)}m/s</span>
+        </div>
+      `).join('');
     }
   }
 
@@ -103,18 +243,18 @@ export class Hud {
     if (activeRover.role === 'surface-mapping') {
       $('act-role-title').textContent = '🗺️ Ares Mapper (Eksplorasi)';
       $('act-role-status').textContent = hasWaypoint ? 'Waypoint Ditandai — Siap Dijemput' : 'Siap Menandai Titik Sampel';
-      $('act-role-status').style.color = '#00d4ff';
+      $('act-role-status').style.color = 'var(--data-cyan)';
 
       mainBtn.textContent = '📍 Tandai Waypoint Sampel (Space)';
       mainBtn.style.display = 'block';
-      mainBtn.style.background = 'linear-gradient(135deg, #185a9d 0%, #0d3660 100%)';
-      mainBtn.style.borderColor = '#00d4ff';
+      mainBtn.style.background = '#0b3d91';
+      mainBtn.style.borderColor = '#1e4fa3';
 
       if (secBtn) {
         secBtn.textContent = '🚛 Panggil Hermes Transport (C)';
         secBtn.style.display = hasWaypoint ? 'block' : 'none';
-        secBtn.style.background = 'linear-gradient(135deg, #2c6e49 0%, #17422b 100%)';
-        secBtn.style.borderColor = '#00ff88';
+        secBtn.style.background = '#1b382b';
+        secBtn.style.borderColor = 'var(--status-green)';
       }
     } else if (activeRover.role === 'geological-investigation') {
       $('act-role-title').textContent = '🔬 Curiosity GeoLab (Riset)';
@@ -123,29 +263,29 @@ export class Hud {
 
       mainBtn.textContent = hasLab ? '🔬 Laser Raman & Bor Sampel (Space)' : '🏗️ Bangun Stasiun Lab Sains (Space / B)';
       mainBtn.style.display = 'block';
-      mainBtn.style.background = 'linear-gradient(135deg, #9d1838 0%, #5e0d20 100%)';
+      mainBtn.style.background = '#8a152e';
       mainBtn.style.borderColor = '#ff3b5c';
 
       if (secBtn) {
         secBtn.textContent = '🔬 Analisis Batuan Sekitar';
         secBtn.style.display = hasLab ? 'block' : 'none';
-        secBtn.style.background = '#3a2016';
-        secBtn.style.borderColor = '#6b4a36';
+        secBtn.style.background = '#241a1a';
+        secBtn.style.borderColor = '#4a2d2d';
       }
     } else if (activeRover.role === 'transport-support') {
       $('act-role-title').textContent = '🚛 Hermes Container Hauler (Logistik)';
       const cargoText = hasCargo ? `📦 Kargo: ${missionSystem.transportCargo.name}` : '📡 Radar: Memindai Benda Unik Mars...';
       $('act-role-status').textContent = cargoText;
-      $('act-role-status').style.color = hasCargo ? '#00ff88' : '#ffb74d';
+      $('act-role-status').style.color = hasCargo ? 'var(--status-green)' : 'var(--status-amber)';
 
       if (hasCargo) {
         mainBtn.textContent = hasLab ? '🚚 Kirim Kontainer ke Stasiun Lab (Space)' : '⚠️ Bangun Lab Dahulu (Pakai GeoLab)!';
-        mainBtn.style.background = hasLab ? 'linear-gradient(135deg, #187d46 0%, #0d4a29 100%)' : '#4a3020';
-        mainBtn.style.borderColor = hasLab ? '#00ff88' : '#ff9f55';
+        mainBtn.style.background = hasLab ? '#124e2c' : '#3d2b1a';
+        mainBtn.style.borderColor = hasLab ? 'var(--status-green)' : '#92602c';
       } else {
         mainBtn.textContent = '📡 Kunci Target Radar / Jemput (Space)';
-        mainBtn.style.background = 'linear-gradient(135deg, #187d46 0%, #0d4a29 100%)';
-        mainBtn.style.borderColor = '#00ff88';
+        mainBtn.style.background = '#124e2c';
+        mainBtn.style.borderColor = 'var(--status-green)';
       }
       mainBtn.style.display = 'block';
 
@@ -159,8 +299,8 @@ export class Hud {
     if (questList && missionSystem.quests) {
       questList.innerHTML = missionSystem.quests.map(q => `
         <div class="quest-item ${q.completed ? 'completed' : ''}">
-          <span class="q-icon">${q.completed ? '✓' : '○'}</span>
-          <span class="q-title">${q.title}</span>
+          <span style="font-family:monospace;width:12px;">${q.completed ? '✓' : '○'}</span>
+          <span>${q.title}</span>
         </div>
       `).join('');
     }
@@ -178,30 +318,31 @@ export class Hud {
   }
 
   update(s) {
-    // Only update detailed telemetry if the details drawer is open
-    if (this.showDetails) {
-      if ($('r-lon')) $('r-lon').textContent = `${s.lon.toFixed(5)}° E, ${s.lat.toFixed(5)}° N`;
-      if ($('r-xy')) $('r-xy').textContent = `X ${s.X.toFixed(0)}  Y ${s.Y.toFixed(0)} m`;
-      if ($('r-el')) $('r-el').textContent = `${s.elev.toFixed(1)} m`;
-      if ($('r-slope')) $('r-slope').textContent = `${s.slope.toFixed(1)}°`;
-      if ($('r-hd')) $('r-hd').textContent = `${((s.heading * 180 / Math.PI) % 360 + 360) % 360 | 0}°`;
-      if ($('r-status')) {
-        $('r-status').textContent = s.status;
-        $('r-status').className = s.status.startsWith('blocked') ? 'warn' : '';
-      }
+    // Flight Dynamics Telemetry Card
+    if ($('r-speed')) $('r-speed').textContent = `${s.speed.toFixed(1)} m/s`;
+    if ($('r-el')) $('r-el').textContent = `${s.elev.toFixed(0)} m`;
+    if ($('r-hd')) $('r-hd').textContent = `${((s.heading * 180 / Math.PI) % 360 + 360) % 360 | 0}°`;
+    if ($('r-slope')) $('r-slope').textContent = `${s.slope.toFixed(1)}°`;
+    if ($('r-status')) {
+      $('r-status').textContent = s.status;
+      $('r-status').style.color = s.status.startsWith('blocked') ? 'var(--status-amber)' : 'var(--data-cyan)';
     }
 
     // Fast top telemetry bar
     if ($('topSpeed')) $('topSpeed').textContent = `${s.speed.toFixed(1)} m/s`;
     if ($('topElev')) $('topElev').textContent = `${s.elev.toFixed(0)} m`;
-    if ($('fps')) $('fps').textContent = `${s.fps.toFixed(0)} fps`;
+    if ($('fps')) $('fps').textContent = `${s.fps.toFixed(0)}`;
   }
 
   setInspect(p) {
-    if ($('inspect')) {
-      $('inspect').textContent = p
-        ? `📍 ${p.lon.toFixed(5)}° E, ${p.lat.toFixed(5)}° N · Elev: ${p.elevation.toFixed(1)} m`
-        : '';
+    const el = $('inspect');
+    if (el) {
+      if (p) {
+        el.style.display = 'flex';
+        el.textContent = `📍 ${p.lon.toFixed(5)}° E, ${p.lat.toFixed(5)}° N · Elev: ${p.elevation.toFixed(1)} m`;
+      } else {
+        el.style.display = 'none';
+      }
     }
   }
 

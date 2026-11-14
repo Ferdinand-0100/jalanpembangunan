@@ -13,6 +13,7 @@ export const REGION_SCIENCE_DATA = {
   elysium: {
     id: 'elysium',
     name: 'Elysium',
+    stateOfMatter: 'solid', // Benda Padat -> Diambil dengan CAPIT (Claw)
     artifactName: 'Kristal Inti Magma (Magma Core Crystal)',
     rockType: 'Lava Basaltik & Kaldera Vulkanik',
     mineral: 'Olivin Basaltik & Silikat Magmatik',
@@ -25,6 +26,7 @@ export const REGION_SCIENCE_DATA = {
   syrtis: {
     id: 'syrtis',
     name: 'Syrtis Major Planum',
+    stateOfMatter: 'solid', // Benda Padat -> Diambil dengan CAPIT (Claw)
     artifactName: 'Permata Mantel Olivin (Mantle Peridotite Gem)',
     rockType: 'Perisai Lava Basalt Gelap',
     mineral: 'Plagioklas Kalsik & Piroksen Besi',
@@ -37,18 +39,20 @@ export const REGION_SCIENCE_DATA = {
   acidalia: {
     id: 'acidalia',
     name: 'Acidalia Planitia',
-    artifactName: 'Inti Es Hidrotermal Purba (Hydrothermal Ice Core)',
-    rockType: 'Sedimen Danau & Lempung Hidrat',
-    mineral: 'Smektit, Sulfat & Jejak Air Purba',
+    stateOfMatter: 'liquid', // Benda Cair -> Diambil dengan SEROK (Liquid Scoop)
+    artifactName: 'Fluida Akuifer Hidrotermal (Hydrothermal Brine Liquid)',
+    rockType: 'Reservoir Fluida Danau & Mata Air Hidrotermal',
+    mineral: 'Larutan Garam Sulfat, Smektit & Air Purba',
     color: 0x00d4ff,
     offsetX: -8000,
     offsetY: 6000,
-    significance: 'Indikasi danau luas dan interaksi air-batuan masa lampau.',
-    analysisResult: 'Komposisi: 42% Mineral Lempung, 31% Sulfat Hidrat, 18% Pasir Kuarsa-Besi. Jejak retensi air purba terdeteksi!',
+    significance: 'Bukti cairan fluida hidrotermal bawah permukaan masa lampau.',
+    analysisResult: 'Komposisi: 74% Air Larutan Garam Mg-Sulfat, 18% Asam Silikat Terlarut, 8% Klorida. Fluida cair purba terbukti!',
   },
   arabia: {
     id: 'arabia',
     name: 'Arabia Terra',
+    stateOfMatter: 'solid', // Benda Padat -> Diambil dengan CAPIT (Claw)
     artifactName: 'Meteorit Logam Chondrite (Metallic Chondrite)',
     rockType: 'Breksia Kawah Tumbukan Kuno',
     mineral: 'Kerak Noachian Primitif & Logam Asteroid',
@@ -61,6 +65,7 @@ export const REGION_SCIENCE_DATA = {
   isidis: {
     id: 'isidis',
     name: 'Isidis Planitia',
+    stateOfMatter: 'solid', // Benda Padat -> Diambil dengan CAPIT (Claw)
     artifactName: 'Kaca Benturan Kosmik (Impactite Tektite Glass)',
     rockType: 'Ejecta Tumbukan Asteroid Raksasa',
     mineral: 'Impactite & Magnesit Karbonat',
@@ -73,14 +78,15 @@ export const REGION_SCIENCE_DATA = {
   hesperia: {
     id: 'hesperia',
     name: 'Hesperia Planum',
-    artifactName: 'Monolit Pematang Tektonik (Tectonic Ridge Monolith)',
-    rockType: 'Pematang Kerut Lava (*Wrinkle Ridges*)',
-    mineral: 'Lava Transisi Hesperian',
+    stateOfMatter: 'liquid', // Benda Cair -> Diambil dengan SEROK (Liquid Scoop)
+    artifactName: 'Fluida Geotermal Celah Pematang (Liquid Geothermal Brine)',
+    rockType: 'Kolam Fluida Mineral Geotermal Celah Tektonik',
+    mineral: 'Fluida Kaya Besi, Sulfida & Zeolit Terlarut',
     color: 0x66bb6a,
     offsetX: 3000,
     offsetY: -10000,
-    significance: 'Penanda batas geokronologi transisi iklim Mars.',
-    analysisResult: 'Komposisi: 55% Basalt Terkompresi, 25% Hematit, 15% Zeolit Tektonik. Menunjukkan gaya kompresi tektonik global!',
+    significance: 'Penanda sirkulasi fluida geotermal pasca-kompresi tektonik global.',
+    analysisResult: 'Komposisi: 62% Larutan Besi-Sulfat, 22% Zeolit Koloid, 16% Senyawa Karbonat. Sumber geotermal aktif!',
   },
 };
 
@@ -129,6 +135,7 @@ export class MissionSystem {
     // Notification callbacks
     this.onNotify = () => {};
     this.onStateChange = () => {};
+    this.onTaskComplete = () => {};  // Visual Perception callback
 
     this.#initUniqueArtifacts();
     this.#initTransportRadar();
@@ -176,7 +183,8 @@ export class MissionSystem {
       group.add(beam);
 
       // Label Billboard Melayang
-      const label = this.#createFloatingLabel(`💎 ${data.artifactName}`, '#' + new THREE.Color(data.color).getHexString());
+      const matterTag = data.stateOfMatter === 'solid' ? '💎 [PADAT]' : '🌊 [CAIR]';
+      const label = this.#createFloatingLabel(`${matterTag} ${data.artifactName}`, '#' + new THREE.Color(data.color).getHexString());
       label.position.y = 195;
       group.add(label);
 
@@ -186,6 +194,7 @@ export class MissionSystem {
         id: data.id,
         name: data.artifactName,
         regionName: data.name,
+        stateOfMatter: data.stateOfMatter || 'solid', // 'solid' | 'liquid'
         mineral: data.mineral,
         rockType: data.rockType,
         color: data.color,
@@ -203,8 +212,9 @@ export class MissionSystem {
     const hexColor = new THREE.Color(color);
 
     if (regionId === 'elysium') {
-      // Kristal Inti Magma (Octahedron kristal obsidian menyala lava)
-      const geo = new THREE.OctahedronGeometry(14, 0);
+      // PADAT: Kristal Inti Magma (Octahedron kristal obsidian menyala lava)
+      const group = new THREE.Group();
+      const geo = new THREE.OctahedronGeometry(15, 0);
       const mat = new THREE.MeshStandardMaterial({
         color: 0x220500,
         emissive: 0xff3300,
@@ -212,23 +222,50 @@ export class MissionSystem {
         roughness: 0.2,
         metalness: 0.9,
       });
-      return new THREE.Mesh(geo, mat);
+      group.add(new THREE.Mesh(geo, mat));
+      // Kerikil kristal basal padat di sekelilingnya
+      for (let i = 0; i < 4; i++) {
+        const mini = new THREE.Mesh(new THREE.DodecahedronGeometry(4, 0), mat);
+        mini.position.set(Math.sin(i * 1.57) * 12, -4, Math.cos(i * 1.57) * 12);
+        group.add(mini);
+      }
+      return group;
     } else if (regionId === 'acidalia') {
-      // Inti Es Hidrotermal (Icosahedron es kristal cyan transparan)
-      const geo = new THREE.IcosahedronGeometry(15, 0);
-      const mat = new THREE.MeshStandardMaterial({
-        color: 0x88eeff,
-        emissive: 0x00d4ff,
-        emissiveIntensity: 1.5,
-        roughness: 0.1,
-        metalness: 0.8,
+      // CAIR: Akuifer Fluida Hidrotermal (Kolam Fluida Danau Berpendar Cyan Bergelombang)
+      const group = new THREE.Group();
+      // Bak/kawah penampung fluida purba
+      const basinMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.8, metalness: 0.2 });
+      const basin = new THREE.Mesh(new THREE.CylinderGeometry(18, 14, 6, 24), basinMat);
+      basin.position.y = -3;
+      group.add(basin);
+
+      // Permukaan fluida cair cyan bergelombang (rippling brine pool)
+      const fluidMat = new THREE.MeshStandardMaterial({
+        color: 0x00d4ff,
+        emissive: 0x0088cc,
+        emissiveIntensity: 1.6,
+        roughness: 0.05,
+        metalness: 0.9,
         transparent: true,
         opacity: 0.88,
       });
-      return new THREE.Mesh(geo, mat);
+      const fluidSurface = new THREE.Mesh(new THREE.CylinderGeometry(16.5, 16.5, 1.2, 24), fluidMat);
+      fluidSurface.position.y = 0.5;
+      group.add(fluidSurface);
+
+      // Gelembung fluida hidrotermal meletup ke atas
+      for (let i = 0; i < 3; i++) {
+        const bubble = new THREE.Mesh(
+          new THREE.SphereGeometry(2.5, 12, 12),
+          new THREE.MeshBasicMaterial({ color: 0x88eeff, transparent: true, opacity: 0.75 })
+        );
+        bubble.position.set((i - 1) * 6, 4 + i * 2, (i % 2 === 0 ? 3 : -3));
+        group.add(bubble);
+      }
+      return group;
     } else if (regionId === 'arabia') {
-      // Fragmen Meteorit Logam (Dodecahedron kromium gelap berkilau)
-      const geo = new THREE.DodecahedronGeometry(13, 0);
+      // PADAT: Fragmen Meteorit Logam (Dodecahedron kromium gelap berkilau)
+      const geo = new THREE.DodecahedronGeometry(14, 0);
       const mat = new THREE.MeshStandardMaterial({
         color: 0x3d3a44,
         emissive: 0xffb74d,
@@ -238,8 +275,8 @@ export class MissionSystem {
       });
       return new THREE.Mesh(geo, mat);
     } else if (regionId === 'isidis') {
-      // Kaca Tektite Kosmik (TorusKnot emas-merah)
-      const geo = new THREE.TorusKnotGeometry(9, 3, 48, 8);
+      // PADAT: Kaca Tektite Kosmik (TorusKnot emas-merah)
+      const geo = new THREE.TorusKnotGeometry(10, 3.2, 48, 8);
       const mat = new THREE.MeshStandardMaterial({
         color: 0xff4422,
         emissive: 0xff8800,
@@ -249,8 +286,8 @@ export class MissionSystem {
       });
       return new THREE.Mesh(geo, mat);
     } else if (regionId === 'syrtis') {
-      // Permata Mantel Olivin (Octahedron zamrud hijau berkilau)
-      const geo = new THREE.OctahedronGeometry(14, 1);
+      // PADAT: Permata Mantel Olivin (Octahedron zamrud hijau berkilau)
+      const geo = new THREE.OctahedronGeometry(15, 1);
       const mat = new THREE.MeshStandardMaterial({
         color: 0x00aa55,
         emissive: 0x00ff88,
@@ -260,16 +297,26 @@ export class MissionSystem {
       });
       return new THREE.Mesh(geo, mat);
     } else {
-      // Monolit Tektonik Hesperia
-      const geo = new THREE.BoxGeometry(10, 24, 10);
-      const mat = new THREE.MeshStandardMaterial({
-        color: 0x55aa44,
-        emissive: 0x88ff66,
-        emissiveIntensity: 1.2,
-        roughness: 0.3,
-        metalness: 0.75,
+      // CAIR: Kolam Fluida Geotermal Celah Pematang Hesperia
+      const group = new THREE.Group();
+      const basinMat = new THREE.MeshStandardMaterial({ color: 0x2d3748, roughness: 0.7 });
+      const basin = new THREE.Mesh(new THREE.CylinderGeometry(17, 13, 5, 20), basinMat);
+      basin.position.y = -2.5;
+      group.add(basin);
+
+      const fluidMat = new THREE.MeshStandardMaterial({
+        color: 0x66bb6a,
+        emissive: 0x33aa44,
+        emissiveIntensity: 1.5,
+        roughness: 0.1,
+        metalness: 0.8,
+        transparent: true,
+        opacity: 0.85,
       });
-      return new THREE.Mesh(geo, mat);
+      const fluid = new THREE.Mesh(new THREE.CylinderGeometry(15.5, 15.5, 1.0, 20), fluidMat);
+      fluid.position.y = 0.2;
+      group.add(fluid);
+      return group;
     }
   }
 
@@ -294,61 +341,111 @@ export class MissionSystem {
   }
 
   /* ---------------------------------------------------------
-   * 3. ARES MAPPER: TANDAI WAYPOINT SAMPEL
+   * 3. ARES MAPPER: TANDAI WAYPOINT SAMPEL (BENDA BATUAN MENONJOL)
    * --------------------------------------------------------- */
   markSampleWaypoint(roverPhysics, currentRegionId = null) {
     if (this.activeWaypoint && this.activeWaypoint.mesh) {
       this.scene.remove(this.activeWaypoint.mesh);
     }
 
-    const X = roverPhysics.X;
-    const Y = roverPhysics.Y;
+    // Tempatkan benda menonjol sedikit di depan haluan Mapper agar langsung terlihat
+    const forwardDist = 32;
+    const X = roverPhysics.X + Math.sin(roverPhysics.heading) * forwardDist;
+    const Y = roverPhysics.Y + Math.cos(roverPhysics.heading) * forwardDist;
     const elev = this.getElevation(X, Y);
     const w = this.frame.toWorld(X, Y, elev);
 
     const regionInfo = REGION_SCIENCE_DATA[currentRegionId] || {
-      name: 'Jezero Western Delta',
-      mineral: 'Lempung Smektit Delta & Karbonat',
-      artifactName: 'Batuan Sedimen Karbonat Delta',
-      analysisResult: 'Kaya akan lempung smektit berpotensi mengawetkan biosignature purba!',
+      name: 'Singkapan Kawah Jezero',
+      mineral: 'Batuan Sedimen Karbonat & Lempung Smektit',
+      artifactName: 'Batuan Sedimen Karbonat Delta (Benda Menonjol)',
+      analysisResult: 'Kaya akan lempung smektit berpotensi mengawetkan biosignature purba Mars!',
       color: 0x00d4ff,
     };
 
     const group = new THREE.Group();
     group.position.set(w.x, w.y, w.z);
 
-    // Model Peti Kontainer Waypoint
-    const boxMat = new THREE.MeshStandardMaterial({ color: 0x00d4ff, emissive: 0x0066aa, emissiveIntensity: 1.0, roughness: 0.3, metalness: 0.8 });
-    const box = new THREE.Mesh(new THREE.BoxGeometry(16, 12, 22), boxMat);
-    box.position.y = 8;
-    group.add(box);
+    // 1. FORMATION BATUAN MENONJOL DI TANAH (Prominent Outcrop Rocks)
+    const rockMat = new THREE.MeshStandardMaterial({
+      color: 0x3d271d,
+      roughness: 0.9,
+      metalness: 0.1,
+    });
+    // Batuan dasar menonjol
+    const baseRock = new THREE.Mesh(new THREE.DodecahedronGeometry(12, 1), rockMat);
+    baseRock.scale.set(1.4, 0.8, 1.2);
+    baseRock.position.y = 4;
+    group.add(baseRock);
 
-    const poleMat = new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.5 });
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 160, 8), poleMat);
-    pole.position.y = 80;
-    group.add(pole);
+    // 2. KRISTAL / SPESIMEN MENONJOL YANG SIAP DICAPIT HERMES
+    const crystalGeo = new THREE.OctahedronGeometry(9, 0);
+    const crystalMat = new THREE.MeshStandardMaterial({
+      color: 0x00aacc,
+      emissive: 0x00e5ff,
+      emissiveIntensity: 2.2,
+      roughness: 0.15,
+      metalness: 0.85,
+    });
+    const prominentRock = new THREE.Mesh(crystalGeo, crystalMat);
+    prominentRock.position.set(0, 14, 0);
+    group.add(prominentRock);
 
-    const label = this.#createFloatingLabel(`📦 WAYPOINT: ${regionInfo.mineral}`, '#00d4ff');
-    label.position.y = 180;
+    // 3. Cincin Pendar Penanda di Tanah
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide, transparent: true, opacity: 0.65 });
+    const ring = new THREE.Mesh(new THREE.RingGeometry(18, 22, 24), ringMat);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 1.5;
+    group.add(ring);
+
+    // 4. Suar Pilar Cahaya Vertikal
+    const beamMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.45 });
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 3, 220, 8), beamMat);
+    beam.position.y = 110;
+    group.add(beam);
+
+    // 5. Label Billboard Melayang
+    const label = this.#createFloatingLabel(`💎 BATUAN MENONJOL: ${regionInfo.artifactName}`, '#00e5ff');
+    label.position.y = 230;
     group.add(label);
 
     this.scene.add(group);
 
     this.activeWaypoint = {
+      id: currentRegionId || 'jezero_waypoint',
       X,
       Y,
       worldPos: w,
       mesh: group,
-      regionId: currentRegionId,
+      prominentRock,
+      regionId: currentRegionId || 'jezero_delta',
       regionName: regionInfo.name,
       artifactName: regionInfo.artifactName,
+      stateOfMatter: 'solid',
       mineral: regionInfo.mineral,
       analysisResult: regionInfo.analysisResult,
       isWaypoint: true,
     };
 
-    this.onNotify(`[Ares Mapper] Waypoint Sampel ditandai di ${regionInfo.name}! Siap dipanggil.`);
+    this.onNotify(`💎 [Ares Mapper] Benda Batuan Menonjol ditemukan di ${regionInfo.name}! Siap diambil Hermes.`);
     this.onStateChange();
+
+    // Dokumentasi Visual Snapshot & Depth Camera untuk Task Pemetaan Ares Mapper
+    if (typeof this.onTaskComplete === 'function') {
+      this.onTaskComplete({
+        taskId: `MAP-WP-${Date.now()}`,
+        roverId: '01',
+        roverName: 'Ares Mapper',
+        roverRole: 'surface-mapping',
+        description: `Pemetaan & Penemuan Batuan Menonjol: ${regionInfo.artifactName}`,
+        regionId: currentRegionId || 'jezero_delta',
+        regionName: regionInfo.name,
+        roverPhysics: { ...roverPhysics },
+        mineral: regionInfo.mineral,
+        analysisResult: regionInfo.analysisResult,
+      });
+    }
+
     return this.activeWaypoint;
   }
 
@@ -472,6 +569,22 @@ export class MissionSystem {
     this.onNotify(`🎉 [GeoLab] Stasiun Lab Sains Alpha berhasil didirikan! Siap meneliti spesimen.`);
     this.onStateChange();
 
+    // Dokumentasi Visual Snapshot & Depth Camera untuk Pembangunan Lab Sains oleh GeoLab
+    if (typeof this.onTaskComplete === 'function') {
+      this.onTaskComplete({
+        taskId: `BUILD-LAB-${Date.now()}`,
+        roverId: '02',
+        roverName: 'Curiosity GeoLab',
+        roverRole: 'geological-investigation',
+        description: `Pembangunan Stasiun Lab Sains Lapangan di Mars`,
+        regionId: 'science-base',
+        regionName: 'Stasiun Lab Sains Alpha',
+        roverPhysics: { ...roverPhysics },
+        mineral: 'Struktur Komposit Modular & Reaktor Nuklir RTG',
+        analysisResult: 'Laboratorium Sains beroperasi penuh dengan inkubator batuan & spektrometer laser!',
+      });
+    }
+
     // Jika Hermes sudah memegang kargo di kontainernya, langsung perintahkan Hermes ke Lab!
     if (this.transportCargo) {
       this.transportState = 'carrying_to_lab';
@@ -511,74 +624,152 @@ export class MissionSystem {
       }
     }
 
-    // C. RADAR SCANNING OTOMATIS: Deteksi Benda Unik di Dekat Hermes
-    if (!this.transportCargo) {
-      for (const art of this.artifacts) {
-        if (art.collected) continue;
+    // C. PROSES SAMPLING OTOMATIS: Capit (Benda Padat) atau Serok (Benda Cair)
+    if (this.samplingProcess) {
+      this.samplingProcess.timer += dt;
+      const art = this.samplingProcess.artifact;
+      const isSolid = art.stateOfMatter === 'solid';
+      const progress = Math.min(1.0, this.samplingProcess.timer / this.samplingProcess.duration);
 
-        const dist = Math.hypot(tPhys.X - art.X, tPhys.Y - art.Y);
-        // Jika terpantau dalam jangkauan radar Hermes (< radarRadius)
-        if (dist < this.radarRadius) {
-          // KUNCI TARGET & AMBIL KE DALAM KONTAINER!
-          art.collected = true;
-          this.scene.remove(art.group);
+      // Kemudikan haluan Hermes menghadap tepat ke benda yang diambil
+      if (art) {
+        const dx = art.X - tPhys.X;
+        const dy = art.Y - tPhys.Y;
+        const targetHeading = Math.atan2(dx, dy);
+        let diff = targetHeading - tPhys.heading;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        tPhys.heading += diff * Math.min(1.0, 6 * dt);
+      }
 
-          this.transportCargo = {
-            id: art.id,
-            name: art.name,
-            regionName: art.regionName,
-            mineral: art.mineral,
-            rockType: art.rockType,
-            analysisResult: art.analysisResult,
-          };
+      // Rem halus Hermes selama mengambil sampel
+      tPhys.speed *= Math.exp(-5 * dt);
 
-          // Nyalakan visual kargo di dalam kontainer Hermes
-          if (hooks && hooks.cargoSpecimen) {
-            hooks.cargoSpecimen.visible = true;
-          }
+      if (hooks) {
+        hooks.samplingMode = isSolid ? 'claw' : 'scoop';
+        hooks.samplingProgress = progress;
+      }
 
-          this.completeQuest('radar_pickup');
-          this.onNotify(`🎯 [RADAR LOCK] ${art.name} Terdeteksi & Dimasukkan ke Kontainer Hermes!`);
-
-          // SETELAH DIAMBIL -> LANGSUNG KIRIM KE LAB!
-          if (this.labStation) {
-            this.transportState = 'carrying_to_lab';
-            this.onNotify(`🚀 [Hermes Container] Membawa spesimen! Melaju kencang langsung ke Stasiun Lab Sains...`);
-          } else {
-            this.transportState = 'idle';
-            this.onNotify(`⚠️ [Perhatian] Benda Unik ada di Kontainer! Gunakan Robot 02 (GeoLab) tekan B untuk membangun Lab Sains!`);
-          }
-
-          this.onStateChange();
-          break;
+      // Animasi getar/angkat objek saat dicapit/diserok
+      if (art.artifactMesh) {
+        if (progress > 0.45 && progress < 0.85) {
+          art.artifactMesh.position.y = 15 + (progress - 0.45) * 55;
+        }
+      } else if (art.prominentRock) {
+        if (progress > 0.45 && progress < 0.85) {
+          art.prominentRock.position.y = 14 + (progress - 0.45) * 55;
         }
       }
 
-      // Deteksi Waypoint Ares Mapper jika didekati
-      if (this.activeWaypoint && !this.transportCargo) {
-        const distW = Math.hypot(tPhys.X - this.activeWaypoint.X, tPhys.Y - this.activeWaypoint.Y);
-        if (distW < 45.0) {
-          this.transportCargo = {
-            id: this.activeWaypoint.regionId || 'waypoint',
-            name: this.activeWaypoint.artifactName,
-            regionName: this.activeWaypoint.regionName,
-            mineral: this.activeWaypoint.mineral,
-            analysisResult: this.activeWaypoint.analysisResult,
-          };
-          if (this.activeWaypoint.mesh) this.scene.remove(this.activeWaypoint.mesh);
+      if (this.samplingProcess.timer >= this.samplingProcess.duration) {
+        // PROSES PENGAMBILAN SELESAI -> Masuk ke kontainer!
+        if (art.collected !== undefined) art.collected = true;
+        if (art.group) this.scene.remove(art.group);
+        if (art.mesh) this.scene.remove(art.mesh);
+        if (this.activeWaypoint && this.activeWaypoint === art) {
           this.activeWaypoint = null;
+        }
 
-          if (hooks && hooks.cargoSpecimen) hooks.cargoSpecimen.visible = true;
+        this.transportCargo = {
+          id: art.id || 'jezero_delta',
+          name: art.artifactName || art.name,
+          stateOfMatter: art.stateOfMatter || 'solid',
+          regionName: art.regionName,
+          mineral: art.mineral,
+          rockType: art.rockType || 'Batuan Sedimen Delta',
+          analysisResult: art.analysisResult,
+        };
 
-          this.completeQuest('radar_pickup');
-          this.onNotify(`📦 [Hermes Container] Kontainer sampel berhasil dimuat! Meluncur ke Stasiun Lab...`);
+        if (hooks) {
+          hooks.samplingMode = 'idle';
+          hooks.samplingProgress = 0;
+          if (hooks.cargoSpecimen) hooks.cargoSpecimen.visible = true;
+        }
 
-          if (this.labStation) {
-            this.transportState = 'carrying_to_lab';
-          } else {
-            this.transportState = 'idle';
+        this.completeQuest('radar_pickup');
+
+        const actionText = isSolid ? 'MENCAPIT BATUAN MENONJOL' : 'MENYEROK BENDA CAIR';
+        this.onNotify(`🦾 [${actionText} SUKSES] ${art.artifactName || art.name} terangkat & masuk ke Kontainer Hermes!`);
+
+        // Dokumentasi Visual Snapshot & Depth Camera untuk Task Pengambilan
+        if (typeof this.onTaskComplete === 'function') {
+          this.onTaskComplete({
+            taskId: `SAMPLE-${(art.id || 'SP').toUpperCase()}-${Date.now()}`,
+            roverId: '03',
+            roverName: 'Hermes Transport',
+            roverRole: 'transport-support',
+            description: isSolid
+              ? `Pengambilan Batuan Menonjol via Capit Hidrolik: ${art.artifactName || art.name}`
+              : `Pengambilan Benda Cair via Serok Suction: ${art.name}`,
+            regionId: art.id || 'jezero_delta',
+            regionName: art.regionName,
+            roverPhysics: { ...tPhys },
+            mineral: art.mineral,
+            analysisResult: art.analysisResult,
+          });
+        }
+
+        this.samplingProcess = null;
+
+        // SETELAH DIAMBIL -> LANGSUNG MELUNCUR KE STASIUN LAB!
+        if (this.labStation) {
+          this.transportState = 'carrying_to_lab';
+          this.onNotify(`🚀 [Hermes Container] Membawa spesimen ke Lab! Tekan B pada GeoLab jika belum ada Lab.`);
+        } else {
+          this.transportState = 'idle';
+          this.onNotify(`⚠️ [Perhatian] Spesimen aman di Kontainer! Gunakan Robot 02 (GeoLab) tekan B untuk mendirikan Lab Sains.`);
+        }
+        this.onStateChange();
+      }
+    } else if (!this.transportCargo) {
+      // 1. Deteksi Waypoint Batuan Menonjol Ares Mapper jika didekati
+      if (this.activeWaypoint && !this.samplingProcess) {
+        const distW = Math.hypot(tPhys.X - this.activeWaypoint.X, tPhys.Y - this.activeWaypoint.Y);
+        if (distW < 75.0) {
+          // MEMULAI ANIMASI PENCAPITAN BATUAN MENONJOL DI WAYPOINT
+          this.samplingProcess = {
+            artifact: this.activeWaypoint,
+            timer: 0,
+            duration: 2.2, // 2.2 detik animasi pencapitan nyata
+          };
+
+          if (hooks) {
+            hooks.samplingMode = 'claw';
+            hooks.samplingProgress = 0;
           }
-          this.onStateChange();
+
+          this.onNotify(`🦾 [ROBOTIC CLAW] Mengunci Batuan Menonjol! Lengan capit Hermes menjulur mencapit batuan...`);
+        }
+      }
+
+      // 2. Deteksi Benda Unik Wilayah jika didekati
+      if (!this.samplingProcess) {
+        for (const art of this.artifacts) {
+          if (art.collected) continue;
+
+          const dist = Math.hypot(tPhys.X - art.X, tPhys.Y - art.Y);
+          // Jika terpantau dalam jangkauan radar Hermes (< radarRadius)
+          if (dist < 75.0) {
+            // MEMULAI PROSEDUR PENGAMBILAN DENGAN CAPIT ATAU SEROK
+            const isSolid = art.stateOfMatter === 'solid';
+            this.samplingProcess = {
+              artifact: art,
+              timer: 0,
+              duration: 2.2, // 2.2 detik animasi pencapitan / penyerokan realistis
+            };
+
+            if (hooks) {
+              hooks.samplingMode = isSolid ? 'claw' : 'scoop';
+              hooks.samplingProgress = 0;
+            }
+
+            if (isSolid) {
+              this.onNotify(`🦾 [ROBOTIC CLAW] Mengunci ${art.name} (Benda Padat)! Lengan hidrolik menjulur mencapit...`);
+            } else {
+              this.onNotify(`🥄 [SUCTION SCOOP] Mengunci ${art.name} (Benda Cair)! Lengan serok menjulur menciduk fluida...`);
+            }
+            break;
+          }
         }
       }
     }
@@ -675,6 +866,20 @@ export class MissionSystem {
     if (cargo.id === 'acidalia') this.completeQuest('acidalia_sample');
     if (cargo.id === 'arabia') this.completeQuest('arabia_sample');
     if (cargo.id === 'isidis') this.completeQuest('isidis_sample');
+
+    // Fire Visual Perception task-complete event BEFORE clearing cargo
+    this.onTaskComplete({
+      taskId: `TASK-${Date.now()}-${(cargo.id || 'UNK').toUpperCase()}`,
+      roverId: '03',
+      roverName: 'Hermes Transport',
+      roverRole: 'transport-support',
+      description: `Cargo Delivered: ${cargo.name} to ${this.labStation?.name || 'Science Lab'}`,
+      regionId: cargo.id || 'unknown',
+      regionName: cargo.regionName || cargo.name || 'Unknown',
+      roverPhysics: this.rovers?.[2]?.physics || {},
+      mineral: cargo.mineral || '—',
+      analysisResult: cargo.analysisResult || '—',
+    });
 
     // Kosongkan kargo di kontainer Hermes
     this.transportCargo = null;

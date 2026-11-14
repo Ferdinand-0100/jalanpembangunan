@@ -318,6 +318,73 @@ export class RoverSwarm {
       if (h.relayGroup) {
         h.relayGroup.rotation.y = 0.6 + Math.sin(this._animTime * 0.4) * 0.15;
       }
+
+      // Animasi Articulated Sampling Arm (Capit Padat & Serok Cair)
+      if (h.samplingArmGroup && h.upperArm && h.forearmGroup) {
+        if (h.samplingMode === 'claw') {
+          // MODE CAPIT BENDA PADAT (Hydraulic Claw Gripper)
+          if (h.clawGroup) h.clawGroup.visible = true;
+          if (h.scoopGroup) h.scoopGroup.visible = false;
+
+          const p = Math.max(0, Math.min(1, h.samplingProgress || 0));
+          if (p < 0.45) {
+            // Fase 1: Lengan turun menjangkau ke tanah, capit membuka lebar
+            const t = p / 0.45;
+            h.upperArm.rotation.x = -0.4 + (0.85 - (-0.4)) * t;
+            h.forearmGroup.rotation.x = 0.7 * t;
+            if (h.clawLeft) h.clawLeft.rotation.z = -0.15 - 0.4 * t;
+            if (h.clawRight) h.clawRight.rotation.z = 0.15 + 0.4 * t;
+          } else if (p < 0.75) {
+            // Fase 2: Capit MENJEPIT RAPAT benda padat!
+            const t = (p - 0.45) / 0.3;
+            h.upperArm.rotation.x = 0.85;
+            h.forearmGroup.rotation.x = 0.7;
+            if (h.clawLeft) h.clawLeft.rotation.z = -0.55 + 0.7 * t;
+            if (h.clawRight) h.clawRight.rotation.z = 0.55 - 0.7 * t;
+          } else {
+            // Fase 3: Lengan terangkat ke atas menuju pintu kontainer & memasukkan kargo
+            const t = (p - 0.75) / 0.25;
+            h.upperArm.rotation.x = 0.85 - (0.85 - (-0.9)) * t;
+            h.forearmGroup.rotation.x = 0.7 - 0.9 * t;
+            if (h.clawLeft) h.clawLeft.rotation.z = 0.15;
+            if (h.clawRight) h.clawRight.rotation.z = -0.15;
+          }
+        } else if (h.samplingMode === 'scoop') {
+          // MODE SEROK BENDA CAIR (Suction Dipper Scoop)
+          if (h.clawGroup) h.clawGroup.visible = false;
+          if (h.scoopGroup) h.scoopGroup.visible = true;
+
+          const p = Math.max(0, Math.min(1, h.samplingProgress || 0));
+          if (p < 0.4) {
+            // Fase 1: Lengan menjulur turun ke kolam fluida
+            const t = p / 0.4;
+            h.upperArm.rotation.x = -0.4 + (0.8 - (-0.4)) * t;
+            h.forearmGroup.rotation.x = 0.75 * t;
+            if (h.scoopGroup) h.scoopGroup.rotation.x = -0.2 * t;
+          } else if (p < 0.75) {
+            // Fase 2: MENYEROK FLUIDA CAIR (Gerakan menciduk berayun)
+            const t = (p - 0.4) / 0.35;
+            h.upperArm.rotation.x = 0.8 + Math.sin(t * Math.PI) * 0.1;
+            h.forearmGroup.rotation.x = 0.75;
+            if (h.scoopGroup) h.scoopGroup.rotation.x = -0.2 + 0.8 * t;
+          } else {
+            // Fase 3: Lengan terangkat menuang cairan ke selang tangki kontainer
+            const t = (p - 0.75) / 0.25;
+            h.upperArm.rotation.x = 0.8 - (0.8 - (-0.9)) * t;
+            h.forearmGroup.rotation.x = 0.75 - 0.9 * t;
+            if (h.scoopGroup) h.scoopGroup.rotation.x = 0.6;
+          }
+        } else {
+          // MODE IDLE: Lengan kembali ke posisi parkir terlipat
+          if (h.clawGroup) h.clawGroup.visible = true;
+          if (h.scoopGroup) h.scoopGroup.visible = true;
+          h.upperArm.rotation.x += (-0.4 - h.upperArm.rotation.x) * dt * 5;
+          h.forearmGroup.rotation.x += (0 - h.forearmGroup.rotation.x) * dt * 5;
+          if (h.clawLeft) h.clawLeft.rotation.z += (0 - h.clawLeft.rotation.z) * dt * 5;
+          if (h.clawRight) h.clawRight.rotation.z += (0 - h.clawRight.rotation.z) * dt * 5;
+          if (h.scoopGroup) h.scoopGroup.rotation.x += (0 - h.scoopGroup.rotation.x) * dt * 5;
+        }
+      }
     }
   }
 
