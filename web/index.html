@@ -36,115 +36,51 @@
  #toast{position:fixed;top:15px;left:50%;transform:translateX(-50%);background:rgba(25,15,10,0.92);border:1px solid #00d4ff;color:#e8f7ff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:500;box-shadow:0 4px 16px rgba(0,212,255,0.3);display:none;z-index:9999;backdrop-filter:blur(6px)}
 
  /* ========================================================
-    MAP PORTAL / MISSION SELECTION OVERLAY STYLES
+    MAP PORTAL — Simple Landing Page
     ======================================================== */
- .map-portal-overlay{position:fixed;inset:0;background:rgba(12,8,6,0.96);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;backdrop-filter:blur(8px);overflow-y:auto}
- .map-portal-container{max-width:1220px;width:100%;max-height:92vh;background:#18100b;border:1px solid #5a3824;border-radius:12px;box-shadow:0 12px 48px rgba(0,0,0,0.8);display:flex;flex-direction:column;overflow:hidden}
+ .map-portal-overlay{position:fixed;inset:0;background:rgba(10,7,5,0.98);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px)}
 
- .portal-header{padding:14px 20px;background:#20140e;border-bottom:1px solid #4a2d1d;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
- .mission-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:bold;background:#00d4ff22;color:#00d4ff;border:1px solid #00d4ff55;letter-spacing:0.5px}
- .portal-title{margin:4px 0 2px;font-size:18px;color:#ffc299;font-weight:700}
- .portal-subtitle{margin:0;font-size:11.5px;color:#a89280}
+ .portal-landing{display:flex;flex-direction:column;align-items:center;gap:40px;padding:40px 20px;max-width:900px;width:100%}
 
- .map-selector-pills{display:flex;gap:6px;align-items:center}
- .map-pill{padding:5px 10px;font-size:11px;background:#281810;border:1px solid #4e3020;border-radius:6px;color:#d8c6b6;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start}
- .map-pill:hover{background:#3b2318;color:#fff}
- .map-pill.active{background:#452516;border-color:#ffb98a;color:#fff;box-shadow:0 0 10px rgba(255,185,138,0.25)}
- .map-pill.placeholder{border-style:dashed;color:#a88f7b}
- .pill-code{font-weight:bold;font-size:10px;color:#ffb98a}
- .pill-name{font-size:10px;opacity:0.85}
+ .portal-brand{text-align:center}
+ .brand-icon{font-size:64px;margin-bottom:12px;filter:drop-shadow(0 0 20px rgba(255,185,138,0.4))}
+ .brand-title{margin:0;font-size:32px;color:#ffc299;font-weight:800;letter-spacing:1px}
+ .brand-sub{margin:8px 0 0;font-size:14px;color:#a89280;font-weight:400}
 
- .portal-body{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;padding:16px 20px;overflow-y:auto;flex:1}
- @media (max-width: 900px){.portal-body{grid-template-columns:1fr}}
+ .map-cards-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:16px;width:100%}
 
- /* Left Column: Map Radar Visualizer */
- .portal-map-col{display:flex;flex-direction:column;gap:12px}
- .map-card-canvas{background:#1e120b;border:1px solid #5a3824;border-radius:8px;padding:12px;position:relative}
- .map-radar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:11.5px}
- .badge-code{background:#ff9f5522;color:#ff9f55;border:1px solid #ff9f5566;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:bold;margin-right:6px}
- .meta-tag{font-size:10.5px;color:#9e8774;font-family:monospace}
+ .map-card{background:#1e130d;border:2px solid #3d2a1e;border-radius:12px;padding:20px;cursor:pointer;transition:all 0.2s ease;position:relative;overflow:hidden}
+ .map-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+ .map-card.active-map{border-color:#4a3020}
+ .map-card.active-map:hover{border-color:#ffb98a;box-shadow:0 8px 32px rgba(255,185,138,0.2)}
+ .map-card.locked-map{opacity:0.5;cursor:not-allowed}
+ .map-card.placeholder{border-style:dashed;border-color:#3d2a1e;opacity:0.4;cursor:default}
+ .map-card.placeholder:hover{transform:none;box-shadow:none}
 
- /* Coordinate Viewport Grid */
- .mars-grid-viewport{height:250px;background:radial-gradient(ellipse at center, #2e1a12 0%, #160c07 100%);border:1px solid #4a2d1d;border-radius:6px;position:relative;overflow:hidden}
- .grid-line{position:absolute;pointer-events:none}
- .lat-line{left:0;right:0;border-top:1px dashed rgba(255,185,138,0.18);display:flex;justify-content:flex-end}
- .lat-line.equator{border-top:1px solid rgba(0,212,255,0.4)}
- .lat-line span{font-size:9px;color:#856c5a;padding-right:6px;transform:translateY(-12px)}
- .lat-line.equator span{color:#00d4ff}
- .lon-line{top:0;bottom:0;border-left:1px dashed rgba(255,185,138,0.18)}
- .lon-line span{font-size:9px;color:#856c5a;padding-left:4px}
+ .card-top-badge{position:absolute;top:12px;right:12px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;letter-spacing:0.5px}
+ .ready-badge{background:rgba(0,212,255,0.15);color:#00d4ff;border:1px solid rgba(0,212,255,0.4)}
+ .coming-badge{background:rgba(255,185,138,0.1);color:#a89280;border:1px solid rgba(255,185,138,0.2)}
+ .placeholder-badge{background:rgba(168,146,128,0.1);color:#6b5a4e;border:1px solid rgba(168,146,128,0.2)}
 
- /* Pins on Mars Grid */
- .region-pin{position:absolute;transform:translate(-50%, -50%);cursor:pointer;z-index:2}
- .pin-dot{width:10px;height:10px;border-radius:50%;background:#ffb98a;border:2px solid #140c08;transition:all 0.15s ease}
- .pin-pulse{position:absolute;inset:-6px;border-radius:50%;border:1px solid #ffb98a;opacity:0.6;animation:pinPulse 2s infinite ease-out}
- .region-pin.sim-target .pin-dot{background:#00d4ff;box-shadow:0 0 10px #00d4ff}
- .region-pin.sim-target .pin-pulse{border-color:#00d4ff}
- .region-pin.selected .pin-dot{background:#ff3b5c;transform:scale(1.4)}
- .region-pin:hover .pin-dot{transform:scale(1.5)}
+ .card-code{font-size:20px;font-weight:800;color:#ffb98a;margin-bottom:6px;font-family:'Courier New',monospace}
+ .card-title{font-size:13px;color:#d8c6b6;line-height:1.4;margin-bottom:10px}
+ .card-meta{font-size:11px;color:#8a7565;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+ .card-regions{display:flex;justify-content:space-between;align-items:center;font-size:11px;border-top:1px solid #2d1f16;padding-top:8px}
+ .region-count{color:#a89280}
+ .enter-hint{color:#00d4ff;font-weight:600}
+ .card-hint{font-size:11px;color:#6b5a4e;margin-top:6px}
 
- .pin-label{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(18,11,7,0.92);border:1px solid #5a3824;padding:3px 7px;border-radius:4px;white-space:nowrap;font-size:10px;color:#f3e6d8;display:none;pointer-events:none;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.6)}
- .region-pin:hover .pin-label, .region-pin.selected .pin-label{display:flex;flex-direction:column;align-items:center}
- .target-tag{color:#00d4ff;font-weight:bold;font-size:9px}
+ .portal-footer{text-align:center;font-size:11px;color:#5a4a3e;display:flex;gap:8px;align-items:center;justify-content:center}
+ .portal-footer code{background:#2a1c14;padding:1px 6px;border-radius:3px;color:#a89280;font-size:10px}
 
- @keyframes pinPulse{0%{transform:scale(0.8);opacity:0.9}100%{transform:scale(2.4);opacity:0}}
-
- .map-legend-bar{margin-top:8px;font-size:10px;color:#9b8370;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;border-top:1px solid #3d2315;padding-top:6px}
-
- /* Sector Cards Scroller */
- .sector-cards-list{display:flex;flex-direction:column}
- .cards-scroller{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:190px;overflow-y:auto;padding-right:4px}
- .sector-card{background:#20140e;border:1px solid #4a2d1d;border-radius:6px;padding:6px 9px;cursor:pointer;transition:all 0.15s ease}
- .sector-card:hover{background:#321f15;border-color:#6e452f}
- .sector-card.active{background:#3e2417;border-color:#ff9f55;box-shadow:0 0 8px rgba(255,159,85,0.25)}
- .sector-header{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#fff}
- .ready-badge{background:#00d4ff22;color:#00d4ff;border:1px solid #00d4ff55;font-size:9px;padding:1px 4px;border-radius:3px;font-weight:bold}
- .sector-meta{font-size:10px;color:#b19885;margin-top:1px}
- .sector-epoch{font-size:10px;font-weight:bold;margin-top:2px}
-
- /* Right Column: Tabs & Inspector */
- .portal-info-col{display:flex;flex-direction:column;gap:10px}
- .info-tabs{display:flex;gap:4px;border-bottom:1px solid #4a2d1d;padding-bottom:6px}
- .info-tab{padding:6px 10px;font-size:11px;background:#241610;border:1px solid #4a2d1d;border-radius:5px 5px 0 0;color:#cbb5a2;cursor:pointer}
- .info-tab:hover{background:#321f15;color:#fff}
- .info-tab.active{background:#3e2417;border-color:#ffb98a;color:#ffb98a;font-weight:bold}
-
- .tab-pane-content{flex:1;background:#20130d;border:1px solid #4a2d1d;border-radius:8px;padding:12px;overflow-y:auto;max-height:330px}
- .region-hero{background:#2a1911;border:1px solid #5a3824;border-radius:6px;padding:10px;margin-bottom:10px}
- .region-title{margin:0 0 2px;font-size:15px;color:#ffc299}
- .region-coords{font-size:10.5px;color:#b89f8c}
- .epoch-badge{padding:2px 7px;border-radius:4px;font-size:10px;font-weight:bold}
- .region-desc{margin:8px 0 0;font-size:11.5px;color:#ecd8c8;line-height:1.45}
-
- .spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
- .spec-item{background:#26160f;border:1px solid #432819;border-radius:5px;padding:6px 8px}
- .spec-label{display:block;font-size:9.5px;color:#9b826e;text-transform:uppercase}
- .spec-val{font-size:11px;color:#fff;font-weight:500;margin-top:2px;display:block}
-
- .materials-list{display:flex;flex-direction:column;gap:6px}
- .material-card{background:#281810;border:1px solid #432819;border-left:4px solid;border-radius:5px;padding:7px 10px}
- .material-name{font-weight:bold;font-size:11.5px;margin-bottom:2px}
- .material-focus{font-size:11px;color:#c9b4a2;line-height:1.4}
-
- .epochs-timeline{display:flex;flex-direction:column;gap:8px}
- .epoch-card{background:#281810;border:1px solid #432819;border-left:4px solid;border-radius:6px;padding:8px 10px}
- .epoch-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
- .epoch-name{font-size:12px;font-weight:bold;color:#ffc299}
- .epoch-period{font-size:10px;font-weight:bold;padding:1px 6px;border-radius:3px}
- .epoch-desc{margin:0;font-size:11px;color:#c9b4a2;line-height:1.4}
-
- .phenomena-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
- .phenomenon-card{background:#26160f;border:1px solid #432819;border-radius:5px;padding:6px 8px;display:flex;gap:8px;align-items:flex-start}
- .phenomenon-icon{font-size:16px}
- .phenomenon-title{font-size:11px;font-weight:bold;color:#ffc299}
- .phenomenon-summary{font-size:10px;color:#bca28e;line-height:1.35;margin-top:1px}
-
- /* Launch Button Card */
- .launch-box{background:linear-gradient(135deg, #2b180f 0%, #1c100a 100%);border:1px solid #7d4d33;border-radius:8px;padding:10px 12px;margin-top:auto}
- .launch-desc b{color:#00d4ff;font-size:11.5px}
- .launch-desc p{margin:2px 0 8px;font-size:11px;color:#bba28f}
- .btn-launch{margin-top:0;padding:10px 14px;background:linear-gradient(135deg, #1b6899 0%, #124b6e 100%);border:1px solid #00d4ff;border-radius:6px;font-size:13px;font-weight:bold;color:#fff;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 4px 16px rgba(0,212,255,0.25)}
- .btn-launch:hover{background:linear-gradient(135deg, #237cb4 0%, #185a85 100%);box-shadow:0 4px 20px rgba(0,212,255,0.4)}
+ /* ========================================================
+    REGION PROXIMITY POPUP (in-world)
+    ======================================================== */
+ .region-popup{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(18,12,8,0.94);border:2px solid #ffb98a;border-radius:10px;padding:10px 16px;display:flex;align-items:center;gap:12px;z-index:100;backdrop-filter:blur(8px);box-shadow:0 6px 24px rgba(0,0,0,0.6);max-width:400px}
+ .popup-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px currentColor}
+ .popup-text{display:flex;flex-direction:column;gap:2px}
+ .popup-name{font-size:14px;font-weight:700}
+ .popup-desc{font-size:11px;color:#c9b4a2;line-height:1.3}
 </style></head><body>
 <div id="app"></div>
 <div id="loading">Loading Jezero Crater Simulation…</div>

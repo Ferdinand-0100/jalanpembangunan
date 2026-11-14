@@ -10,8 +10,9 @@ import { RoverInput } from './rover/roverInput.js';
 import { CameraRig } from './camera/cameraRig.js';
 import { Hud } from './ui/hud.js';
 import { MapPortal } from './ui/mapPortal.js';
+import { RegionMarkers } from './terrain/regionMarkers.js';
 
-let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal;
+let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal, regionMarkers;
 
 const hud = new Hud({
   onExaggeration: v => { frame.setExaggeration(v); terrain.build(); },
@@ -82,6 +83,9 @@ async function main() {
   swarm = new RoverSwarm(scene, hf, frame, CONFIG.rover, CONFIG.roverVisualScale);
   swarm.onMissionLog = msg => hud.showToast(msg);
 
+  // Initialize 6 geological region markers in the 3D world
+  regionMarkers = new RegionMarkers(scene, hf, frame);
+
   marker = new THREE.Mesh(new THREE.ConeGeometry(25, 120, 12), new THREE.MeshBasicMaterial({ color: 0x00e0ff }));
   marker.visible = false;
   scene.add(marker);
@@ -97,10 +101,10 @@ async function main() {
   hud.setInspect(null);
   hud.hideLoading();
 
-  // Initialize and display the Mars Geologic Map Portal first
+  // Initialize simple Map Portal (shown first before 3D simulation)
   mapPortal = new MapPortal({
-    onLaunchSimulation: region => {
-      hud.showToast(`Memasuki Simulasi 3D Jezero Crater (${region.name})`);
+    onLaunchSimulation: mapData => {
+      hud.showToast(`Memasuki simulasi 3D — ${mapData.title}`);
     },
   });
   mapPortal.show();
@@ -155,6 +159,11 @@ async function main() {
 
     const active = swarm.getActiveRover();
     const activeMeshPos = active.mesh.position;
+
+    // Update region markers proximity check
+    if (regionMarkers) {
+      regionMarkers.update(active.physics.X, active.physics.Y);
+    }
 
     // Directional shadow frustum follows active rover
     sun.position.copy(activeMeshPos).add(sunDir.clone().multiplyScalar(5000));
