@@ -17,6 +17,7 @@ export class Hud {
     $('swarmMode').onchange = e => h.onSwarmMode(e.target.value);
     $('resetRover').onclick = () => h.onReset();
     $('taskBtn').onclick = () => h.onTriggerTask();
+    if ($('openMapPortalBtn')) $('openMapPortalBtn').onclick = () => h.onOpenMapPortal();
 
     // Robot selection buttons (0: Mapper, 1: GeoLab, 2: Transport)
     const btns = document.querySelectorAll('#robotSelector .r-btn');

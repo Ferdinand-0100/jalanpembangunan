@@ -9,8 +9,9 @@ import { RoverSwarm } from './rover/roverSwarm.js';
 import { RoverInput } from './rover/roverInput.js';
 import { CameraRig } from './camera/cameraRig.js';
 import { Hud } from './ui/hud.js';
+import { MapPortal } from './ui/mapPortal.js';
 
-let frame, hf, terrain, rig, swarm, sun, input, marker, meta;
+let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal;
 
 const hud = new Hud({
   onExaggeration: v => { frame.setExaggeration(v); terrain.build(); },
@@ -25,6 +26,9 @@ const hud = new Hud({
   onSwarmMode: mode => swarm.setSwarmMode(mode),
   onTriggerTask: () => {
     if (swarm) swarm.triggerActiveTask();
+  },
+  onOpenMapPortal: () => {
+    if (mapPortal) mapPortal.show();
   },
 });
 
@@ -92,6 +96,14 @@ async function main() {
   document.getElementById('sources').innerHTML = meta.sources.map(s => `<li><b>${s.role}:</b> ${s.file}<br><span>${s.credit}</span></li>`).join('');
   hud.setInspect(null);
   hud.hideLoading();
+
+  // Initialize and display the Mars Geologic Map Portal first
+  mapPortal = new MapPortal({
+    onLaunchSimulation: region => {
+      hud.showToast(`Memasuki Simulasi 3D Jezero Crater (${region.name})`);
+    },
+  });
+  mapPortal.show();
 
   // Keyboard shortcut switching between the 3 robots & task triggers
   addEventListener('keydown', e => {
