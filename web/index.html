@@ -1,74 +1,103 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>Jezero Crater 3D Terrain Simulator - Mars Swarm</title>
+<html lang="en"><head><meta charset="utf-8"><title>Jezero Crater 3D Mars Swarm Simulator</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/addons/"}}</script>
 <style>
  html,body{margin:0;height:100%;overflow:hidden;background:#1a120d;font:12px/1.45 system-ui,sans-serif;color:#f3e6d8}
  #app{position:fixed;inset:0}
- .panel{position:fixed;background:rgba(20,12,8,.84);border:1px solid #6b4a36;border-radius:8px;padding:10px 12px;backdrop-filter:blur(6px);box-shadow:0 4px 20px rgba(0,0,0,0.5)}
- #info{top:10px;left:10px;width:320px} #ctl{top:10px;right:10px;width:250px} #help{bottom:10px;left:10px;max-width:540px;color:#cdb8a4}
+ .panel{position:fixed;background:rgba(20,12,8,.86);border:1px solid #6b4a36;border-radius:8px;padding:10px 12px;backdrop-filter:blur(6px);box-shadow:0 4px 24px rgba(0,0,0,0.55)}
+ #info{top:10px;left:10px;width:340px} #ctl{top:10px;right:10px;width:260px} #help{bottom:10px;left:10px;max-width:560px;color:#cdb8a4}
  h3{margin:0 0 6px;font-size:13px;color:#ffb98a;display:flex;align-items:center;justify-content:space-between}
- table{border-collapse:collapse;width:100%} td{padding:2px 0;vertical-align:top} td:first-child{color:#b99a82;width:66px}
- label{display:block;margin:6px 0 2px;color:#b99a82} input[type=range],select{width:100%;background:#2a1c14;border:1px solid #6b4a36;color:#f3e6d8;border-radius:4px;padding:2px}
+ table{border-collapse:collapse;width:100%} td{padding:2px 0;vertical-align:top} td:first-child{color:#b99a82;width:72px}
+ label{display:block;margin:6px 0 2px;color:#b99a82} input[type=range],select{width:100%;background:#2a1c14;border:1px solid #6b4a36;color:#f3e6d8;border-radius:4px;padding:3px}
  .warn{color:#ff7a59} #sources{margin:4px 0 0;padding-left:14px;font-size:11px} #sources span{color:#a58a74}
  #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#1a120d;font-size:16px;text-align:center;padding:30px} #loading.err{color:#ff7a59}
- button{margin-top:8px;width:100%;background:#6b4a36;color:#fff;border:0;border-radius:5px;padding:5px 8px;cursor:pointer;font-weight:500;transition:all 0.15s ease}
+ button{margin-top:6px;width:100%;background:#6b4a36;color:#fff;border:0;border-radius:5px;padding:6px 8px;cursor:pointer;font-weight:500;transition:all 0.15s ease}
  button:hover{background:#8a5e45}
  #inspect{color:#7fe0ff;margin-top:6px} kbd{background:#3a2a20;border:1px solid #5a3d2c;border-radius:3px;padding:1px 5px;font-weight:600;color:#ffc49e}
 
- /* Swarm selector styling */
- .swarm-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px}
- .r-btn{margin-top:0;padding:5px 6px;font-size:11px;text-align:left;background:#241610;border:1px solid #4a3022;border-left:4px solid #6b4a36;border-radius:4px;color:#d8c6b6;cursor:pointer}
+ /* 3 Specialized Robots Selector */
+ .robot-selector{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+ .r-btn{margin-top:0;padding:6px 8px;font-size:11px;text-align:left;background:#241610;border:1px solid #4a3022;border-left:5px solid #6b4a36;border-radius:5px;color:#d8c6b6;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
  .r-btn:hover{background:#382218;color:#fff}
- .r-btn.active{background:#3f2518;color:#fff;font-weight:bold;box-shadow:0 0 8px rgba(255,185,138,0.25)}
- .rover-badge{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
- .rover-desc{font-size:11px;color:#bca18d;margin-bottom:6px;border-bottom:1px solid #452b1e;padding-bottom:5px}
+ .r-btn.active{background:#3e2417;color:#fff;font-weight:bold;box-shadow:0 0 10px rgba(255,185,138,0.3)}
+ .r-badge{padding:1px 5px;border-radius:3px;font-size:10px;font-weight:bold}
+
+ /* Mission Task Box */
+ .mission-box{background:rgba(30,18,12,0.9);border:1px solid #7d4d33;border-radius:6px;padding:8px 10px;margin-top:8px}
+ .mission-title{font-weight:bold;color:#ffc299;font-size:11.5px;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+ .mission-stat{display:flex;justify-content:space-between;margin:2px 0;font-size:11px}
+ .mission-stat span:first-child{color:#bfa48e}
+ .mission-stat span:last-child{color:#fff;font-family:monospace}
+ .action-btn{margin-top:6px;background:#2c6e49;border:1px solid #439b68;font-weight:bold}
+ .action-btn:hover{background:#3b8c5f}
+
+ /* Notification Toast */
+ #toast{position:fixed;top:15px;left:50%;transform:translateX(-50%);background:rgba(25,15,10,0.92);border:1px solid #00d4ff;color:#e8f7ff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:500;box-shadow:0 4px 16px rgba(0,212,255,0.3);display:none;z-index:999;backdrop-filter:blur(6px)}
 </style></head><body>
 <div id="app"></div>
 <div id="loading">Loading Jezero Crater Simulation…</div>
+<div id="toast"></div>
 
 <div id="info" class="panel">
  <h3>
-  <span>Mars Rover Swarm (4 Units)</span>
-  <span id="activeCallsign" style="font-size:11px;padding:1px 6px;border-radius:3px;background:#382317;color:#00e5ff">PER-01</span>
+  <span>Mars Swarm Units</span>
+  <span id="activeCallsign" class="r-badge" style="background:#00d4ff22;color:#00d4ff">ROV-01</span>
  </h3>
 
- <!-- 4 Rovers Selector Grid -->
- <div class="swarm-grid" id="roverSelector">
-  <button class="r-btn active" data-index="0" style="border-left-color:#00e5ff"><span class="rover-badge" style="background:#00e5ff"></span>01 Perseverance</button>
-  <button class="r-btn" data-index="1" style="border-left-color:#ffaa00"><span class="rover-badge" style="background:#ffaa00"></span>02 Ares Scout</button>
-  <button class="r-btn" data-index="2" style="border-left-color:#ff385c"><span class="rover-badge" style="background:#ff385c"></span>03 Curiosity-II</button>
-  <button class="r-btn" data-index="3" style="border-left-color:#00ff88"><span class="rover-badge" style="background:#00ff88"></span>04 Hermes</button>
+ <!-- 3 Specialized Robot Buttons -->
+ <div class="robot-selector" id="robotSelector">
+  <button class="r-btn active" data-index="0" style="border-left-color:#00d4ff">
+   <span>🗺️ <b>01. Ares Mapper</b></span>
+   <span class="r-badge" style="background:#00d4ff33;color:#00d4ff">Surface Mapping</span>
+  </button>
+  <button class="r-btn" data-index="1" style="border-left-color:#ff3b5c">
+   <span>🔬 <b>02. Curiosity GeoLab</b></span>
+   <span class="r-badge" style="background:#ff3b5c33;color:#ff3b5c">Geology &amp; Drill</span>
+  </button>
+  <button class="r-btn" data-index="2" style="border-left-color:#00ff88">
+   <span>🚛 <b>03. Hermes Transport</b></span>
+   <span class="r-badge" style="background:#00ff8833;color:#00ff88">Transport &amp; Support</span>
+  </button>
  </div>
- <div id="roverDesc" class="rover-desc">Mission Lead · Robotic Arm & Coring Drill</div>
 
- <table>
-  <tr><td>Position</td><td id="r-lon">-</td></tr>
+ <!-- Dynamic Specialized Mission Task Box -->
+ <div class="mission-box" id="missionBox">
+  <div class="mission-title" id="m-title">🗺️ Tugas: Surface Mapping &amp; Exploration</div>
+  <div class="mission-stat"><span>Tugas Utama:</span><span id="m-desc" style="text-align:right;max-width:200px">Pemetaan permukaan &amp; jalur aman</span></div>
+  <div class="mission-stat"><span>Statistik Misi:</span><span id="m-stat1">0.00 km² terpetakan</span></div>
+  <div class="mission-stat"><span>Target / Objek:</span><span id="m-stat2">Western Fan Delta</span></div>
+  <div class="mission-stat"><span>Status Alat:</span><span id="m-tool" style="color:#00d4ff">LiDAR 360° Scan Aktif</span></div>
+  <button id="taskBtn" class="action-btn">Lakukan Pemindaian LiDAR (Space)</button>
+ </div>
+
+ <table style="margin-top:8px">
+  <tr><td>Koordinat</td><td id="r-lon">-</td></tr>
   <tr><td>Projected</td><td id="r-xy">-</td></tr>
-  <tr><td>Elevation</td><td id="r-el">-</td></tr>
-  <tr><td>Slope</td><td id="r-slope">-</td></tr>
+  <tr><td>Elevasi</td><td id="r-el">-</td></tr>
+  <tr><td>Kemiringan</td><td id="r-slope">-</td></tr>
   <tr><td>Heading</td><td id="r-hd">-</td></tr>
-  <tr><td>Status</td><td id="r-status">-</td></tr>
+  <tr><td>Status Gerak</td><td id="r-status">-</td></tr>
  </table>
  <div id="inspect"></div>
- <h3 style="margin-top:10px">Data sources</h3><ul id="sources"></ul>
- <div style="margin-top:4px;color:#a58a74;font-size:11px">Elevation &amp; imagery: real NASA/USGS data. Mars-tone tint, slope colours, lighting, rover models: visualisation only.</div>
+ <h3 style="margin-top:8px">Data sources</h3><ul id="sources"></ul>
+ <div style="margin-top:4px;color:#a58a74;font-size:11px">Elevation &amp; imagery: real NASA/USGS Jezero Crater data.</div>
 </div>
 
 <div id="ctl" class="panel">
- <h3>View &amp; Swarm <span id="fps" style="float:right;color:#b99a82"></span></h3>
- <label>Camera</label>
+ <h3>Kontrol &amp; Tampilan <span id="fps" style="float:right;color:#b99a82"></span></h3>
+ <label>Kamera</label>
  <select id="cam">
   <option value="follow">Follow rover (drag/zoom/pan)</option>
   <option value="orbit">Free orbit</option>
   <option value="fly">Free-fly</option>
  </select>
 
- <label>Swarm Behavior</label>
+ <label>Mode Operasi Swarm</label>
  <select id="swarmMode">
-  <option value="formation" selected>Follow Leader (Formation)</option>
-  <option value="patrol">Independent Scout & Survey</option>
-  <option value="hold">Hold Position (Parked)</option>
+  <option value="autonomous" selected>Misi Mandiri (Semua Robot Bertugas)</option>
+  <option value="formation">Formasi Kawal (Follow Leader)</option>
+  <option value="hold">Parkir / Tahan Posisi (Hold)</option>
  </select>
 
  <label>Vertical exaggeration <span id="exagV">1.0×</span></label>
@@ -85,17 +114,17 @@
  <label>Rover display scale <span id="rscaleV">15×</span></label>
  <input id="rscale" type="range" min="1" max="60" value="15">
 
- <label>Sun elevation / azimuth</label>
+ <label>Sudut Matahari (Elevasi / Azimuth)</label>
  <input id="sunEl" type="range" min="5" max="80" value="40">
  <input id="sunAz" type="range" min="0" max="360" value="135">
 
  <label><input id="slope" type="checkbox"> Slope map (green→red, 0–30°)</label>
  <label><input id="tint" type="checkbox" checked> Mars-tone tint (imagery is grayscale)</label>
- <button id="resetRover">Reset swarm to start position</button>
+ <button id="resetRover">Reset semua robot ke posisi awal</button>
 </div>
 
 <div id="help" class="panel">
- <b>Drive:</b> <kbd>W A S D</kbd> / arrows · <b>Switch Rover:</b> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> / <kbd>Tab</kbd> · <b>Camera:</b> Drag to rotate/pan, wheel to zoom · <b>Free-fly:</b> <kbd>WASD</kbd>, <kbd>Q/E</kbd>, <kbd>Shift</kbd> · <b>Click</b> terrain to inspect
+ <b>Setir:</b> <kbd>W A S D</kbd> / Panah · <b>Pilih Robot:</b> <kbd>1</kbd> (Mapper) <kbd>2</kbd> (GeoLab) <kbd>3</kbd> (Transport) / <kbd>Tab</kbd> · <b>Aksi Tugas:</b> <kbd>Space</kbd> · <b>Kamera:</b> Drag putar/geser, scroll zoom · <b>Klik medan:</b> Inspeksi titik
 </div>
 
 <script type="module" src="./src/main.js"></script>

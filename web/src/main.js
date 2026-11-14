@@ -23,6 +23,9 @@ const hud = new Hud({
   onReset: () => startRovers(),
   onSelectRover: idx => selectRover(idx),
   onSwarmMode: mode => swarm.setSwarmMode(mode),
+  onTriggerTask: () => {
+    if (swarm) swarm.triggerActiveTask();
+  },
 });
 
 function selectRover(idx) {
@@ -71,8 +74,9 @@ async function main() {
   terrain = new TerrainRenderer(scene, hf, frame, data.texture);
   hud.setMeshInfo(terrain.build(CONFIG.meshStride));
 
-  // Initialize the 4-rover swarm with detailed 3D models and autonomous companion AI
+  // Initialize the 3 specialized mission robots
   swarm = new RoverSwarm(scene, hf, frame, CONFIG.rover, CONFIG.roverVisualScale);
+  swarm.onMissionLog = msg => hud.showToast(msg);
 
   marker = new THREE.Mesh(new THREE.ConeGeometry(25, 120, 12), new THREE.MeshBasicMaterial({ color: 0x00e0ff }));
   marker.visible = false;
@@ -89,14 +93,17 @@ async function main() {
   hud.setInspect(null);
   hud.hideLoading();
 
-  // Keyboard shortcut switching between rovers
+  // Keyboard shortcut switching between the 3 robots & task triggers
   addEventListener('keydown', e => {
-    if (['Digit1', 'Digit2', 'Digit3', 'Digit4'].includes(e.code)) {
+    if (['Digit1', 'Digit2', 'Digit3'].includes(e.code)) {
       const idx = parseInt(e.code.replace('Digit', ''), 10) - 1;
       selectRover(idx);
     } else if (e.code === 'Tab') {
       e.preventDefault();
       selectRover((swarm.activeIndex + 1) % swarm.rovers.length);
+    } else if (e.code === 'Space' && rig.mode !== 'fly') {
+      e.preventDefault();
+      swarm.triggerActiveTask();
     }
   });
 
@@ -131,13 +138,13 @@ async function main() {
     const dt = Math.min(clock.getDelta(), 0.1);
     fps += (1 / Math.max(dt, 1e-3) - fps) * 0.05;
 
-    // Update all 4 rovers in the swarm
+    // Update the 3 specialized rovers and their autonomous mission routines
     swarm.update(dt, input.read());
 
     const active = swarm.getActiveRover();
     const activeMeshPos = active.mesh.position;
 
-    // Directional shadow frustum follows the active rover
+    // Directional shadow frustum follows active rover
     sun.position.copy(activeMeshPos).add(sunDir.clone().multiplyScalar(5000));
     sun.target.position.copy(activeMeshPos);
 
@@ -146,6 +153,7 @@ async function main() {
 
     const [lon, lat] = frame.projToLonLat(active.physics.X, active.physics.Y);
     hud.update({
+      rover: active,
       lon,
       lat,
       X: active.physics.X,
