@@ -604,6 +604,10 @@ vWN = normalize(mat3(modelMatrix) * objectNormal);`);
     }
   }
 
+  getCurrentRegionId() {
+    return this.activePopup;
+  }
+
   #showPopup(marker) {
     const hexColor = '#' + new THREE.Color(marker.color).getHexString();
     this.popupEl.innerHTML = `

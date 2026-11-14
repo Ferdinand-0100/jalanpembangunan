@@ -11,8 +11,9 @@ import { CameraRig } from './camera/cameraRig.js';
 import { Hud } from './ui/hud.js';
 import { MapPortal } from './ui/mapPortal.js';
 import { RegionMarkers } from './terrain/regionMarkers.js';
+import { MissionSystem } from './mission/missionSystem.js';
 
-let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal, regionMarkers;
+let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal, regionMarkers, missionSystem;
 
 const hud = new Hud({
   onExaggeration: v => { frame.setExaggeration(v); terrain.build(); },
@@ -25,9 +26,8 @@ const hud = new Hud({
   onReset: () => startRovers(),
   onSelectRover: idx => selectRover(idx),
   onSwarmMode: mode => swarm.setSwarmMode(mode),
-  onTriggerTask: () => {
-    if (swarm) swarm.triggerActiveTask();
-  },
+  onTriggerTask: () => triggerMainTask(),
+  onSecondaryAction: () => triggerSecondaryTask(),
   onOpenMapPortal: () => {
     if (mapPortal) mapPortal.show();
   },
@@ -40,6 +40,57 @@ function selectRover(idx) {
   if (rig && rig.mode === 'follow') {
     rig.controls.target.copy(rover.mesh.position);
   }
+  if (missionSystem) {
+    hud.updateWorkflow(missionSystem, rover);
+  }
+}
+
+function triggerMainTask() {
+  if (!swarm || !missionSystem) return;
+  const active = swarm.getActiveRover();
+
+  if (active.role === 'surface-mapping') {
+    // 1. Mapper menandai waypoint sampel geologi di posisinya
+    const regId = regionMarkers ? regionMarkers.getCurrentRegionId() : null;
+    missionSystem.markSampleWaypoint(active.physics, regId);
+  } else if (active.role === 'geological-investigation') {
+    // 2. GeoLab: Bangun lab sains jika belum ada, atau jalankan laser bor
+    if (!missionSystem.labStation) {
+      missionSystem.buildScienceLab(active.physics);
+    } else {
+      swarm.triggerActiveTask();
+      hud.showToast(`[GeoLab] Laser Raman & Pengeboran aktif pada singkapan batuan!`);
+    }
+  } else if (active.role === 'transport-support') {
+    // 3. Hermes Transport: Jika ada kargo -> antar ke lab, jika belum -> jemput ke waypoint
+    if (missionSystem.transportCargo) {
+      if (missionSystem.labStation) {
+        missionSystem.transportState = 'carrying_to_lab';
+        hud.showToast(`[Hermes Transport] Memulai rute pengantaran ke Stasiun Lab Sains...`);
+      } else {
+        hud.showToast(`[Perhatian] Bangun Stasiun Lab dahulu menggunakan Robot 02 (GeoLab)!`);
+      }
+    } else if (missionSystem.activeWaypoint) {
+      missionSystem.callTransportToWaypoint();
+    } else {
+      swarm.triggerActiveTask();
+    }
+  }
+  hud.updateWorkflow(missionSystem, active);
+}
+
+function triggerSecondaryTask() {
+  if (!swarm || !missionSystem) return;
+  const active = swarm.getActiveRover();
+
+  if (active.role === 'surface-mapping') {
+    // Mapper memanggil Hermes Transport menuju waypoint sampel
+    missionSystem.callTransportToWaypoint();
+  } else if (active.role === 'geological-investigation') {
+    // GeoLab membangun Lab Sains
+    missionSystem.buildScienceLab(active.physics);
+  }
+  hud.updateWorkflow(missionSystem, active);
 }
 
 async function main() {
@@ -89,6 +140,14 @@ async function main() {
   // Hubungkan elevasi wilayah prosedural ke swarm agar robot memanjat gunung api & kawah tanpa tenggelam
   swarm.setReliefSampler((X, Y) => regionMarkers.getReliefAt(X, Y));
 
+  // Initialize Integrated Team Mission System
+  missionSystem = new MissionSystem(scene, frame, hf, (X, Y) => regionMarkers.getReliefAt(X, Y));
+  missionSystem.rovers = swarm.rovers;
+  missionSystem.onNotify = msg => hud.showToast(msg);
+  missionSystem.onStateChange = () => {
+    hud.updateWorkflow(missionSystem, swarm.getActiveRover());
+  };
+
   marker = new THREE.Mesh(new THREE.ConeGeometry(25, 120, 12), new THREE.MeshBasicMaterial({ color: 0x00e0ff }));
   marker.visible = false;
   scene.add(marker);
@@ -104,7 +163,7 @@ async function main() {
   hud.setInspect(null);
   hud.hideLoading();
 
-  // Initialize simple Map Portal (shown first before 3D simulation)
+  // Initialize simple Map Portal
   mapPortal = new MapPortal({
     onLaunchSimulation: mapData => {
       hud.showToast(`Memasuki simulasi 3D — ${mapData.title}`);
@@ -112,7 +171,7 @@ async function main() {
   });
   mapPortal.show();
 
-  // Keyboard shortcut switching between the 3 robots & task triggers
+  // Keyboard shortcut switching between the 3 robots & mission triggers
   addEventListener('keydown', e => {
     if (['Digit1', 'Digit2', 'Digit3'].includes(e.code)) {
       const idx = parseInt(e.code.replace('Digit', ''), 10) - 1;
@@ -122,7 +181,16 @@ async function main() {
       selectRover((swarm.activeIndex + 1) % swarm.rovers.length);
     } else if (e.code === 'Space' && rig.mode !== 'fly') {
       e.preventDefault();
-      swarm.triggerActiveTask();
+      triggerMainTask();
+    } else if (e.code === 'KeyB') {
+      // Shortcut B: Bangun Stasiun Lab
+      const geoRover = swarm.rovers[1];
+      if (geoRover) {
+        missionSystem.buildScienceLab(geoRover.physics);
+      }
+    } else if (e.code === 'KeyC') {
+      // Shortcut C: Panggil Hermes Transport (Shift+C untuk Pendaratan Ekspres Instan)
+      missionSystem.callTransportToWaypoint(e.shiftKey);
     }
   });
 
@@ -159,6 +227,11 @@ async function main() {
 
     // Update the 3 specialized rovers and their autonomous mission routines
     swarm.update(dt, input.read());
+
+    // Update mission workflow loop (Hermes navigation, sample loading & lab delivery)
+    if (missionSystem) {
+      missionSystem.update(dt, swarm.rovers);
+    }
 
     const active = swarm.getActiveRover();
     const activeMeshPos = active.mesh.position;
@@ -207,6 +280,9 @@ function startRovers() {
   const w = frame.toWorld(active.physics.X, active.physics.Y, active.physics.elevation);
   rig.placeBehind(new THREE.Vector3(w.x, w.y, w.z), 0);
   hud.updateRoverSelection(swarm.activeIndex, active);
+  if (missionSystem) {
+    hud.updateWorkflow(missionSystem, active);
+  }
 }
 
 main();

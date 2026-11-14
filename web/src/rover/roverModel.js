@@ -340,46 +340,102 @@ export function createRoverModel(opts = {}) {
 
   } else if (role === 'transport-support') {
     /* ---------------------------------------------------------
-     * ROLE 3: MISSION TRANSPORT & LOGISTICS SUPPORT
-     * Features: 10 sample storage tubes rack, high-gain relay dish, heavy rollcage
+     * ROLE 3: HEAVY CARGO CONTAINER TRANSPORT (HERMES)
+     * Desain: Struktur kontainer kargo futuristik berpelindung baja,
+     * kubah radar scanning berputar di atas kabin, dan lampu status muatan.
      * --------------------------------------------------------- */
-    // Large Steerable Satellite Relay Dish
-    const relayGroup = new THREE.Group();
-    relayGroup.position.set(-0.55, 1.3, -0.3);
-    relayGroup.rotation.x = -0.4;
-    relayGroup.rotation.y = 0.6;
+    // 1. MODULAR FREIGHT CONTAINER BODY (Struktur Bodi Kontainer)
+    const containerMat = new THREE.MeshStandardMaterial({
+      color: 0x2e353b, // Industrial Dark Slate
+      roughness: 0.4,
+      metalness: 0.8,
+    });
+    const containerPanelMat = new THREE.MeshStandardMaterial({
+      color: 0xeeece6, // White Ceramic Shield Panels
+      roughness: 0.3,
+      metalness: 0.5,
+    });
+    const hazardMat = new THREE.MeshStandardMaterial({
+      color: 0xffaa00,
+      emissive: 0x885500,
+      emissiveIntensity: 0.4,
+      roughness: 0.4,
+    });
+    const containerGlowMat = new THREE.MeshStandardMaterial({
+      color: 0x00ff88,
+      emissive: 0x00ff88,
+      emissiveIntensity: 1.8,
+      roughness: 0.2,
+    });
 
-    addMesh(new THREE.CylinderGeometry(0.04, 0.04, 0.35, 8), chromeStrut, 0, 0.15, 0, 0, 0, 0, relayGroup);
-    addMesh(new THREE.CylinderGeometry(0.48, 0.2, 0.14, 20), bodyWhite, 0, 0.35, 0, 0, 0, 0, relayGroup);
-    addMesh(new THREE.CylinderGeometry(0.025, 0.025, 0.25, 8), accentMat, 0, 0.5, 0, 0, 0, 0, relayGroup);
-    group.add(relayGroup);
+    // Kontainer Utama (Panjang 2.4m, Lebar 1.8m, Tinggi 1.1m)
+    addMesh(new THREE.BoxGeometry(1.75, 1.05, 2.3), containerMat, 0, 1.4, 0.2);
 
-    // Heavy-Duty Cargo Carrier Bay (Holds 10 Sample Tubes)
-    addMesh(new THREE.BoxGeometry(1.3, 0.22, 1.1), darkTitanium, 0, 1.28, 0.55);
-
-    // 10 Sample Canister Tubes in 2 rows of 5
-    const sampleTubes = [];
-    for (let row = 0; row < 2; row++) {
-      for (let col = 0; col < 5; col++) {
-        const cx = (col - 2) * 0.22;
-        const cz = 0.32 + row * 0.34;
-        // Metal socket sleeve
-        addMesh(new THREE.CylinderGeometry(0.05, 0.05, 0.18, 12), chromeStrut, cx, 1.36, cz);
-        // Tube body
-        const tube = addMesh(new THREE.CylinderGeometry(0.038, 0.038, 0.28, 12), tubeEmptyMat, cx, 1.48, cz);
-        sampleTubes.push(tube);
-      }
+    // Panel Samping Kontainer Bergaris Industri
+    for (const sign of [-1, 1]) {
+      addMesh(new THREE.BoxGeometry(0.08, 0.85, 2.1), containerPanelMat, sign * 0.9, 1.4, 0.2);
+      // Strip Garis Peringatan Hazard Kuning
+      addMesh(new THREE.BoxGeometry(0.09, 0.12, 2.1), hazardMat, sign * 0.91, 1.65, 0.2);
+      // Strip Lampu LED Status Kargo
+      addMesh(new THREE.BoxGeometry(0.09, 0.06, 1.9), containerGlowMat, sign * 0.91, 1.1, 0.2);
     }
 
-    // Heavy Duty Reinforced Front & Side Rollcage
-    addMesh(new THREE.CylinderGeometry(0.045, 0.045, 1.6, 8), chromeStrut, 0, 0.98, -1.48, 0, 0, Math.PI / 2);
-    addMesh(new THREE.CylinderGeometry(0.04, 0.04, 0.55, 8), darkTitanium, -0.72, 0.78, -1.45, 0.4, 0, 0);
-    addMesh(new THREE.CylinderGeometry(0.04, 0.04, 0.55, 8), darkTitanium, 0.72, 0.78, -1.45, 0.4, 0, 0);
+    // Pintu Kargo Belakang Berengsel Hidrolik
+    addMesh(new THREE.BoxGeometry(1.6, 0.9, 0.1), darkTitanium, 0, 1.4, 1.36);
+    addMesh(new THREE.BoxGeometry(1.4, 0.15, 0.14), chromeStrut, 0, 1.4, 1.38); // Palang Kunci Kontainer
+    addMesh(new THREE.SphereGeometry(0.08, 8, 8), containerGlowMat, -0.6, 1.7, 1.4); // Lampu Indikator Kunci
 
-    roleHooks.sampleTubes = sampleTubes;
-    roleHooks.tubeActiveMat = tubeActiveMat;
-    roleHooks.tubeEmptyMat = tubeEmptyMat;
-    roleHooks.relayGroup = relayGroup;
+    // 2. KABIN DEPAN & RADAR SCANNER 360° BERPUTAR
+    // Kabin Pengemudi / Unit Komputasi Logistik
+    addMesh(new THREE.BoxGeometry(1.5, 0.65, 0.8), darkTitanium, 0, 1.25, -1.15);
+    addMesh(new THREE.BoxGeometry(1.2, 0.4, 0.2), lensGlass, 0, 1.35, -1.56); // Kaca Visor Kabin Depan
+
+    // Dudukan Tiang Radar di Atap Kabin
+    const radarGroup = new THREE.Group();
+    radarGroup.position.set(0, 1.65, -1.1);
+
+    addMesh(new THREE.CylinderGeometry(0.12, 0.16, 0.2, 12), darkTitanium, 0, 0.1, 0, 0, 0, 0, radarGroup);
+    // Piringan Radar Scanner Berputar
+    const radarDish = new THREE.Group();
+    radarDish.position.set(0, 0.25, 0);
+    addMesh(new THREE.CylinderGeometry(0.42, 0.18, 0.12, 20), bodyWhite, 0, 0.06, 0, 0, 0, 0, radarDish);
+    addMesh(new THREE.CylinderGeometry(0.04, 0.04, 0.35, 8), chromeStrut, 0, 0.22, 0, 0, 0, 0, radarDish);
+    addMesh(new THREE.SphereGeometry(0.08, 8, 8), accentMat, 0, 0.4, 0, 0, 0, 0, radarDish);
+    radarGroup.add(radarDish);
+    group.add(radarGroup);
+
+    // 3. OBJEK MUATAN SPESIMEN DI DALAM KONTAINER (Visible saat muatan terisi)
+    const cargoSpecimen = new THREE.Group();
+    cargoSpecimen.position.set(0, 1.4, 0.2);
+    // Kapsul Tabung Spesimen Beriluminasi
+    addMesh(new THREE.CylinderGeometry(0.3, 0.3, 0.8, 16), containerGlowMat, 0, 0, 0, Math.PI / 2, 0, 0, cargoSpecimen);
+    addMesh(new THREE.TorusGeometry(0.32, 0.05, 8, 16), chromeStrut, 0, 0, 0, 0, 0, 0, cargoSpecimen);
+    cargoSpecimen.visible = false;
+    group.add(cargoSpecimen);
+
+    // 4. TWIN ROCKET BOOSTER THRUSTERS (Pendorong Roket di Belakang Kontainer)
+    const flameMat = new THREE.MeshBasicMaterial({
+      color: 0x00d4ff,
+      transparent: true,
+      opacity: 0.85,
+    });
+    const boosterFlames = [];
+    for (const sx of [-0.48, 0.48]) {
+      addMesh(new THREE.CylinderGeometry(0.14, 0.18, 0.22, 12), darkTitanium, sx, 1.1, 1.42, Math.PI / 2);
+      const flame = addMesh(new THREE.ConeGeometry(0.12, 0.8, 12), flameMat, sx, 1.1, 1.9, -Math.PI / 2);
+      flame.visible = false;
+      boosterFlames.push(flame);
+    }
+
+    // Rollcage Pelindung Depan Tebal (Heavy Bullbar)
+    addMesh(new THREE.CylinderGeometry(0.06, 0.06, 1.7, 10), chromeStrut, 0, 0.75, -1.55, 0, 0, Math.PI / 2);
+    addMesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6, 8), darkTitanium, -0.75, 0.6, -1.5, 0.3, 0, 0);
+    addMesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6, 8), darkTitanium, 0.75, 0.6, -1.5, 0.3, 0, 0);
+
+    roleHooks.radarDish = radarDish;
+    roleHooks.containerGlow = containerGlowMat;
+    roleHooks.cargoSpecimen = cargoSpecimen;
+    roleHooks.boosterFlames = boosterFlames;
   }
 
   /* ---------------------------------------------------------

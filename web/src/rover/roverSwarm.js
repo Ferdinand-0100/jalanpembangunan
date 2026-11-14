@@ -298,18 +298,25 @@ export class RoverSwarm {
       }
     }
 
-    // 3. Transport: Relay dish tracking animation & tube sync
+    // 3. Transport: Continuous Radar Scanner Rotation & Container Sync
     const transport = this.rovers[2];
     if (transport && transport.mesh.userData.roleHooks) {
       const h = transport.mesh.userData.roleHooks;
+      if (h.radarDish) {
+        h.radarDish.rotation.y += dt * 4.8;
+      }
+      if (h.boosterFlames) {
+        const isBoosting = transport.physics.speed > 45;
+        for (const flame of h.boosterFlames) {
+          flame.visible = isBoosting;
+          if (isBoosting) {
+            const scaleZ = 0.8 + Math.random() * 0.5 + Math.min(2.5, transport.physics.speed / 180);
+            flame.scale.set(1.0, scaleZ, 1.0);
+          }
+        }
+      }
       if (h.relayGroup) {
         h.relayGroup.rotation.y = 0.6 + Math.sin(this._animTime * 0.4) * 0.15;
-      }
-      // Auto cache when GeoLab seals a new sample
-      if (geo && geo.agent.samplesSealed > transport.agent.tubesCached) {
-        transport.agent.cacheSample();
-        this.#updateTubeVisuals();
-        this.onMissionLog(`[Auto-Logistics] Hermes mengambil sampel #${transport.agent.tubesCached} dari GeoLab`);
       }
     }
   }

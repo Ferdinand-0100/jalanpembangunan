@@ -3,141 +3,190 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/addons/"}}</script>
 <style>
- html,body{margin:0;height:100%;overflow:hidden;background:#1a120d;font:12px/1.45 system-ui,sans-serif;color:#f3e6d8}
+ html,body{margin:0;height:100%;overflow:hidden;background:#140c08;font:12px/1.4 system-ui,-apple-system,sans-serif;color:#f3e6d8;user-select:none}
  #app{position:fixed;inset:0}
- .panel{position:fixed;background:rgba(20,12,8,.86);border:1px solid #6b4a36;border-radius:8px;padding:10px 12px;backdrop-filter:blur(6px);box-shadow:0 4px 24px rgba(0,0,0,0.55);z-index:10}
- #info{top:10px;left:10px;width:340px} #ctl{top:10px;right:10px;width:260px} #help{bottom:10px;left:10px;max-width:560px;color:#cdb8a4}
- h3{margin:0 0 6px;font-size:13px;color:#ffb98a;display:flex;align-items:center;justify-content:space-between}
- table{border-collapse:collapse;width:100%} td{padding:2px 0;vertical-align:top} td:first-child{color:#b99a82;width:72px}
- label{display:block;margin:6px 0 2px;color:#b99a82} input[type=range],select{width:100%;background:#2a1c14;border:1px solid #6b4a36;color:#f3e6d8;border-radius:4px;padding:3px}
- .warn{color:#ff7a59} #sources{margin:4px 0 0;padding-left:14px;font-size:11px} #sources span{color:#a58a74}
- #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#1a120d;font-size:16px;text-align:center;padding:30px;z-index:50} #loading.err{color:#ff7a59}
- button{margin-top:6px;width:100%;background:#6b4a36;color:#fff;border:0;border-radius:5px;padding:6px 8px;cursor:pointer;font-weight:500;transition:all 0.15s ease}
- button:hover{background:#8a5e45}
- #inspect{color:#7fe0ff;margin-top:6px} kbd{background:#3a2a20;border:1px solid #5a3d2c;border-radius:3px;padding:1px 5px;font-weight:600;color:#ffc49e}
+ .panel{position:fixed;background:rgba(20,13,9,.88);border:1px solid #5a3824;border-radius:10px;padding:12px;backdrop-filter:blur(8px);box-shadow:0 8px 32px rgba(0,0,0,0.65);z-index:10}
+ #info{top:12px;left:12px;width:310px;max-height:calc(100vh - 24px);overflow-y:auto}
+ #ctl{top:12px;right:12px;width:230px}
+ #help{bottom:12px;left:50%;transform:translateX(-50%);background:rgba(18,11,7,0.92);padding:6px 14px;border-radius:20px;font-size:11px;color:#cbb5a2;white-space:nowrap;z-index:10;border:1px solid #4a2d1d}
 
- /* 3 Specialized Robots Selector */
- .robot-selector{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
- .r-btn{margin-top:0;padding:6px 8px;font-size:11px;text-align:left;background:#241610;border:1px solid #4a3022;border-left:5px solid #6b4a36;border-radius:5px;color:#d8c6b6;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
- .r-btn:hover{background:#382218;color:#fff}
- .r-btn.active{background:#3e2417;color:#fff;font-weight:bold;box-shadow:0 0 10px rgba(255,185,138,0.3)}
- .r-badge{padding:1px 5px;border-radius:3px;font-size:10px;font-weight:bold}
+ h3{margin:0 0 8px;font-size:12.5px;color:#ffb98a;display:flex;align-items:center;justify-content:space-between;letter-spacing:0.3px}
+ table{border-collapse:collapse;width:100%} td{padding:3px 0;vertical-align:top;font-size:11px} td:first-child{color:#b3967f;width:80px}
+ label{display:block;margin:6px 0 2px;color:#b3967f;font-size:11px}
+ input[type=range],select{width:100%;background:#261710;border:1px solid #5a3824;color:#f3e6d8;border-radius:4px;padding:3px;box-sizing:border-box}
+ .warn{color:#ff7a59;font-weight:bold}
+ #sources{margin:4px 0 0;padding-left:14px;font-size:10px} #sources span{color:#9e836e}
+ #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#140c08;font-size:16px;text-align:center;padding:30px;z-index:50} #loading.err{color:#ff7a59}
+ button{width:100%;background:#5a3824;color:#fff;border:0;border-radius:6px;padding:7px 10px;cursor:pointer;font-weight:600;font-size:11.5px;transition:all 0.15s ease}
+ button:hover{background:#75492f}
+ kbd{background:#382216;border:1px solid #5a3824;border-radius:3px;padding:1px 5px;font-weight:bold;color:#ffc49e;font-size:10px}
 
- /* Mission Task Box */
- .mission-box{background:rgba(30,18,12,0.9);border:1px solid #7d4d33;border-radius:6px;padding:8px 10px;margin-top:8px}
- .mission-title{font-weight:bold;color:#ffc299;font-size:11.5px;margin-bottom:4px;display:flex;align-items:center;gap:5px}
- .mission-stat{display:flex;justify-content:space-between;margin:2px 0;font-size:11px}
- .mission-stat span:first-child{color:#bfa48e}
- .mission-stat span:last-child{color:#fff;font-family:monospace}
- .action-btn{margin-top:6px;background:#2c6e49;border:1px solid #439b68;font-weight:bold}
- .action-btn:hover{background:#3b8c5f}
+ /* Robot Selector Pills */
+ .robot-selector{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:10px}
+ .r-btn{padding:6px 4px;font-size:10.5px;text-align:center;background:#20130d;border:1px solid #3d2518;border-radius:6px;color:#cbb5a2;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+ .r-btn:hover{background:#331d13;color:#fff}
+ .r-btn.active{background:#3d2215;color:#fff;font-weight:bold;border-color:#ffb98a;box-shadow:0 0 10px rgba(255,185,138,0.25)}
+ .r-badge{padding:1px 5px;border-radius:3px;font-size:9.5px;font-weight:bold}
 
- /* Notification Toast */
- #toast{position:fixed;top:15px;left:50%;transform:translateX(-50%);background:rgba(25,15,10,0.92);border:1px solid #00d4ff;color:#e8f7ff;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:500;box-shadow:0 4px 16px rgba(0,212,255,0.3);display:none;z-index:9999;backdrop-filter:blur(6px)}
+ /* Workflow Pipeline Bar */
+ .workflow-box{background:rgba(26,16,10,0.85);border:1px solid #4a2d1d;border-radius:7px;padding:8px;margin-bottom:10px}
+ .wf-title{font-size:10.5px;color:#a8907d;font-weight:bold;margin-bottom:6px;display:flex;justify-content:space-between}
+ .wf-steps{display:grid;grid-template-columns:repeat(4, 1fr);gap:3px}
+ .wf-step{background:#1a100a;border:1px solid #382014;border-radius:4px;padding:4px 2px;text-align:center;font-size:9px;color:#7d6756;line-height:1.2}
+ .wf-step.current{border-color:#00d4ff;color:#00d4ff;background:#00d4ff15;font-weight:bold}
+ .wf-step.active{border-color:#ffb74d;color:#ffb74d;background:#ffb74d15;font-weight:bold;animation:pulseStep 1.5s infinite}
+ .wf-step.done{border-color:#00ff88;color:#00ff88;background:#00ff8815}
+ @keyframes pulseStep{0%{opacity:0.7}50%{opacity:1}100%{opacity:0.7}}
 
- /* ========================================================
-    MAP PORTAL — Simple Landing Page
-    ======================================================== */
- .map-portal-overlay{position:fixed;inset:0;background:rgba(10,7,5,0.98);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px)}
+ /* Active Action Box */
+ .action-card{background:linear-gradient(135deg, #28170f 0%, #1a0f0a 100%);border:1px solid #633b24;border-radius:8px;padding:10px;margin-bottom:10px}
+ .act-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+ .act-role-title{font-weight:bold;font-size:11.5px;color:#ffc299}
+ .act-role-status{font-size:10px;font-family:monospace}
+ .btn-main-action{margin-top:6px;padding:8px 10px;font-size:12px;font-weight:bold;color:#fff;border-radius:6px;box-shadow:0 3px 12px rgba(0,0,0,0.4)}
+ .btn-sec-action{margin-top:6px;padding:6px 8px;font-size:11px;font-weight:bold;color:#e8f7ff;border-radius:6px}
 
- .portal-landing{display:flex;flex-direction:column;align-items:center;gap:40px;padding:40px 20px;max-width:900px;width:100%}
+ /* Quest Checklist */
+ .quest-box{background:rgba(26,16,10,0.85);border:1px solid #4a2d1d;border-radius:7px;padding:8px;margin-bottom:10px}
+ .quest-header{display:flex;justify-content:space-between;align-items:center;font-size:10.5px;font-weight:bold;color:#ffb98a;margin-bottom:5px}
+ .quest-score{color:#00ff88;font-size:10.5px}
+ .quest-list{display:flex;flex-direction:column;gap:3px;max-height:120px;overflow-y:auto}
+ .quest-item{display:flex;align-items:center;gap:6px;font-size:10px;color:#c5b09f}
+ .quest-item.completed{color:#00ff88;text-decoration:line-through;opacity:0.85}
+ .q-icon{font-weight:bold;font-family:monospace;width:12px}
 
- .portal-brand{text-align:center}
- .brand-icon{font-size:64px;margin-bottom:12px;filter:drop-shadow(0 0 20px rgba(255,185,138,0.4))}
- .brand-title{margin:0;font-size:32px;color:#ffc299;font-weight:800;letter-spacing:1px}
- .brand-sub{margin:8px 0 0;font-size:14px;color:#a89280;font-weight:400}
+ /* Details Drawer Toggle */
+ .btn-details-toggle{background:transparent;border:1px dashed #5a3824;color:#a8907d;font-size:10.5px;padding:5px}
+ .btn-details-toggle:hover{background:#26160f;color:#fff}
+ #telemetryDetails{display:none;margin-top:8px;background:#180e08;border:1px solid #3d2315;border-radius:6px;padding:8px}
 
- .map-cards-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:16px;width:100%}
+ /* Toast */
+ #toast{position:fixed;top:15px;left:50%;transform:translateX(-50%);background:rgba(20,12,8,0.95);border:1px solid #00d4ff;color:#e8f7ff;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:600;box-shadow:0 4px 20px rgba(0,212,255,0.35);display:none;z-index:9999;backdrop-filter:blur(6px)}
 
- .map-card{background:#1e130d;border:2px solid #3d2a1e;border-radius:12px;padding:20px;cursor:pointer;transition:all 0.2s ease;position:relative;overflow:hidden}
- .map-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.5)}
- .map-card.active-map{border-color:#4a3020}
- .map-card.active-map:hover{border-color:#ffb98a;box-shadow:0 8px 32px rgba(255,185,138,0.2)}
- .map-card.locked-map{opacity:0.5;cursor:not-allowed}
- .map-card.placeholder{border-style:dashed;border-color:#3d2a1e;opacity:0.4;cursor:default}
- .map-card.placeholder:hover{transform:none;box-shadow:none}
+ /* Quick Top Telemetry Bar */
+ #topBar{position:fixed;top:12px;left:335px;display:flex;gap:8px;z-index:10}
+ .top-stat{background:rgba(20,13,9,0.85);border:1px solid #4a2d1d;border-radius:6px;padding:4px 10px;font-size:11px;backdrop-filter:blur(6px);display:flex;align-items:center;gap:5px}
+ .top-stat b{color:#ffb98a}
 
- .card-top-badge{position:absolute;top:12px;right:12px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold;letter-spacing:0.5px}
- .ready-badge{background:rgba(0,212,255,0.15);color:#00d4ff;border:1px solid rgba(0,212,255,0.4)}
- .coming-badge{background:rgba(255,185,138,0.1);color:#a89280;border:1px solid rgba(255,185,138,0.2)}
- .placeholder-badge{background:rgba(168,146,128,0.1);color:#6b5a4e;border:1px solid rgba(168,146,128,0.2)}
-
- .card-code{font-size:20px;font-weight:800;color:#ffb98a;margin-bottom:6px;font-family:'Courier New',monospace}
- .card-title{font-size:13px;color:#d8c6b6;line-height:1.4;margin-bottom:10px}
- .card-meta{font-size:11px;color:#8a7565;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
- .card-regions{display:flex;justify-content:space-between;align-items:center;font-size:11px;border-top:1px solid #2d1f16;padding-top:8px}
- .region-count{color:#a89280}
- .enter-hint{color:#00d4ff;font-weight:600}
- .card-hint{font-size:11px;color:#6b5a4e;margin-top:6px}
-
- .portal-footer{text-align:center;font-size:11px;color:#5a4a3e;display:flex;gap:8px;align-items:center;justify-content:center}
- .portal-footer code{background:#2a1c14;padding:1px 6px;border-radius:3px;color:#a89280;font-size:10px}
-
- /* ========================================================
-    REGION PROXIMITY POPUP (in-world)
-    ======================================================== */
- .region-popup{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(18,12,8,0.94);border:2px solid #ffb98a;border-radius:10px;padding:10px 16px;display:flex;align-items:center;gap:12px;z-index:100;backdrop-filter:blur(8px);box-shadow:0 6px 24px rgba(0,0,0,0.6);max-width:400px}
+ /* Region Proximity Popup */
+ .region-popup{position:fixed;bottom:50px;left:50%;transform:translateX(-50%);background:rgba(18,11,7,0.95);border:2px solid #ffb98a;border-radius:10px;padding:10px 16px;display:flex;align-items:center;gap:12px;z-index:100;backdrop-filter:blur(8px);box-shadow:0 6px 24px rgba(0,0,0,0.65);max-width:440px}
  .popup-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px currentColor}
  .popup-text{display:flex;flex-direction:column;gap:2px}
  .popup-name{font-size:14px;font-weight:700}
  .popup-desc{font-size:11px;color:#c9b4a2;line-height:1.3}
+
+ /* Landing Map Portal Overlay */
+ .map-portal-overlay{position:fixed;inset:0;background:rgba(10,7,5,0.98);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px)}
+ .portal-landing{display:flex;flex-direction:column;align-items:center;gap:35px;padding:40px 20px;max-width:900px;width:100%}
+ .portal-brand{text-align:center}
+ .brand-icon{font-size:58px;margin-bottom:10px;filter:drop-shadow(0 0 20px rgba(255,185,138,0.4))}
+ .brand-title{margin:0;font-size:30px;color:#ffc299;font-weight:800;letter-spacing:1px}
+ .brand-sub{margin:6px 0 0;font-size:13.5px;color:#a89280}
+ .map-cards-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(290px, 1fr));gap:16px;width:100%}
+ .map-card{background:#1e130d;border:2px solid #3d2a1e;border-radius:12px;padding:20px;cursor:pointer;transition:all 0.2s ease;position:relative}
+ .map-card:hover{transform:translateY(-2px);border-color:#ffb98a;box-shadow:0 8px 32px rgba(255,185,138,0.2)}
+ .map-card.placeholder{border-style:dashed;opacity:0.4;cursor:default}
+ .card-top-badge{position:absolute;top:12px;right:12px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:bold}
+ .ready-badge{background:rgba(0,212,255,0.15);color:#00d4ff;border:1px solid rgba(0,212,255,0.4)}
+ .placeholder-badge{background:rgba(168,146,128,0.1);color:#6b5a4e;border:1px solid rgba(168,146,128,0.2)}
+ .card-code{font-size:20px;font-weight:800;color:#ffb98a;margin-bottom:6px;font-family:'Courier New',monospace}
+ .card-title{font-size:12.5px;color:#d8c6b6;margin-bottom:8px;line-height:1.4}
+ .card-meta{font-size:10.5px;color:#8a7565;display:flex;gap:6px;margin-bottom:10px}
+ .card-regions{display:flex;justify-content:space-between;align-items:center;font-size:11px;border-top:1px solid #2d1f16;padding-top:8px}
+ .enter-hint{color:#00d4ff;font-weight:bold}
+ .portal-footer{text-align:center;font-size:11px;color:#5a4a3e;display:flex;gap:8px}
+ .portal-footer code{background:#2a1c14;padding:1px 6px;border-radius:3px;color:#a89280}
 </style></head><body>
 <div id="app"></div>
-<div id="loading">Loading Jezero Crater Simulation…</div>
+<div id="loading">Memuat Simulasi Mars Jezero Crater…</div>
 <div id="toast"></div>
 
-<!-- 3D SIMULATION HUD OVERLAY -->
+<!-- QUICK TOP BAR -->
+<div id="topBar">
+ <div class="top-stat">Speed: <b id="topSpeed">0.0 m/s</b></div>
+ <div class="top-stat">Elevasi: <b id="topElev">0 m</b></div>
+ <div class="top-stat" id="inspect"></div>
+</div>
+
+<!-- LEFT PANEL: ROVER SELECTION & INTEGRATED MISSION OPERATIONS -->
 <div id="info" class="panel">
  <h3>
   <span>Mars Swarm Units</span>
   <span id="activeCallsign" class="r-badge" style="background:#00d4ff22;color:#00d4ff">ROV-01</span>
  </h3>
 
- <!-- 3 Specialized Robot Buttons -->
+ <!-- 3 Robot Selection Buttons -->
  <div class="robot-selector" id="robotSelector">
-  <button class="r-btn active" data-index="0" style="border-left-color:#00d4ff">
-   <span>🗺️ <b>01. Ares Mapper</b></span>
-   <span class="r-badge" style="background:#00d4ff33;color:#00d4ff">Surface Mapping</span>
+  <button class="r-btn active" data-index="0" style="border-top:3px solid #00d4ff">
+   <span>🗺️ <b>01. Ares</b></span>
+   <span style="font-size:9px;color:#00d4ff">Mapper</span>
   </button>
-  <button class="r-btn" data-index="1" style="border-left-color:#ff3b5c">
-   <span>🔬 <b>02. Curiosity GeoLab</b></span>
-   <span class="r-badge" style="background:#ff3b5c33;color:#ff3b5c">Geology &amp; Drill</span>
+  <button class="r-btn" data-index="1" style="border-top:3px solid #ff3b5c">
+   <span>🔬 <b>02. GeoLab</b></span>
+   <span style="font-size:9px;color:#ff3b5c">Riset &amp; Lab</span>
   </button>
-  <button class="r-btn" data-index="2" style="border-left-color:#00ff88">
-   <span>🚛 <b>03. Hermes Transport</b></span>
-   <span class="r-badge" style="background:#00ff8833;color:#00ff88">Transport &amp; Support</span>
+  <button class="r-btn" data-index="2" style="border-top:3px solid #00ff88">
+   <span>🚛 <b>03. Hermes</b></span>
+   <span style="font-size:9px;color:#00ff88">Transport</span>
   </button>
  </div>
 
- <!-- Dynamic Specialized Mission Task Box -->
- <div class="mission-box" id="missionBox">
-  <div class="mission-title" id="m-title">🗺️ Tugas: Surface Mapping &amp; Exploration</div>
-  <div class="mission-stat"><span>Tugas Utama:</span><span id="m-desc" style="text-align:right;max-width:200px">Pemetaan permukaan &amp; jalur aman</span></div>
-  <div class="mission-stat"><span>Statistik Misi:</span><span id="m-stat1">0.00 km² terpetakan</span></div>
-  <div class="mission-stat"><span>Target / Objek:</span><span id="m-stat2">Western Fan Delta</span></div>
-  <div class="mission-stat"><span>Status Alat:</span><span id="m-tool" style="color:#00d4ff">LiDAR 360° Scan Aktif</span></div>
-  <button id="taskBtn" class="action-btn">Lakukan Pemindaian LiDAR (Space)</button>
+ <!-- Mission Workflow Pipeline (4 Tahap) -->
+ <div class="workflow-box">
+  <div class="wf-title">
+   <span>ALUR KERJA RISET TIM</span>
+   <span style="color:#00d4ff;font-family:monospace">STEP 1-4</span>
+  </div>
+  <div class="wf-steps">
+   <div class="wf-step current" id="step-map">1. Petakan<br>Sampel</div>
+   <div class="wf-step" id="step-transport">2. Muat ke<br>Hermes</div>
+   <div class="wf-step" id="step-lab">3. Bangun<br>Lab Sains</div>
+   <div class="wf-step" id="step-research">4. Riset &amp;<br>Analisis</div>
+  </div>
  </div>
 
- <table style="margin-top:8px">
-  <tr><td>Koordinat</td><td id="r-lon">-</td></tr>
-  <tr><td>Projected</td><td id="r-xy">-</td></tr>
-  <tr><td>Elevasi</td><td id="r-el">-</td></tr>
-  <tr><td>Kemiringan</td><td id="r-slope">-</td></tr>
-  <tr><td>Heading</td><td id="r-hd">-</td></tr>
-  <tr><td>Status Gerak</td><td id="r-status">-</td></tr>
- </table>
- <div id="inspect"></div>
- <h3 style="margin-top:8px">Data sources</h3><ul id="sources"></ul>
- <div style="margin-top:4px;color:#a58a74;font-size:11px">Elevation &amp; imagery: real NASA/USGS Jezero Crater data.</div>
+ <!-- Contextual Action Controls based on active robot -->
+ <div class="action-card">
+  <div class="act-header">
+   <div class="act-role-title" id="act-role-title">🗺️ Ares Mapper (Eksplorasi)</div>
+   <div class="act-role-status" id="act-role-status" style="color:#00d4ff">Siap</div>
+  </div>
+  <button id="mainActionBtn" class="btn-main-action">📍 Tandai Waypoint Sampel (Space)</button>
+  <button id="secActionBtn" class="btn-sec-action" style="display:none">🚛 Panggil Hermes Transport (C)</button>
+ </div>
+
+ <!-- Quest & Science Achievements Checklist -->
+ <div class="quest-box">
+  <div class="quest-header">
+   <span>🎯 TARGET &amp; RISET SAINS</span>
+   <span id="scienceScore" class="quest-score">0 Poin</span>
+  </div>
+  <div class="quest-list" id="questList"></div>
+ </div>
+
+ <!-- Collapsible Telemetry Details Drawer -->
+ <button id="toggleDetailsBtn" class="btn-details-toggle">📊 Lihat Detail Telemetri</button>
+ <div id="telemetryDetails">
+  <table>
+   <tr><td>Koordinat</td><td id="r-lon">-</td></tr>
+   <tr><td>Projected</td><td id="r-xy">-</td></tr>
+   <tr><td>Elevasi</td><td id="r-el">-</td></tr>
+   <tr><td>Kemiringan</td><td id="r-slope">-</td></tr>
+   <tr><td>Heading</td><td id="r-hd">-</td></tr>
+   <tr><td>Status Gerak</td><td id="r-status">-</td></tr>
+  </table>
+  <h3 style="margin-top:8px;font-size:11px">Sumber Data NASA/USGS</h3>
+  <ul id="sources"></ul>
+ </div>
 </div>
 
+<!-- RIGHT PANEL: CONTROLS & DISPLAY SETTINGS -->
 <div id="ctl" class="panel">
- <button id="openMapPortalBtn" style="background:#1d4160;border:1px solid #00d4ff;margin-bottom:8px;font-weight:bold;color:#e8f7ff">
+ <button id="openMapPortalBtn" style="background:#184266;border:1px solid #00d4ff;margin-bottom:8px;font-weight:bold;color:#e8f7ff">
   🗺️ Peta Geologi (Map Portal)
  </button>
 
- <h3>Kontrol &amp; Tampilan <span id="fps" style="float:right;color:#b99a82"></span></h3>
+ <h3>Kontrol &amp; Tampilan <span id="fps" style="font-size:11px;color:#b99a82"></span></h3>
  <label>Kamera</label>
  <select id="cam">
   <option value="follow">Follow rover (drag/zoom/pan)</option>
@@ -152,10 +201,13 @@
   <option value="autonomous">Patroli Otonom (Robot Bekerja Sendiri)</option>
  </select>
 
- <label>Vertical exaggeration <span id="exagV">1.0×</span></label>
+ <label>Skala Visual Rover <span id="rscaleV">15×</span></label>
+ <input id="rscale" type="range" min="1" max="60" value="15">
+
+ <label>Vertical Exaggeration <span id="exagV">1.0×</span></label>
  <input id="exag" type="range" min="1" max="5" step="0.5" value="1">
 
- <label>Mesh resolution <span id="meshInfo" style="color:#a58a74"></span></label>
+ <label>Resolusi Medan <span id="meshInfo" style="color:#a58a74"></span></label>
  <select id="stride">
   <option value="8">Low (320 m)</option>
   <option value="4" selected>Medium (160 m)</option>
@@ -163,20 +215,18 @@
   <option value="1">Full (40 m, heavy)</option>
  </select>
 
- <label>Rover display scale <span id="rscaleV">15×</span></label>
- <input id="rscale" type="range" min="1" max="60" value="15">
-
- <label>Sudut Matahari (Elevasi / Azimuth)</label>
+ <label>Sudut Matahari</label>
  <input id="sunEl" type="range" min="5" max="80" value="40">
  <input id="sunAz" type="range" min="0" max="360" value="135">
 
- <label><input id="slope" type="checkbox"> Slope map (green→red, 0–30°)</label>
- <label><input id="tint" type="checkbox" checked> Mars-tone tint (imagery is grayscale)</label>
- <button id="resetRover">Reset semua robot ke posisi awal</button>
+ <label><input id="slope" type="checkbox"> Slope map (hijau→merah)</label>
+ <label><input id="tint" type="checkbox" checked> Pewarnaan Mars-tone</label>
+ <button id="resetRover" style="margin-top:6px;background:#3d2518">Reset Posisi Awal</button>
 </div>
 
-<div id="help" class="panel">
- <b>Setir:</b> <kbd>W A S D</kbd> / Panah · <b>Turbo Lari:</b> <kbd>Shift</kbd> · <b>Pilih Robot:</b> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> / <kbd>Tab</kbd> · <b>Aksi Tugas:</b> <kbd>Space</kbd> · <b>Klik medan:</b> Inspeksi titik
+<!-- BOTTOM QUICK CONTROLS BAR -->
+<div id="help">
+ <b>Setir:</b> <kbd>W A S D</kbd> · <b>Turbo:</b> <kbd>Shift</kbd> · <b>Pilih Robot:</b> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> / <kbd>Tab</kbd> · <b>Aksi Utama:</b> <kbd>Space</kbd> · <b>Bangun Lab:</b> <kbd>B</kbd> · <b>Panggil Transport:</b> <kbd>C</kbd>
 </div>
 
 <script type="module" src="./src/main.js"></script>
