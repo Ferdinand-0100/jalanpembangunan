@@ -16,95 +16,9 @@ import { VisualPerceptionSystem } from './mission/visualPerception.js';
 import { VisualPerceptionPanel } from './ui/visualPerceptionPanel.js';
 import { HistoryTracker } from './rover/historyTracker.js';
 import { LabBackpackWorkbench } from './ui/labBackpack.js';
-import { MarsGlobe3D } from './marsGlobe.js';
-import { DashboardController } from './ui/dashboardController.js';
-import { getOlympusMonsCalderaHeights } from './terrain/olympusMonsTerrain.js';
 
 let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal, regionMarkers, missionSystem;
 let vpms, vpPanel, historyTracker, labBackpack;
-let marsGlobe, dashboardController;
-let originalHeights = null;
-let currentSimMapId = 'usgs-i-1802-a';
-
-// Initialize 3D Mars Planetary Dashboard immediately on page load
-// — Dashboard tampil PERTAMA, simulator aktif setelah tombol "MULAI SIMULASI 3D" diklik
-try {
-  marsGlobe = new MarsGlobe3D('marsGlobeCanvasContainer', {
-    onHotspotClick: (hs) => {
-      if (dashboardController) {
-        dashboardController.selectMap(hs.id);
-      }
-      hud.showToast(`📍 Selected ${hs.name} (${hs.code})`);
-    },
-  });
-
-  dashboardController = new DashboardController({
-    onLaunchSimulation: (mapData) => {
-      // Dashboard fade-out is handled by DashboardController.hide()
-      // Hud & simulator panels below appear after the fade-out delay
-      setTimeout(() => {
-        // Display all simulator panels
-        const simPanels = ['topControlBar', 'simSettingsModal', 'robotDetailPanel', 'help'];
-        simPanels.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.style.display = '';
-        });
-        switchSimulationTerrain(mapData);
-      }, 500);
-    },
-    onToast: (msg) => hud.showToast(msg),
-  });
-
-  window.marsGlobe = marsGlobe;
-  window.dashboardController = dashboardController;
-} catch (err) {
-  console.error('[MarsDashboard] Failed to initialize:', err);
-}
-
-function switchSimulationTerrain(mapData) {
-  if (!hf || !terrain) return;
-  const mapId = typeof mapData === 'string' ? mapData : mapData.id;
-  currentSimMapId = mapId;
-
-  if (mapId === 'usgs-sim-3470') {
-    // 1. Build and apply real Olympus Mons Caldera DEM heights
-    const olympusHeights = getOlympusMonsCalderaHeights(meta);
-    hf.data = olympusHeights;
-    terrain.build(CONFIG.meshStride);
-
-    // 2. Spawn rovers on the flat basaltic caldera floor (+18,100 m) near center
-    const centerX = (meta.extent.left + meta.extent.right) * 0.5;
-    const centerY = (meta.extent.bottom + meta.extent.top) * 0.5;
-    if (swarm) {
-      swarm.spawnAt(centerX, centerY, 0);
-      const active = swarm.getActiveRover();
-      if (rig && active) {
-        rig.controls.target.copy(active.mesh.position);
-      }
-    }
-
-    // 3. Disable Jezero regional patches so the real Olympus caldera topography is clean
-    if (regionMarkers) {
-      regionMarkers.setVisible(false);
-    }
-    hud.showToast('🌋 Landed at Olympus Mons Caldera (USGS SIM 3470, Summit Elevation +18,100 m)');
-  } else {
-    // 1. Restore original Valles Marineris / Jezero heights
-    if (originalHeights) {
-      hf.data = originalHeights;
-      terrain.build(CONFIG.meshStride);
-    }
-
-    // 2. Spawn rovers at default start coordinates
-    startRovers();
-
-    // 3. Enable regional markers
-    if (regionMarkers) {
-      regionMarkers.setVisible(true);
-    }
-    hud.showToast('🚀 Landed at Valles Marineris & Tharsis (USGS I-1802A)');
-  }
-}
 
 const hud = new Hud({
   onExaggeration: v => { frame.setExaggeration(v); terrain.build(); },
@@ -120,18 +34,7 @@ const hud = new Hud({
   onTriggerTask: () => triggerMainTask(),
   onSecondaryAction: () => triggerSecondaryTask(),
   onOpenMapPortal: () => {
-    if (dashboardController) {
-      // Sembunyikan panel simulator dulu, lalu buka dashboard
-      const simPanels = ['topControlBar', 'simSettingsModal', 'robotDetailPanel', 'help'];
-      simPanels.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-      });
-      dashboardController.show();
-      if (marsGlobe) marsGlobe.resize();
-    } else if (mapPortal) {
-      mapPortal.show();
-    }
+    if (mapPortal) mapPortal.show();
   },
   onToggleHistory: (visible) => {
     if (historyTracker) historyTracker.setShowHistory(visible);
@@ -237,7 +140,6 @@ async function main() {
   }
 
   meta = data.meta;
-  originalHeights = data.heights.slice();
   hf = new Heightfield(meta, data.heights);
   frame = new GeoFrame(meta, CONFIG.verticalExaggeration);
 
@@ -320,10 +222,7 @@ async function main() {
 
   const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 3, 600000);
   rig = new CameraRig(camera, renderer.domElement, hf, frame);
-  input = new RoverInput(
-    () => rig.mode,
-    () => dashboardController && dashboardController.isVisible
-  );
+  input = new RoverInput(() => rig.mode);
 
   startRovers();
   updateSun();
@@ -332,24 +231,16 @@ async function main() {
   hud.setInspect(null);
   hud.hideLoading();
 
-  // Initialize simple Map Portal as secondary reference if needed
+  // Initialize simple Map Portal
   mapPortal = new MapPortal({
     onLaunchSimulation: mapData => {
       hud.showToast(`Memasuki simulasi 3D — ${mapData.title}`);
-      switchSimulationTerrain(mapData);
     },
   });
+  mapPortal.show();
 
   // Keyboard shortcut switching between the 3 robots & mission triggers
   addEventListener('keydown', e => {
-    // If dashboard is active, don't trigger rover controls
-    if (dashboardController && dashboardController.isVisible) {
-      if (e.code === 'Escape') {
-        dashboardController.hideHelpModal();
-      }
-      return;
-    }
-
     if (['Digit1', 'Digit2', 'Digit3'].includes(e.code)) {
       const idx = parseInt(e.code.replace('Digit', ''), 10) - 1;
       selectRover(idx);

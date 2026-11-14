@@ -368,20 +368,12 @@ export class RegionMarkers {
     }
   }
 
-  setVisible(visible) {
-    this._disabled = !visible;
-    for (const m of this.markers) {
-      if (m.group) m.group.visible = visible;
-    }
-    if (this.popupEl) this.popupEl.style.display = 'none';
-  }
-
   /**
    * Mengembalikan elevasi tambahan (meter) dari relief wilayah prosedural pada koordinat projected (X, Y).
    * Digunakan oleh RoverPhysics agar robot dapat memanjat gunung api, kawah, dan bukit tanpa tenggelam.
    */
   getReliefAt(X, Y) {
-    if (this._disabled || !this.patchData) return 0;
+    if (!this.patchData) return 0;
     let extra = 0;
     const o = { h: 0, heat: 0 };
     for (let i = 0; i < this.patchData.length; i++) {
