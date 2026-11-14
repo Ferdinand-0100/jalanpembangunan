@@ -1,0 +1,85 @@
+{
+  "name": "Jezero Crater region (Mars 2020 landing-site CTX products)",
+  "generated_by": "preprocessing/preprocess.py",
+  "crs": {
+    "name": "Equirectangular, Mars 2000 sphere (R = 3396190 m)",
+    "radius_m": 3396190.0,
+    "standard_parallel_deg": 18.4663,
+    "central_meridian_deg": 0,
+    "x_formula": "X = R * lon_rad * cos(standard_parallel)",
+    "y_formula": "Y = R * lat_rad",
+    "note": "East-west ground scale is exact only at 18.4663 N; at the north/south edges of the area it is off by about +/-0.5 %."
+  },
+  "extent": {
+    "left": 4329199.999999998,
+    "right": 4418039.999999998,
+    "bottom": 1042140.0000000028,
+    "top": 1143340.0000000028,
+    "width": 88840.0,
+    "height": 101200.0
+  },
+  "grid": {
+    "cols": 2221,
+    "rows": 2530,
+    "cell_size_m": 40.0,
+    "cell_reference": "pixel centre",
+    "layout": "row-major, first row = northernmost",
+    "dtype": "float32 little-endian"
+  },
+  "elevation": {
+    "min": -3500.94091796875,
+    "max": -476.98681640625,
+    "mean": -2316.592041015625,
+    "unit": "metres (not stated in the GeoTIFF metadata; consistent with Jezero Crater's known relief)",
+    "datum": "Not stated in file metadata (Mars 2000 sphere / MOLA-referenced DEM)",
+    "nodata_value": -3.4028234663852886e+38,
+    "nodata_cells_filled": 0
+  },
+  "texture": {
+    "file": "texture.jpg",
+    "width": 4096,
+    "height": 4666,
+    "bands": 1,
+    "note": "Source CTX orthoimage is panchromatic (grayscale); no natural colour is contained in the data."
+  },
+  "sources": [
+    {
+      "role": "terrain geometry",
+      "file": "M20_JezeroCrater_CTXDEM_20m.tif",
+      "native_res_m": 20.0,
+      "native_size": [
+        4456,
+        5067
+      ],
+      "sha256": "ba7f706ea1b5d63a562f28a7dcf7a7f3c79bce7f048e6974b57e8a33c30d1ba2",
+      "credit": "USGS Astrogeology / NASA Mars 2020 terrain data, CTX DEM, 20 m/px"
+    },
+    {
+      "role": "surface texture",
+      "file": "M20_JezeroCrater_CTXortho_mosaic_5m.tif",
+      "native_res_m": [
+        5.002064681102627,
+        5.002262971613293
+      ],
+      "native_size": [
+        17766,
+        20234
+      ],
+      "sha256": "cd9f4b2154fdd43e8c17abfbae63210b72507db2209d1d7db63f6f855b18d2df",
+      "credit": "USGS Astrogeology / NASA Mars 2020 terrain data, CTX orthomosaic, 5 m/px"
+    }
+  ],
+  "transformations": [
+    "Cropped DEM and orthomosaic to their common ground extent (snapped to the DEM pixel grid).",
+    "DEM block-averaged 2x2 (NaN-aware mean) from 20.0 m to 40.0 m cells; no smoothing or filtering beyond that.",
+    "0 NoData cells filled by inverse-distance interpolation for rendering only; mask in nodata.bin.",
+    "Orthomosaic area-averaged (rasterio Resampling.average) from ~5 m to 21.69 m/px; pixel values not otherwise altered.",
+    "No reprojection: both inputs already share the same equirectangular CRS (standard parallel 18.4663), so geometry and texture align by coordinates."
+  ],
+  "unused": [
+    {
+      "file": "Jezero_ChannelFan_DEM.tif",
+      "reason": "See docs/DATASETS.md - different CRS/standard parallel and unresolved vertical (~13 m) and possible horizontal offset against the CTX DEM; kept separate."
+    }
+  ]
+}
