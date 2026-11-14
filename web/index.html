@@ -1,34 +1,102 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>Jezero Crater 3D Terrain Simulator</title>
+<html lang="en"><head><meta charset="utf-8"><title>Jezero Crater 3D Terrain Simulator - Mars Swarm</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/addons/"}}</script>
 <style>
  html,body{margin:0;height:100%;overflow:hidden;background:#1a120d;font:12px/1.45 system-ui,sans-serif;color:#f3e6d8}
  #app{position:fixed;inset:0}
- .panel{position:fixed;background:rgba(20,12,8,.82);border:1px solid #6b4a36;border-radius:8px;padding:10px 12px;backdrop-filter:blur(4px)}
- #info{top:10px;left:10px;width:310px} #ctl{top:10px;right:10px;width:250px} #help{bottom:10px;left:10px;max-width:470px;color:#cdb8a4}
- h3{margin:0 0 6px;font-size:13px;color:#ffb98a} table{border-collapse:collapse;width:100%} td{padding:1px 0;vertical-align:top} td:first-child{color:#b99a82;width:62px}
- label{display:block;margin:5px 0 2px;color:#b99a82} input[type=range],select{width:100%} .warn{color:#ff7a59} #sources{margin:4px 0 0;padding-left:14px;font-size:11px} #sources span{color:#a58a74}
+ .panel{position:fixed;background:rgba(20,12,8,.84);border:1px solid #6b4a36;border-radius:8px;padding:10px 12px;backdrop-filter:blur(6px);box-shadow:0 4px 20px rgba(0,0,0,0.5)}
+ #info{top:10px;left:10px;width:320px} #ctl{top:10px;right:10px;width:250px} #help{bottom:10px;left:10px;max-width:540px;color:#cdb8a4}
+ h3{margin:0 0 6px;font-size:13px;color:#ffb98a;display:flex;align-items:center;justify-content:space-between}
+ table{border-collapse:collapse;width:100%} td{padding:2px 0;vertical-align:top} td:first-child{color:#b99a82;width:66px}
+ label{display:block;margin:6px 0 2px;color:#b99a82} input[type=range],select{width:100%;background:#2a1c14;border:1px solid #6b4a36;color:#f3e6d8;border-radius:4px;padding:2px}
+ .warn{color:#ff7a59} #sources{margin:4px 0 0;padding-left:14px;font-size:11px} #sources span{color:#a58a74}
  #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#1a120d;font-size:16px;text-align:center;padding:30px} #loading.err{color:#ff7a59}
- button{margin-top:8px;width:100%;background:#6b4a36;color:#fff;border:0;border-radius:5px;padding:5px;cursor:pointer} #inspect{color:#7fe0ff;margin-top:6px} kbd{background:#3a2a20;border-radius:3px;padding:0 4px}
+ button{margin-top:8px;width:100%;background:#6b4a36;color:#fff;border:0;border-radius:5px;padding:5px 8px;cursor:pointer;font-weight:500;transition:all 0.15s ease}
+ button:hover{background:#8a5e45}
+ #inspect{color:#7fe0ff;margin-top:6px} kbd{background:#3a2a20;border:1px solid #5a3d2c;border-radius:3px;padding:1px 5px;font-weight:600;color:#ffc49e}
+
+ /* Swarm selector styling */
+ .swarm-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px}
+ .r-btn{margin-top:0;padding:5px 6px;font-size:11px;text-align:left;background:#241610;border:1px solid #4a3022;border-left:4px solid #6b4a36;border-radius:4px;color:#d8c6b6;cursor:pointer}
+ .r-btn:hover{background:#382218;color:#fff}
+ .r-btn.active{background:#3f2518;color:#fff;font-weight:bold;box-shadow:0 0 8px rgba(255,185,138,0.25)}
+ .rover-badge{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+ .rover-desc{font-size:11px;color:#bca18d;margin-bottom:6px;border-bottom:1px solid #452b1e;padding-bottom:5px}
 </style></head><body>
 <div id="app"></div>
-<div id="loading">Loading…</div>
-<div id="info" class="panel"><h3>Rover (test unit)</h3>
- <table><tr><td>Position</td><td id="r-lon">-</td></tr><tr><td>Projected</td><td id="r-xy">-</td></tr><tr><td>Elevation</td><td id="r-el">-</td></tr>
- <tr><td>Slope</td><td id="r-slope">-</td></tr><tr><td>Heading</td><td id="r-hd">-</td></tr><tr><td>Status</td><td id="r-status">-</td></tr></table>
+<div id="loading">Loading Jezero Crater Simulation…</div>
+
+<div id="info" class="panel">
+ <h3>
+  <span>Mars Rover Swarm (4 Units)</span>
+  <span id="activeCallsign" style="font-size:11px;padding:1px 6px;border-radius:3px;background:#382317;color:#00e5ff">PER-01</span>
+ </h3>
+
+ <!-- 4 Rovers Selector Grid -->
+ <div class="swarm-grid" id="roverSelector">
+  <button class="r-btn active" data-index="0" style="border-left-color:#00e5ff"><span class="rover-badge" style="background:#00e5ff"></span>01 Perseverance</button>
+  <button class="r-btn" data-index="1" style="border-left-color:#ffaa00"><span class="rover-badge" style="background:#ffaa00"></span>02 Ares Scout</button>
+  <button class="r-btn" data-index="2" style="border-left-color:#ff385c"><span class="rover-badge" style="background:#ff385c"></span>03 Curiosity-II</button>
+  <button class="r-btn" data-index="3" style="border-left-color:#00ff88"><span class="rover-badge" style="background:#00ff88"></span>04 Hermes</button>
+ </div>
+ <div id="roverDesc" class="rover-desc">Mission Lead · Robotic Arm & Coring Drill</div>
+
+ <table>
+  <tr><td>Position</td><td id="r-lon">-</td></tr>
+  <tr><td>Projected</td><td id="r-xy">-</td></tr>
+  <tr><td>Elevation</td><td id="r-el">-</td></tr>
+  <tr><td>Slope</td><td id="r-slope">-</td></tr>
+  <tr><td>Heading</td><td id="r-hd">-</td></tr>
+  <tr><td>Status</td><td id="r-status">-</td></tr>
+ </table>
  <div id="inspect"></div>
  <h3 style="margin-top:10px">Data sources</h3><ul id="sources"></ul>
- <div style="margin-top:4px;color:#a58a74;font-size:11px">Elevation &amp; imagery: real NASA/USGS data. Mars-tone tint, slope colours, lighting, rover model: visualisation only.</div></div>
-<div id="ctl" class="panel"><h3>View <span id="fps" style="float:right;color:#b99a82"></span></h3>
- <label>Camera</label><select id="cam"><option value="follow">Follow rover (drag/zoom/pan)</option><option value="orbit">Free orbit</option><option value="fly">Free-fly</option></select>
- <label>Vertical exaggeration <span id="exagV">1.0×</span></label><input id="exag" type="range" min="1" max="5" step="0.5" value="1">
+ <div style="margin-top:4px;color:#a58a74;font-size:11px">Elevation &amp; imagery: real NASA/USGS data. Mars-tone tint, slope colours, lighting, rover models: visualisation only.</div>
+</div>
+
+<div id="ctl" class="panel">
+ <h3>View &amp; Swarm <span id="fps" style="float:right;color:#b99a82"></span></h3>
+ <label>Camera</label>
+ <select id="cam">
+  <option value="follow">Follow rover (drag/zoom/pan)</option>
+  <option value="orbit">Free orbit</option>
+  <option value="fly">Free-fly</option>
+ </select>
+
+ <label>Swarm Behavior</label>
+ <select id="swarmMode">
+  <option value="formation" selected>Follow Leader (Formation)</option>
+  <option value="patrol">Independent Scout & Survey</option>
+  <option value="hold">Hold Position (Parked)</option>
+ </select>
+
+ <label>Vertical exaggeration <span id="exagV">1.0×</span></label>
+ <input id="exag" type="range" min="1" max="5" step="0.5" value="1">
+
  <label>Mesh resolution <span id="meshInfo" style="color:#a58a74"></span></label>
- <select id="stride"><option value="8">Low (320 m)</option><option value="4" selected>Medium (160 m)</option><option value="2">High (80 m)</option><option value="1">Full (40 m, heavy)</option></select>
- <label>Rover display scale <span id="rscaleV">15×</span></label><input id="rscale" type="range" min="1" max="60" value="15">
- <label>Sun elevation / azimuth</label><input id="sunEl" type="range" min="5" max="80" value="40"><input id="sunAz" type="range" min="0" max="360" value="135">
+ <select id="stride">
+  <option value="8">Low (320 m)</option>
+  <option value="4" selected>Medium (160 m)</option>
+  <option value="2">High (80 m)</option>
+  <option value="1">Full (40 m, heavy)</option>
+ </select>
+
+ <label>Rover display scale <span id="rscaleV">15×</span></label>
+ <input id="rscale" type="range" min="1" max="60" value="15">
+
+ <label>Sun elevation / azimuth</label>
+ <input id="sunEl" type="range" min="5" max="80" value="40">
+ <input id="sunAz" type="range" min="0" max="360" value="135">
+
  <label><input id="slope" type="checkbox"> Slope map (green→red, 0–30°)</label>
  <label><input id="tint" type="checkbox" checked> Mars-tone tint (imagery is grayscale)</label>
- <button id="resetRover">Reset rover to start</button></div>
-<div id="help" class="panel"><b>Drive:</b> <kbd>W A S D</kbd> / arrow keys · <b>Camera:</b> left-drag rotate, right-drag pan, wheel zoom · <b>Free-fly:</b> <kbd>WASD</kbd> move, <kbd>Q/E</kbd> down/up, <kbd>Shift</kbd> fast, drag to look, wheel = speed · <b>Click</b> terrain to inspect</div>
-<script type="module" src="./src/main.js"></script></body></html>
+ <button id="resetRover">Reset swarm to start position</button>
+</div>
+
+<div id="help" class="panel">
+ <b>Drive:</b> <kbd>W A S D</kbd> / arrows · <b>Switch Rover:</b> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd> / <kbd>Tab</kbd> · <b>Camera:</b> Drag to rotate/pan, wheel to zoom · <b>Free-fly:</b> <kbd>WASD</kbd>, <kbd>Q/E</kbd>, <kbd>Shift</kbd> · <b>Click</b> terrain to inspect
+</div>
+
+<script type="module" src="./src/main.js"></script>
+</body></html>

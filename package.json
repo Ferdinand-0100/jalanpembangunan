@@ -1,0 +1,11 @@
+{
+  "name": "jezero-crater-3d-simulator",
+  "version": "1.0.0",
+  "description": "Jezero Crater 3D Terrain Simulator",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["mars", "threejs", "jezero-crater", "simulator"],
+  "author": "",
+  "license": "MIT"
+}
