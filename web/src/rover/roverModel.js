@@ -552,8 +552,9 @@ export function createRoverModel(opts = {}) {
    * 8. HOLOGRAPHIC 3D IDENTIFIER TAG
    * --------------------------------------------------------- */
   const sprite = createRoverTag(callsign, name, missionTitle, accent);
-  sprite.position.set(0, 4.0, 0);
+  sprite.position.set(0, 5.5, 0);
   sprite.scale.set(8.0, 3.4, 1);
+  sprite.renderOrder = 999;
   group.add(sprite);
 
   group.userData = {
@@ -622,6 +623,8 @@ function createRoverTag(callsign, name, missionTitle, accentColor) {
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.minFilter = THREE.LinearFilter;
-  const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
-  return new THREE.Sprite(mat);
+  const mat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false, depthWrite: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.renderOrder = 999;
+  return sprite;
 }
