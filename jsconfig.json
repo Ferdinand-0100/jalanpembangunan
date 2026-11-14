@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "target": "ES2022",
+    "baseUrl": ".",
+    "paths": {
+      "three": ["./web/vendor/three.module.js"],
+      "three/addons/*": ["./web/vendor/addons/*"]
+    }
+  },
+  "include": ["web/**/*"]
+}

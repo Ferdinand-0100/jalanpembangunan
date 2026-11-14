@@ -5,10 +5,10 @@ export const CONFIG = {
   verticalExaggeration: 1.0,    // 1 = true scale
   roverVisualScale: 15,         // rover is ~3 m; scaled up so it is visible on a 90 km scene
   rover: {
-    maxSpeed: 40,               // m/s (simulation speed, NOT real rover speed ~0.04 m/s)
-    acceleration: 25,
-    turnRate: 1.2,              // rad/s
-    maxSlopeDeg: 25,            // slopes steeper than this (along travel direction) block movement
+    maxSpeed: 100,              // m/s (fast responsive simulation speed: 360 km/h)
+    acceleration: 65,           // m/s² (snappy acceleration)
+    turnRate: 1.8,              // rad/s (agile responsive turning)
+    maxSlopeDeg: 42,            // slopes steeper than this block movement (allows climbing volcanoes/craters)
   },
   // Start near the publicly documented Mars 2020 landing site (approx.). Used only as a start position.
   startLonLat: [77.4509, 18.4446],

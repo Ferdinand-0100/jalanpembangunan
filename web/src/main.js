@@ -84,7 +84,10 @@ async function main() {
   swarm.onMissionLog = msg => hud.showToast(msg);
 
   // Initialize 6 geological region markers in the 3D world
-  regionMarkers = new RegionMarkers(scene, hf, frame);
+  regionMarkers = new RegionMarkers(scene, hf, frame, { terrain });
+
+  // Hubungkan elevasi wilayah prosedural ke swarm agar robot memanjat gunung api & kawah tanpa tenggelam
+  swarm.setReliefSampler((X, Y) => regionMarkers.getReliefAt(X, Y));
 
   marker = new THREE.Mesh(new THREE.ConeGeometry(25, 120, 12), new THREE.MeshBasicMaterial({ color: 0x00e0ff }));
   marker.visible = false;

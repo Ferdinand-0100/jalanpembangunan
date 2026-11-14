@@ -69,10 +69,22 @@ export class RoverSwarm {
     this._up = new THREE.Vector3();
     this._fwd = new THREE.Vector3();
     this._right = new THREE.Vector3();
+    this._tempPos = new THREE.Vector3();
+    this._wFront = { x: 0, y: 0, z: 0 };
+    this._wRear  = { x: 0, y: 0, z: 0 };
+    this._wLeft  = { x: 0, y: 0, z: 0 };
+    this._wRight = { x: 0, y: 0, z: 0 };
     this._m4 = new THREE.Matrix4();
     this._animTime = 0;
 
     this.#initRobots();
+  }
+
+  setReliefSampler(fn) {
+    this.reliefSampler = fn;
+    for (const r of this.rovers) {
+      r.physics.setReliefSampler(fn);
+    }
   }
 
   #initRobots() {
@@ -304,17 +316,71 @@ export class RoverSwarm {
 
   #updatePose(rover) {
     const p = rover.physics;
-    const w = this.frame.toWorld(p.X, p.Y, p.elevation);
-    const [gx, gy] = p.grad;
-    const e = this.frame.exag;
+    const S = this.visualScale;
 
-    this._up.set(-e * gx, 1, e * gy).normalize();
-    this._fwd.set(Math.sin(p.heading), 0, -Math.cos(p.heading));
-    this._fwd.addScaledVector(this._up, -this._fwd.dot(this._up)).normalize();
+    // Dimensi rover (meter) dari pusat ke roda sesuai skala visual
+    // Rover model: panjang ~2.6m, lebar ~2.5m, radius ban 0.4m
+    const halfL = 1.3 * S;
+    const halfW = 1.25 * S;
+    const sinH = Math.sin(p.heading);
+    const cosH = Math.cos(p.heading);
+
+    // 4 titik kontak roda dengan permukaan medan (koordinat projected East, North)
+    const xFront = p.X + sinH * halfL;
+    const yFront = p.Y + cosH * halfL;
+    const xRear  = p.X - sinH * halfL;
+    const yRear  = p.Y - cosH * halfL;
+
+    const xRight = p.X + cosH * halfW;
+    const yRight = p.Y - sinH * halfW;
+    const xLeft  = p.X - cosH * halfW;
+    const yLeft  = p.Y + sinH * halfW;
+
+    // Sample elevasi di 4 titik roda dan di pusat
+    const eFront  = p.sampleElevation(xFront, yFront);
+    const eRear   = p.sampleElevation(xRear, yRear);
+    const eRight  = p.sampleElevation(xRight, yRight);
+    const eLeft   = p.sampleElevation(xLeft, yLeft);
+    const eCenter = p.elevation;
+
+    // Konversi ke koordinat world Three.js
+    this.frame.toWorld(xFront, yFront, eFront, this._wFront);
+    this.frame.toWorld(xRear,  yRear,  eRear,  this._wRear);
+    this.frame.toWorld(xRight, yRight, eRight, this._wRight);
+    this.frame.toWorld(xLeft,  yLeft,  eLeft,  this._wLeft);
+
+    // Vektor Forward mengikuti kontur kemiringan longitudinal (Pitch)
+    this._fwd.set(
+      this._wFront.x - this._wRear.x,
+      this._wFront.y - this._wRear.y,
+      this._wFront.z - this._wRear.z
+    ).normalize();
+
+    // Vektor Right mengikuti kontur kemiringan lateral (Roll)
+    this._right.set(
+      this._wRight.x - this._wLeft.x,
+      this._wRight.y - this._wLeft.y,
+      this._wRight.z - this._wLeft.z
+    ).normalize();
+
+    // Vektor Normal tanah (Up) dari perkalian silang Right x Forward
+    this._up.crossVectors(this._right, this._fwd).normalize();
+
+    // Jaga agar sumbu orthogonal sempurna
     this._right.crossVectors(this._fwd, this._up).normalize();
 
+    // Rotasi: kolom 0: right, kolom 1: up, kolom 2: -fwd (karena depan model menghadap -Z lokal)
     this._m4.makeBasis(this._right, this._up, this._fwd.clone().negate());
     rover.mesh.quaternion.setFromRotationMatrix(this._m4);
-    rover.mesh.position.set(w.x, w.y, w.z);
+
+    // Elevasi kontak roda: gunakan elevasi maksimum kontak agar tidak pernah tenggelam
+    const avgWheelElev = (eFront + eRear + eRight + eLeft) / 4;
+    const finalElev = Math.max(eCenter, avgWheelElev);
+    const w = this.frame.toWorld(p.X, p.Y, finalElev);
+
+    // Naikkan rover sepanjang normal Up sebesar radius ban agar ban berdiri persis di atas permukaan
+    const wheelOffset = 0.4 * S * 0.85;
+    this._tempPos.set(w.x, w.y, w.z).addScaledVector(this._up, wheelOffset);
+    rover.mesh.position.copy(this._tempPos);
   }
 }
