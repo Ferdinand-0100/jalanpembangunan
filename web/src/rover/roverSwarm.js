@@ -60,7 +60,7 @@ export class RoverSwarm {
 
     this.rovers = [];
     this.activeIndex = 0;
-    this.swarmMode = 'autonomous'; // 'autonomous' | 'formation' | 'hold'
+    this.swarmMode = 'hold'; // 'hold' (default manual) | 'formation' | 'autonomous'
 
     // Notification callback for HUD toasts
     this.onMissionLog = () => {};
@@ -193,21 +193,10 @@ export class RoverSwarm {
     this._animTime += dt;
     const leader = this.getActiveRover();
 
-    // 1. Process active rover (Player controlled if input active, else autonomous)
-    const isPlayerDriving = Math.abs(playerInput.throttle) > 0.01 || Math.abs(playerInput.steer) > 0.01;
-    if (isPlayerDriving) {
-      leader.physics.step(dt, playerInput);
-      if (leader.role === ROVER_ROLES.SURFACE_MAPPING) {
-        leader.agent.mappedKm2 += (Math.abs(leader.physics.speed) * dt * 0.1) / 1000;
-      }
-    } else {
-      // If idle and mode is autonomous, let it run its role task!
-      if (this.swarmMode === 'autonomous') {
-        const step = this.#stepAgent(leader, dt);
-        leader.physics.step(dt, step);
-      } else {
-        leader.physics.step(dt, { throttle: 0, steer: 0 });
-      }
+    // 1. Process active rover - ALWAYS strictly controlled by player input (never moves on its own)
+    leader.physics.step(dt, playerInput);
+    if (leader.role === ROVER_ROLES.SURFACE_MAPPING && Math.abs(leader.physics.speed) > 0.5) {
+      leader.agent.mappedKm2 += (Math.abs(leader.physics.speed) * dt * 0.1) / 1000;
     }
     this.#updatePose(leader);
 
@@ -220,7 +209,7 @@ export class RoverSwarm {
       if (this.swarmMode === 'autonomous') {
         input = this.#stepAgent(companion, dt);
       } else if (this.swarmMode === 'formation') {
-        // Delta formation following leader
+        // Delta formation: companions only reposition if needed
         const [offX, offY] = companion.startOffset;
         const cosH = Math.cos(leader.physics.heading);
         const sinH = Math.sin(leader.physics.heading);
@@ -231,16 +220,21 @@ export class RoverSwarm {
         const dy = targetY - companion.physics.Y;
         const dist = Math.hypot(dx, dy);
 
-        if (dist > 4.5) {
+        // Only move if leader is moving or if companion is far away from its formation spot
+        const leaderIsMoving = Math.abs(leader.physics.speed) > 0.5;
+        if (dist > (leaderIsMoving ? 4.5 : 8.0)) {
           const desiredHeading = Math.atan2(dx, dy);
           let diff = desiredHeading - companion.physics.heading;
           while (diff > Math.PI) diff -= Math.PI * 2;
           while (diff < -Math.PI) diff += Math.PI * 2;
           input = {
             steer: Math.max(-1, Math.min(1, diff * 1.8)),
-            throttle: Math.abs(diff) > 1.2 ? 0.2 : Math.min(1.0, Math.max(0.3, dist / 22)),
+            throttle: Math.abs(diff) > 1.2 ? 0.2 : Math.min(0.9, Math.max(0.25, dist / 22)),
           };
         }
+      } else {
+        // 'hold' mode: park completely
+        input = { throttle: 0, steer: 0 };
       }
       companion.physics.step(dt, input);
       this.#updatePose(companion);
