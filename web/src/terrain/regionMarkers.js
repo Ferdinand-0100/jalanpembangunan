@@ -1,18 +1,5 @@
 import * as THREE from 'three';
 
-/**
- * RegionMarkers — 6 wilayah geologi dengan relief 3D prosedural yang MENEMPEL pada terrain.
- *
- * Tiap wilayah = satu "patch" mesh yang mengikuti heightfield asli lalu diberi relief
- * (kawah, cekungan, pematang, gunung api + lautan lava) dan shader material khusus.
- * Tepi patch memudar halus ke terrain asli, jadi tidak terlihat seperti objek tempelan.
- *
- * Penggunaan:
- *   const terrain = new TerrainRenderer(scene, hf, frame, texture);
- *   const regions = new RegionMarkers(scene, hf, frame, { terrain });
- *   // di animation loop: regions.update(roverProjX, roverProjY);
- */
-
 /* ------------------------------------------------------------------ */
 /*  Noise & util (CPU)                                                 */
 /* ------------------------------------------------------------------ */
@@ -368,12 +355,20 @@ export class RegionMarkers {
     }
   }
 
+  setVisible(visible) {
+    this._disabled = !visible;
+    for (const m of this.markers) {
+      if (m.group) m.group.visible = visible;
+    }
+    if (this.popupEl) this.popupEl.style.display = 'none';
+  }
+
   /**
    * Mengembalikan elevasi tambahan (meter) dari relief wilayah prosedural pada koordinat projected (X, Y).
    * Digunakan oleh RoverPhysics agar robot dapat memanjat gunung api, kawah, dan bukit tanpa tenggelam.
    */
   getReliefAt(X, Y) {
-    if (!this.patchData) return 0;
+    if (this._disabled || !this.patchData) return 0;
     let extra = 0;
     const o = { h: 0, heat: 0 };
     for (let i = 0; i < this.patchData.length; i++) {
