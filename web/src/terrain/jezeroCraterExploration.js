@@ -830,6 +830,14 @@ export class JezeroCraterExploration {
       }
     }
 
+    // Cek apakah SEMUA spesimen di Jezero Crater sudah berhasil diteliti!
+    const allResearched = this.pois.every(p => p.stage === 'RESEARCHED');
+    if (allResearched) {
+      // Simpan status selesai ke localStorage
+      localStorage.setItem('marsmind_map_usgs-sim-3464_completed', 'true');
+      this._showVictoryDebriefModal();
+    }
+
     const nextPoi =
       this.pois.find(p => p.zoneId === this.activeZoneId && p.stage !== 'RESEARCHED') ||
       this.pois.find(p => p.stage !== 'RESEARCHED');
@@ -840,6 +848,99 @@ export class JezeroCraterExploration {
 
     this.onInspectComplete(poi);
     this.renderHUD();
+  }
+
+  _showVictoryDebriefModal() {
+    if (document.getElementById('jezeroVictoryModal')) return;
+
+    const modal = document.createElement('div');
+    modal.id = 'jezeroVictoryModal';
+    Object.assign(modal.style, {
+      position: 'fixed',
+      inset: '0',
+      background: 'rgba(3, 7, 13, 0.92)',
+      backdropFilter: 'blur(10px)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: '9999'
+    });
+
+    modal.innerHTML = `
+      <div style="
+        width: 520px;
+        max-width: 92vw;
+        background: #0d1522;
+        border: 2px solid #10b981;
+        border-radius: 8px;
+        padding: 24px;
+        color: #fff;
+        font-family: var(--font-sans);
+        box-shadow: 0 16px 56px rgba(16, 185, 129, 0.35);
+        text-align: center;
+      ">
+        <div style="font-size: 11px; font-weight: 800; color: #10b981; letter-spacing: 1px; margin-bottom: 8px;">
+          NASA / JPL MARS 2020 MISSION CONTROL
+        </div>
+        <h2 style="font-size: 22px; font-weight: 900; margin: 0 0 8px; color: #f8fafc;">
+          🏆 MISI JEZERO CRATER SELESAI!
+        </h2>
+        <p style="font-size: 12px; color: #94a3b8; line-height: 1.5; margin-bottom: 20px;">
+          Luar biasa! Seluruh 9 spesimen geologi purba di Kawah Jezero berhasil ditandai oleh Ares, diangkut oleh Hermes, dan diidentifikasi secara presisi oleh GeoLab.
+        </p>
+
+        <div style="background: #070b12; border: 1px solid #1e293b; border-radius: 6px; padding: 14px; margin-bottom: 20px; text-align: left; font-family: var(--font-mono); font-size: 11px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px; color: #cbd5e1;">
+            <span>Spesimen Teranalisis:</span>
+            <b style="color: #10b981;">9 / 9 (100%)</b>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px; color: #cbd5e1;">
+            <span>Bonus Poin Sains:</span>
+            <b style="color: #00e5ff;">+1,350 Poin</b>
+          </div>
+          <div style="display: flex; justify-content: space-between; color: #cbd5e1;">
+            <span>Status Peta:</span>
+            <b style="color: #10b981;">✓ SELESAI DIJELAJAHI</b>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button id="victoryDashboardBtn" style="
+            flex: 1;
+            background: #059669;
+            border: 1px solid #10b981;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s;
+          ">
+            🚀 Kembali ke Dashboard Utama
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector('#victoryDashboardBtn').addEventListener('click', () => {
+      modal.remove();
+      // Buka kembali dashboard portal peta
+      const dash = window.dashboardController;
+      if (dash && typeof dash.show === 'function') {
+        const simPanels = ['topControlBar', 'simSettingsModal', 'robotDetailPanel', 'help'];
+        simPanels.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = 'none';
+        });
+        dash.show();
+        if (window.marsGlobe) window.marsGlobe.resize();
+      } else {
+        window.location.reload();
+      }
+    });
   }
 
   onAresMarkSample(roverPhysics) {
