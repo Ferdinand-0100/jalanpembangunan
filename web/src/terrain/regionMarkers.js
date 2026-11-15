@@ -506,22 +506,30 @@ vWN = normalize(mat3(modelMatrix) * objectNormal);`);
     const hexColor = '#' + new THREE.Color(color).getHexString();
 
     const r = 24;
-    ctx.fillStyle = 'rgba(15, 10, 8, 0.85)';
+    ctx.fillStyle = 'rgba(7, 11, 18, 0.92)';
     ctx.beginPath();
     ctx.moveTo(r, 0); ctx.lineTo(w - r, 0); ctx.quadraticCurveTo(w, 0, w, r);
     ctx.lineTo(w, h - r); ctx.quadraticCurveTo(w, h, w - r, h);
     ctx.lineTo(r, h); ctx.quadraticCurveTo(0, h, 0, h - r);
     ctx.lineTo(0, r); ctx.quadraticCurveTo(0, 0, r, 0);
     ctx.fill();
-    ctx.strokeStyle = hexColor; ctx.lineWidth = 6; ctx.stroke();
+    ctx.strokeStyle = hexColor; ctx.lineWidth = 4; ctx.stroke();
 
+    // Top tag
     ctx.fillStyle = hexColor;
-    ctx.font = 'bold 76px system-ui, sans-serif';
+    ctx.font = '700 34px "JetBrains Mono", monospace';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(name, w / 2, 100);
+    ctx.fillText('SEKTOR GEOLOGI MARS', w / 2, 58);
+
+    // Main Region Name
     ctx.fillStyle = '#ffffff';
-    ctx.font = '46px system-ui, sans-serif';
-    ctx.fillText('📍 Wilayah Eksplorasi', w / 2, 190);
+    ctx.font = '700 74px "Plus Jakarta Sans", "Inter", sans-serif';
+    ctx.fillText(name, w / 2, 128);
+
+    // Subtitle
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
+    ctx.font = '600 36px "Plus Jakarta Sans", "Inter", sans-serif';
+    ctx.fillText('ZONA RISET ILMIAH & SURVEY', w / 2, 196);
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.minFilter = THREE.LinearFilter;

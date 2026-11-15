@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
 import { REGION_SCIENCE_DATA } from '../mission/missionSystem.js';
+import { ICONS } from './icons.js';
 
 /**
  * LabBackpackWorkbench — Fasilitas Riset Meja Laboratorium & Backpack Spesimen Mars
@@ -56,9 +57,15 @@ export class LabBackpackWorkbench {
         <div class="lab-bp-header">
           <div class="lab-bp-title-box">
             <span class="lab-bp-badge">NASA / JPL SCIENCE STATION</span>
-            <h2 class="lab-bp-title">🎒 BACKPACK LABORATORIUM — MEJA RISET SPESIMEN MARS</h2>
+            <h2 class="lab-bp-title" style="display:flex;align-items:center;gap:8px;">
+              ${ICONS.backpack(16)}
+              <span>BACKPACK LABORATORIUM — MEJA RISET SPESIMEN MARS</span>
+            </h2>
           </div>
-          <button class="lab-bp-close-btn" id="labBpCloseBtn" title="Tutup Meja Riset">✕ TUTUP</button>
+          <button class="lab-bp-close-btn" id="labBpCloseBtn" title="Tutup Meja Riset" style="display:inline-flex;align-items:center;gap:6px;">
+            ${ICONS.x(12)}
+            <span>TUTUP</span>
+          </button>
         </div>
 
         <!-- Window Main Content -->
@@ -73,16 +80,22 @@ export class LabBackpackWorkbench {
               <!-- Item kartu spesimen dirender dinamis -->
             </div>
             <div class="lab-bp-sidebar-footer">
-              <small>💡 Klik salah satu item untuk meletakkannya di atas meja riset laboratorium</small>
+              <small>Klik salah satu item untuk meletakkannya di atas meja riset laboratorium</small>
             </div>
           </div>
 
           <!-- TENGAH: MEJA RISET 3D INTERAKTIF (EXAMINATION DESK) -->
           <div class="lab-bp-center">
             <div class="lab-bp-viewport-header">
-              <span id="labBpDeskLabel">🔬 MEJA RISET PEMERIKSAAN SPESIMEN 3D</span>
+              <span id="labBpDeskLabel" style="display:flex;align-items:center;gap:6px;">
+                ${ICONS.microscope(14)}
+                <span>MEJA RISET PEMERIKSAAN SPESIMEN 3D</span>
+              </span>
               <div class="lab-bp-view-tools">
-                <button id="labBpResetViewBtn" class="lab-bp-btn-sm" title="Kembalikan Sudut Pandang">↺ Reset View</button>
+                <button id="labBpResetViewBtn" class="lab-bp-btn-sm btn-with-icon" title="Kembalikan Sudut Pandang">
+                  ${ICONS.rotateCcw(11)}
+                  <span>Reset View</span>
+                </button>
                 <span class="lab-bp-drag-hint">Orbit 360° • Zoom • Pan</span>
               </div>
             </div>
@@ -101,22 +114,34 @@ export class LabBackpackWorkbench {
           <!-- SISI KANAN: DESKRIPSI LENGKAP & PERSEPSI VISUAL (DEPTH & SNAPSHOT) -->
           <div class="lab-bp-detail-panel">
             <div class="lab-bp-detail-header">
-              <span class="lab-bp-tag" id="labBpMatterTag">💎 BATUAN PADAT</span>
+              <span class="lab-bp-tag" id="labBpMatterTag" style="display:inline-flex;align-items:center;gap:4px;">
+                ${ICONS.gem(11)}
+                <span>BATUAN PADAT</span>
+              </span>
               <h3 class="lab-bp-item-name" id="labBpItemName">Kristal Inti Magma</h3>
               <div class="lab-bp-item-region" id="labBpItemRegion">Wilayah: Elysium Planitia</div>
             </div>
 
             <!-- Tab Pilihan: Analisis Geologi vs Persepsi Visual Depth -->
             <div class="lab-bp-detail-tabs">
-              <button class="lab-bp-tab-btn active" data-tab="analysis">🔬 ANALISIS LAB</button>
-              <button class="lab-bp-tab-btn" data-tab="perception">📷 PERSEPSI KAMERA &amp; DEPTH</button>
+              <button class="lab-bp-tab-btn active" data-tab="analysis" style="display:inline-flex;align-items:center;gap:6px;">
+                ${ICONS.microscope(13)}
+                <span>ANALISIS LAB</span>
+              </button>
+              <button class="lab-bp-tab-btn" data-tab="perception" style="display:inline-flex;align-items:center;gap:6px;">
+                ${ICONS.camera(13)}
+                <span>PERSEPSI KAMERA &amp; DEPTH</span>
+              </button>
             </div>
 
             <!-- TAB 1: HASIL ANALISIS SAINS -->
             <div class="lab-bp-tab-content active" id="labBpTabAnalysis">
               <div class="lab-bp-section">
                 <label>METODE PENGAMBILAN HERMES</label>
-                <div class="lab-bp-pickup-status" id="labBpPickupMethod">🦾 Dicapit menggunakan Hydraulic Claw Gripper</div>
+                <div class="lab-bp-pickup-status" id="labBpPickupMethod" style="display:flex;align-items:center;gap:6px;">
+                  ${ICONS.claw(13)}
+                  <span>Dicapit menggunakan Hydraulic Claw Gripper</span>
+                </div>
               </div>
 
               <div class="lab-bp-section">
@@ -149,7 +174,10 @@ export class LabBackpackWorkbench {
                   <div class="lab-bp-vis-frame">
                     <img id="labBpRgbImage" class="lab-bp-vis-img" alt="Kamera Depan Rover" style="display:none;">
                     <div id="labBpRgbFallback" class="lab-bp-vis-fallback">
-                      <span>📷 FRONT HAZCAM</span>
+                      <span style="display:flex;align-items:center;justify-content:center;gap:6px;">
+                        ${ICONS.camera(13)}
+                        <span>FRONT HAZCAM</span>
+                      </span>
                       <small>Snapshot medan terverifikasi</small>
                     </div>
                   </div>
@@ -161,7 +189,10 @@ export class LabBackpackWorkbench {
                   <div class="lab-bp-vis-frame">
                     <img id="labBpDepthImage" class="lab-bp-vis-img" alt="Depth Camera Map" style="display:none;">
                     <div id="labBpDepthFallback" class="lab-bp-vis-fallback">
-                      <span>📐 DEPTH MAP STEREO</span>
+                      <span style="display:flex;align-items:center;justify-content:center;gap:6px;">
+                        ${ICONS.slope(13)}
+                        <span>DEPTH MAP STEREO</span>
+                      </span>
                       <small>Turbo Color Ramp Sensor</small>
                     </div>
                   </div>
@@ -467,7 +498,9 @@ export class LabBackpackWorkbench {
     // Badge Wujud Materi
     const matterTag = document.getElementById('labBpMatterTag');
     if (matterTag) {
-      matterTag.textContent = isSolid ? '💎 BATUAN PADAT' : '🌊 FLUIDA CAIR';
+      matterTag.innerHTML = isSolid
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;">${ICONS.gem(11)} <span>BATUAN PADAT</span></span>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;">${ICONS.layers(11)} <span>FLUIDA CAIR</span></span>`;
       matterTag.className = isSolid ? 'lab-bp-tag solid' : 'lab-bp-tag liquid';
     }
 
@@ -481,9 +514,9 @@ export class LabBackpackWorkbench {
     // Cara Pengambilan Hermes
     const pickupEl = document.getElementById('labBpPickupMethod');
     if (pickupEl) {
-      pickupEl.textContent = isSolid
-        ? '🦾 DICAPIT menggunakan Hydraulic Claw Gripper (Benda Padat)'
-        : '🥄 DISEROK menggunakan Suction Dipper Scoop (Benda Cair)';
+      pickupEl.innerHTML = isSolid
+        ? `<span style="display:inline-flex;align-items:center;gap:6px;">${ICONS.claw(14)} <span>DICAPIT menggunakan Hydraulic Claw Gripper (Benda Padat)</span></span>`
+        : `<span style="display:inline-flex;align-items:center;gap:6px;">${ICONS.drill(14)} <span>DISEROK menggunakan Suction Dipper Scoop (Benda Cair)</span></span>`;
     }
 
     // Informasi Geologi
@@ -558,21 +591,21 @@ export class LabBackpackWorkbench {
       if (isCollected) collectedCount++;
 
       const isSelected = this.selectedSpecimenId === key;
-      const matterIcon = item.stateOfMatter === 'solid' ? '💎' : '🌊';
+      const matterIcon = item.stateOfMatter === 'solid' ? ICONS.gem(13) : ICONS.layers(13);
       const matterLabel = item.stateOfMatter === 'solid' ? 'Capit (Padat)' : 'Serok (Cair)';
 
       return `
         <div class="lab-bp-item-card ${isSelected ? 'selected' : ''}" data-id="${key}">
-          <div class="lab-bp-ic-header">
-            <span class="lab-bp-ic-icon">${matterIcon}</span>
+          <div class="lab-bp-ic-header" style="display:flex;align-items:center;gap:6px;">
+            <span class="lab-bp-ic-icon" style="display:inline-flex;align-items:center;">${matterIcon}</span>
             <span class="lab-bp-ic-title">${item.artifactName}</span>
           </div>
-          <div class="lab-bp-ic-meta">
-            <span>📍 ${item.name}</span>
+          <div class="lab-bp-ic-meta" style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="display:inline-flex;align-items:center;gap:4px;">${ICONS.pin(11)} ${item.name}</span>
             <span class="lab-bp-ic-tool">${matterLabel}</span>
           </div>
-          <div class="lab-bp-ic-status ${isCollected ? 'collected' : 'pending'}">
-            ${isCollected ? '✓ DI BACKPACK LAB' : '○ TERDETEKSI DI MEDAN'}
+          <div class="lab-bp-ic-status ${isCollected ? 'collected' : 'pending'}" style="display:inline-flex;align-items:center;gap:4px;">
+            ${isCollected ? `${ICONS.checkCircle(10)} <span>DI BACKPACK LAB</span>` : `${ICONS.circle(10)} <span>TERDETEKSI DI MEDAN</span>`}
           </div>
         </div>
       `;
@@ -712,23 +745,24 @@ export class LabBackpackWorkbench {
       .lab-bp-overlay {
         position: fixed;
         inset: 0;
-        background: rgba(5, 8, 14, 0.94);
+        background: rgba(4, 7, 12, 0.88);
         z-index: 10000;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 24px;
-        backdrop-filter: blur(12px);
-        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        font-family: var(--font-sans, 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif);
         color: #f1f5f9;
         user-select: none;
       }
 
       .lab-bp-window {
-        background: #090e17;
-        border: 1px solid #1e2e42;
-        border-radius: 6px;
-        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 229, 255, 0.12);
+        background: rgba(9, 14, 22, 0.94);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        box-shadow: 0 24px 60px -8px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.08);
         width: 100%;
         max-width: 1280px;
         height: 85vh;
@@ -743,36 +777,38 @@ export class LabBackpackWorkbench {
         align-items: center;
         justify-content: space-between;
         padding: 12px 20px;
-        background: #0b1320;
-        border-bottom: 1px solid #1c2b3d;
+        background: rgba(14, 20, 32, 0.8);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       }
       .lab-bp-badge {
+        font-family: var(--font-mono, 'JetBrains Mono', monospace);
         font-size: 9.5px;
-        font-weight: 800;
+        font-weight: 700;
         color: #00e5ff;
-        background: rgba(0, 229, 255, 0.12);
-        border: 1px solid rgba(0, 229, 255, 0.3);
-        padding: 2px 7px;
-        border-radius: 3px;
-        letter-spacing: 0.5px;
+        background: rgba(0, 229, 255, 0.1);
+        border: 1px solid rgba(0, 229, 255, 0.25);
+        padding: 2px 8px;
+        border-radius: 4px;
+        letter-spacing: 0.6px;
       }
       .lab-bp-title {
         margin: 4px 0 0;
-        font-size: 15px;
-        font-weight: 800;
-        letter-spacing: 0.5px;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
         color: #fff;
+        font-family: var(--font-sans, 'Plus Jakarta Sans', 'Inter', sans-serif);
       }
       .lab-bp-close-btn {
-        background: #16202e;
-        border: 1px solid #283a52;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         color: #94a3b8;
         padding: 6px 14px;
-        border-radius: 4px;
+        border-radius: 6px;
         cursor: pointer;
-        font-family: inherit;
+        font-family: var(--font-sans, inherit);
         font-size: 11px;
-        font-weight: 700;
+        font-weight: 600;
         transition: all 0.15s;
       }
       .lab-bp-close-btn:hover {
@@ -790,18 +826,20 @@ export class LabBackpackWorkbench {
 
       /* SIDEBAR INVENTORI KIRI */
       .lab-bp-sidebar {
-        background: #070b12;
-        border-right: 1px solid #172433;
+        background: rgba(7, 11, 18, 0.95);
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
         display: flex;
         flex-direction: column;
         overflow: hidden;
       }
       .lab-bp-sidebar-header {
         padding: 10px 14px;
-        background: #0d1522;
-        border-bottom: 1px solid #1a2738;
-        font-size: 10px;
+        background: rgba(13, 21, 34, 0.6);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        font-size: 9.5px;
         font-weight: 700;
+        font-family: var(--font-mono, 'JetBrains Mono', monospace);
+        letter-spacing: 0.05em;
         color: #94a3b8;
         display: flex;
         justify-content: space-between;
@@ -809,9 +847,10 @@ export class LabBackpackWorkbench {
       }
       .lab-bp-count {
         color: #00e5ff;
-        background: #072233;
+        background: rgba(0, 229, 255, 0.1);
+        border: 1px solid rgba(0, 229, 255, 0.25);
         padding: 2px 6px;
-        border-radius: 3px;
+        border-radius: 4px;
         font-size: 9.5px;
       }
       .lab-bp-list {
@@ -823,28 +862,28 @@ export class LabBackpackWorkbench {
         gap: 6px;
       }
       .lab-bp-sidebar-footer {
-        padding: 8px 12px;
-        background: #090e17;
-        border-top: 1px solid #15202e;
+        padding: 10px 14px;
+        background: rgba(9, 14, 23, 0.8);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
         color: #64748b;
-        font-size: 9.5px;
-        line-height: 1.35;
+        font-size: 10px;
+        line-height: 1.4;
       }
 
       .lab-bp-item-card {
-        background: #0c121c;
-        border: 1px solid #1a2738;
-        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 6px;
         padding: 9px 10px;
         cursor: pointer;
         transition: all 0.15s;
       }
       .lab-bp-item-card:hover {
-        border-color: #00e5ff66;
-        background: #111a29;
+        border-color: rgba(0, 229, 255, 0.4);
+        background: rgba(255, 255, 255, 0.06);
       }
       .lab-bp-item-card.selected {
-        background: #0d2238;
+        background: rgba(0, 229, 255, 0.08);
         border-color: #00e5ff;
         box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
       }

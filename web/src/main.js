@@ -44,7 +44,7 @@ const hud = new Hud({
     if (labBackpack) {
       labBackpack.toggle();
     } else {
-      hud.showToast('🎒 Laboratorium sedang menyiapkan Meja Riset...');
+      hud.showToast('Laboratorium sedang menyiapkan Meja Riset...');
     }
   },
 });

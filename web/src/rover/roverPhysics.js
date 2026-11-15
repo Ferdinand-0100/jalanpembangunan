@@ -10,6 +10,8 @@ export class RoverPhysics {
     this.Y = 0;
     this.heading = 0;
     this.speed = 0;
+    this.throttle = 0;
+    this.steer = 0;
     this.elevation = 0;
     this.slopeDeg = 0;
     this.grad = [0, 0];
@@ -56,6 +58,8 @@ export class RoverPhysics {
    * input: { throttle: -1..1, steer: -1..1 (+ = turn right), sprint: boolean }
    */
   step(dt, { throttle = 0, steer = 0, sprint = false } = {}) {
+    this.throttle = throttle;
+    this.steer = steer;
     const o = this.opts;
     const speedMult = sprint ? 1.5 : 1.0;
     const target = throttle * o.maxSpeed * speedMult;
