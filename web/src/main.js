@@ -18,11 +18,13 @@ import { HistoryTracker } from './rover/historyTracker.js';
 import { LabBackpackWorkbench } from './ui/labBackpack.js';
 import { MarsGlobe3D } from './marsGlobe.js';
 import { DashboardController } from './ui/dashboardController.js';
+import { Tutorial } from './ui/tutorial.js';
 import { getOlympusMonsCalderaHeights } from './terrain/olympusMonsTerrain.js';
 
 let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal, regionMarkers, missionSystem;
 let vpms, vpPanel, historyTracker, labBackpack;
 let marsGlobe, dashboardController;
+let tutorial;
 let originalHeights = null;
 let currentSimMapId = 'usgs-i-1802-a';
 
@@ -48,6 +50,8 @@ try {
           if (el) el.style.display = '';
         });
         switchSimulationTerrain(mapData);
+        // Show tutorial prompt once the simulator is visible
+        if (tutorial) tutorial.showPrompt();
       }, 500);
     },
     onToast: (msg) => hud.showToast(msg),
@@ -275,6 +279,10 @@ async function main() {
   missionSystem.onStateChange = () => {
     hud.updateWorkflow(missionSystem, swarm.getActiveRover());
   };
+
+  // Initialize tutorial (prompt shown later when user clicks Launch 3D Simulation)
+  tutorial = new Tutorial();
+  tutorial.setMissionSystem(missionSystem);
 
   // === Visual Perception & Mission Documentation System ===
   try {
