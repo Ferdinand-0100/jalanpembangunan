@@ -329,7 +329,7 @@ export class MissionSystem {
       group.add(beam);
 
       // Label Billboard Melayang
-      const matterTag = data.stateOfMatter === 'solid' ? '💎 [PADAT]' : '🌊 [CAIR]';
+      const matterTag = data.stateOfMatter === 'solid' ? '[PADAT]' : '[CAIR]';
       const label = this.#createFloatingLabel(`${matterTag} ${data.artifactName}`, '#' + new THREE.Color(data.color).getHexString());
       label.position.y = 195;
       group.add(label);
@@ -1101,7 +1101,7 @@ export class MissionSystem {
     physics.X += s * physics.speed * dt;
     physics.Y += c * physics.speed * dt;
     physics.elevation = this.getElevation(physics.X, physics.Y);
-    physics.status = `🚀 HYPER-DRIVE (${physics.speed.toFixed(0)} m/s)`;
+    physics.status = `RAPID TRANSIT (${physics.speed.toFixed(0)} m/s)`;
   }
 
   /* ---------------------------------------------------------
@@ -1141,7 +1141,7 @@ export class MissionSystem {
       hooks.cargoSpecimen.visible = false;
     }
 
-    this.onNotify(`🔬 [ANALISIS LAB SELESAI] ${cargo.name} diteliti! ${cargo.analysisResult} (+350 Poin Sains)`);
+    this.onNotify(`[ANALISIS LAB SELESAI] ${cargo.name} diteliti! ${cargo.analysisResult} (+350 Poin Sains)`);
     this.onStateChange();
 
     setTimeout(() => {
@@ -1155,7 +1155,7 @@ export class MissionSystem {
     if (q && !q.completed) {
       q.completed = true;
       this.researchScore += 150;
-      this.onNotify(`✓ TARGET TERCAPAI: ${q.title} (+150 Poin)`);
+      this.onNotify(`TARGET TERCAPAI: ${q.title} (+150 Poin)`);
       this.onStateChange();
     }
   }
@@ -1166,7 +1166,7 @@ export class MissionSystem {
     canvas.height = 192;
     const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = 'rgba(15, 10, 8, 0.90)';
+    ctx.fillStyle = 'rgba(7, 11, 18, 0.92)';
     const r = 24, w = 1024, h = 192;
     ctx.beginPath();
     ctx.moveTo(r, 0); ctx.lineTo(w - r, 0); ctx.quadraticCurveTo(w, 0, w, r);
@@ -1176,11 +1176,11 @@ export class MissionSystem {
     ctx.fill();
 
     ctx.strokeStyle = colorHex;
-    ctx.lineWidth = 6;
+    ctx.lineWidth = 4;
     ctx.stroke();
 
     ctx.fillStyle = colorHex;
-    ctx.font = 'bold 52px system-ui, sans-serif';
+    ctx.font = '700 48px "Plus Jakarta Sans", "Inter", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(text, w / 2, h / 2);
