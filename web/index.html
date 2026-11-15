@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>NASA / JPL — Mars Rover Exploration Workstation &amp; 3D Terrain Simulator</title>
+  <title>Mars Geological Map Exploration — 3D Planetary Dashboard (NASA / USGS)</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./src/dashboard.css">
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/addons/"}}</script>
   <style>
     /* =========================================================================
@@ -14,17 +18,17 @@
       --panel-bg: rgba(13, 17, 23, 0.94);
       --panel-border: #1f2937;
       --panel-border-focus: #374151;
-      --text-main: #f1f5f9;
-      --text-muted: #94a3b8;
-      --text-dim: #64748b;
+      --text-main: #ffffff;
+      --text-muted: #ffffff;
+      --text-dim: #ffffff;
       --nasa-blue: #0b3d91;
       --nasa-red: #e03c31;
       --data-cyan: #00e5ff;
       --status-green: #10b981;
       --status-amber: #f59e0b;
       --status-red: #ef4444;
-      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -501,13 +505,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--bg-space);
+      /* Sembunyikan di bawah dashboard z-500 agar tidak bloking 3D Globe */
+      background: transparent;
       font-size: 15px;
       font-family: var(--font-mono);
-      color: var(--data-cyan);
+      color: transparent;
       text-align: center;
       padding: 30px;
-      z-index: 50;
+      z-index: 10;
+      pointer-events: none;
     }
     #loading.err { color: var(--status-red); }
 
@@ -541,6 +547,166 @@
   </style>
 </head>
 <body>
+
+<!-- =========================================================================
+     MARS GEOLOGICAL MAP EXPLORATION — 3D PLANETARY DASHBOARD
+     ========================================================================= -->
+<div id="dashboard-root">
+  <div class="dashboard-container">
+
+    <!-- 1. TOP MINIMALIST NAVIGATION -->
+    <header class="dash-top-nav">
+      <div class="nav-left">
+        <span class="nav-dots">•••</span>
+        <span class="nav-brand-title font-display">MARSMIND</span>
+      </div>
+      <div class="nav-right">
+        <button id="dashHelpBtn" class="nav-text-btn">HELP</button>
+        <div class="nav-status-indicator">
+          <span class="status-pulse-dot"></span>
+          <span>TELEMETRY ONLINE: VM-001</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. EXPANSIVE HERO STAGE (WEBGL BACKGROUND + FLOATING OVERLAYS) -->
+    <section class="globe-hero-stage">
+
+      <!-- Full-bleed 3D Three.js Canvas Container -->
+      <div id="marsGlobeCanvasContainer" class="globe-canvas-wrap"></div>
+
+      <!-- Dynamic Bracket Connecting SVG Line -->
+      <svg id="globeCalloutSvg" class="stage-bracket-svg">
+        <path id="calloutBracketPath" d="" fill="none" stroke="#FF8955" stroke-width="1.6" stroke-linecap="round"/>
+        <circle id="calloutStartDot" cx="0" cy="0" r="3.5" fill="#FFFFFF"/>
+        <circle id="calloutEndDot" cx="0" cy="0" r="3" fill="#FF8955"/>
+      </svg>
+
+      <!-- Floating Left: Clean Typography -->
+      <div class="stage-floating-left">
+        <div class="tag-meta-line">NASA · USGS PLANETARY GEOLOGIC MAPPING</div>
+        <h1 class="stage-main-title">Mars Geological Map Exploration</h1>
+        <div class="stage-agency-credit">
+          <div class="credit-label">Official Geological Database: <b>USGS Astrogeology GIS Hub</b></div>
+          <a href="https://astrogeology-usgs.hub.arcgis.com/pages/interactive-maps-mars" target="_blank" class="btn-usgs-left" id="btnUsgsLeft">
+            <span>Explore USGS Planetary Mapping ↗</span>
+          </a>
+        </div>
+        <nav id="dashboardMapList" class="dashboard-map-list" aria-label="Select a Mars map">
+          <h2 class="dashboard-map-list-title">AVAILABLE MAPS</h2>
+          <div class="dashboard-map-list-items"></div>
+        </nav>
+      </div>
+
+      <!-- Floating Right: USGS Geologic Map Dynamic Callout Card -->
+      <div class="stage-floating-right">
+        <div id="calloutCard" class="callout-card">
+          <div class="callout-card-top">
+            <span class="callout-badge badge-ready">● 3D SIMULATOR READY</span>
+            <span id="calloutScale" class="callout-scale">1:15,000,000</span>
+          </div>
+          <h2 id="calloutLocation" class="callout-location">Valles Marineris &amp; Tharsis</h2>
+          <div id="calloutCodeTitle" class="callout-code-title">USGS I-1802A · Western Equatorial Region of Mars</div>
+          <div id="calloutAuthor" class="callout-author">David H. Scott &amp; Kenneth L. Tanaka (USGS / NASA)</div>
+
+          <div class="callout-specs-list">
+            <div class="callout-spec-item">
+              <span class="spec-label">Coordinates</span>
+              <span id="calloutCoords" class="spec-value">8.00° S / 285.00° E (75° W)</span>
+            </div>
+            <div class="callout-spec-item">
+              <span class="spec-label">Elevation</span>
+              <span id="calloutElevation" class="spec-value">-7,000 m to +21,287 m</span>
+            </div>
+            <div class="callout-spec-item">
+              <span class="spec-label">Geologic Era</span>
+              <span id="calloutEra" class="spec-value">Hesperian – Amazonian</span>
+            </div>
+            <div class="callout-spec-item">
+              <span class="spec-label">Stratigraphy</span>
+              <span id="calloutStratigraphy" class="spec-value">Basaltic Strata &amp; Tectonic Chasmata</span>
+            </div>
+          </div>
+
+          <p id="calloutDesc" class="callout-desc">
+            Official USGS geologic map covering the grand western Martian landscape: the immense Valles Marineris canyon system (>4,000 km), Olympus Mons volcano (21 km), and the volcanic plains of Tharsis. Directly synchronized with the 3D surface rover simulation.
+          </p>
+
+          <div class="callout-actions">
+            <button id="btnCalloutLaunch" class="btn-callout-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <span>LAUNCH 3D SIMULATION</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Bottom: Elliptical Rotation Guide -->
+      <div class="stage-floating-guide" title="Click and drag Mars globe for 360° rotation">
+        <div class="globe-orbit-guide">
+          <svg class="orbit-ellipse-svg" width="130" height="42" viewBox="0 0 130 42">
+            <ellipse cx="65" cy="21" rx="58" ry="16" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.2" stroke-dasharray="3,3"/>
+            <circle id="orbitDot" cx="123" cy="21" r="3.4" fill="#FF8955"/>
+          </svg>
+          <span class="orbit-guide-label">Rotate Mars Globe</span>
+          <span class="orbit-guide-hint">Drag to rotate 360° · Scroll to zoom</span>
+        </div>
+      </div>
+
+    </section>
+  </div>
+</div>
+
+<!-- Telemetry Launch Sequence Overlay -->
+<div id="dash-init-overlay" class="dash-init-overlay" style="display: none;">
+  <div class="dash-init-content">
+    <div class="dash-init-spinner">
+      <div class="spinner-ring"></div>
+      <div class="spinner-core"></div>
+    </div>
+    <div class="dash-init-title font-display">INITIALIZING MARS 3D SIMULATOR</div>
+    <div class="dash-init-subtitle">CONNECTING AUTONOMOUS ROVER TELEMETRY TO SURFACE</div>
+    <div class="dash-init-progress-bar">
+      <div id="dashInitProgressBar" class="dash-init-progress-fill"></div>
+    </div>
+    <div id="dashInitStatusText" class="dash-init-status">LOADING HIGH-RESOLUTION DEM TERRAIN MODEL...</div>
+    <div class="dash-init-telemetry-logs" id="dashInitLogs">
+      <div>[INIT] NASA Deep Space Network Uplink: ESTABLISHED</div>
+      <div>[GEO] USGS Astrogeology I-1802A Map Datum: ALIGNED</div>
+      <div>[SWARM] 3 Autonomous Rover Swarm Units (Ares, GeoLab, Hermes): ONLINE</div>
+    </div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div id="dashHelpModal" class="dash-help-modal" style="display: none;">
+  <div class="dash-help-backdrop"></div>
+  <div class="dash-help-panel">
+    <div class="dash-help-header">
+      <span class="dash-help-title font-display">MARS GEOLOGICAL EXPLORATION GUIDE</span>
+      <button id="dashHelpCloseBtn" class="dash-help-close">&times;</button>
+    </div>
+    <div class="dash-help-body">
+      <div class="help-section">
+        <h4>1. 3D MARS GLOBE CONTROLS</h4>
+        <ul>
+          <li><b>360° Rotation:</b> Left click &amp; drag anywhere across the screen to rotate Mars with realistic inertial physics.</li>
+          <li><b>Zoom In / Out:</b> Use mouse scroll or trackpad pinch. Calibrated with zero-clipping limits (4.3x to 7.6x distance).</li>
+          <li><b>3D Hotspot:</b> Dynamic telemetry pin at Valles Marineris coordinates (8.00° S, 285.00° E) connects live planetary data.</li>
+        </ul>
+      </div>
+      <div class="help-section">
+        <h4>2. MARS RECONNAISSANCE ORBITER (MRO)</h4>
+        <p>The elliptical orbit with pulsing telemetry beacon visualizes MRO's actual orbital path mapping MOLA topography and CTX imagery.</p>
+      </div>
+      <div class="help-section">
+        <h4>3. USGS GEOLOGIC MAP &amp; ROVER SIMULATION</h4>
+        <p>Active dataset <b>USGS I-1802A</b> maps grand formations across western Mars (Valles Marineris, Olympus Mons, Tharsis). Click <b>'LAUNCH 3D SIMULATION'</b> to deploy the autonomous 3-rover swarm directly onto the Martian surface.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="app"></div>
 <div id="loading">NASA / JPL Mars Jezero Exploration Workstation Memuat Data…</div>
 <div id="toast"></div>
@@ -549,7 +715,7 @@
      TOP-LEFT: MINIMAL WORKSTATION TOOLBAR & DROPDOWN SETTINGS
      (Left side remains completely open for Mars exploration)
      ========================================================================= -->
-<div id="topControlBar">
+<div id="topControlBar" style="display:none">
   <button id="openMapPortalBtn" class="top-chip" style="cursor:pointer;background:#0d1a2d;border-color:#1e3a63;color:#e2e8f0;font-weight:700;">
     🗺️ PETA GEOLOGI
   </button>
@@ -615,7 +781,7 @@
 <!-- =========================================================================
      RIGHT-SIDE: NASA ROBOT DETAIL PANEL + INTERACTIVE 3D VIEWER + HISTORY TRACK
      ========================================================================= -->
-<div id="robotDetailPanel" class="panel">
+<div id="robotDetailPanel" class="panel" style="display:none">
   <!-- Agency & Expedition Header -->
   <div class="agency-header">
     <div>
@@ -759,7 +925,7 @@
 <!-- =========================================================================
      BOTTOM QUICK KEYBOARD CONTROLS
      ========================================================================= -->
-<div id="help">
+<div id="help" style="display:none">
   <b>Setir:</b> <kbd>W A S D</kbd> · <b>Turbo:</b> <kbd>Shift</kbd> · <b>Pilih Robot:</b> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> / <kbd>Tab</kbd> · <b>Aksi:</b> <kbd>Space</kbd> · <b>Lab:</b> <kbd>B</kbd> · <b>Transport:</b> <kbd>C</kbd>
 </div>
 
