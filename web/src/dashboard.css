@@ -41,7 +41,7 @@
   color: var(--text-primary);
   font-family: var(--font-body);
   user-select: none;
-  z-index: 500;
+  z-index: 1000;
   transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

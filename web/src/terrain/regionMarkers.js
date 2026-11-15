@@ -1,6 +1,32 @@
 import * as THREE from 'three';
 import { OLYMPUS_REGIONS } from './olympusMonsTerrain.js';
 
+/** Forces all sprites inside a group to always render on top of terrain. */
+function forceSpritesOnTop(group, renderOrder = 999) {
+  group.traverse(obj => {
+    if (obj.isSprite) {
+      obj.renderOrder = renderOrder;
+      if (obj.material) {
+        obj.material.depthTest = false;
+        obj.material.depthWrite = false;
+      }
+    }
+  });
+}
+
+/**
+ * RegionMarkers — 6 wilayah geologi dengan relief 3D prosedural yang MENEMPEL pada terrain.
+ *
+ * Tiap wilayah = satu "patch" mesh yang mengikuti heightfield asli lalu diberi relief
+ * (kawah, cekungan, pematang, gunung api + lautan lava) dan shader material khusus.
+ * Tepi patch memudar halus ke terrain asli, jadi tidak terlihat seperti objek tempelan.
+ *
+ * Penggunaan:
+ *   const terrain = new TerrainRenderer(scene, hf, frame, texture);
+ *   const regions = new RegionMarkers(scene, hf, frame, { terrain });
+ *   // di animation loop: regions.update(roverProjX, roverProjY);
+ */
+
 /* ------------------------------------------------------------------ */
 /*  Noise & util (CPU)                                                 */
 /* ------------------------------------------------------------------ */
@@ -356,6 +382,7 @@ export class RegionMarkers {
       let light = null;
       if (KIND[region.feature] === 3) light = this.#addLavaGlow(group, region, patch.centerY);
 
+      forceSpritesOnTop(group);
       this.scene.add(group);
       this.markers.push({
         id: region.id, name: region.name, desc: region.desc, color: region.color,
@@ -569,7 +596,8 @@ vWN = normalize(mat3(modelMatrix) * objectNormal);`);
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.minFilter = THREE.LinearFilter;
-    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, fog: false }));
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false, fog: false }));
+    sprite.renderOrder = 999;
     sprite.scale.set(1100, 275, 1);
     sprite.position.y = y;
     group.add(sprite);
@@ -609,8 +637,9 @@ vWN = normalize(mat3(modelMatrix) * objectNormal);`);
       this._glowTex = new THREE.CanvasTexture(c);
     }
     const glow = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: this._glowTex, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, fog: false,
+      map: this._glowTex, blending: THREE.AdditiveBlending, transparent: true, depthTest: false, depthWrite: false, fog: false,
     }));
+    glow.renderOrder = 998;
     glow.scale.setScalar(region.radius * 0.32);
     glow.position.y = centerY + 40;
     group.add(glow);

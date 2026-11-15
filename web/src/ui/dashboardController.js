@@ -42,19 +42,12 @@ export class DashboardController {
   }
 
   #initEvents() {
-    // 1. Launch Button (Supports Mouse, Pointer, and Touch for mobile & touchscreen devices)
+    // 1. Launch Button
     const btnLaunch = document.getElementById('btnCalloutLaunch');
     if (btnLaunch) {
-      const handleLaunch = (e) => {
-        if (e) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
+      btnLaunch.addEventListener('click', () => {
         this.triggerLaunchSequence();
-      };
-      btnLaunch.addEventListener('click', handleLaunch);
-      btnLaunch.addEventListener('pointerup', handleLaunch);
-      btnLaunch.addEventListener('touchend', handleLaunch);
+      });
     }
 
     // 2. Help Button & Modal

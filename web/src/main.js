@@ -18,11 +18,15 @@ import { HistoryTracker } from './rover/historyTracker.js';
 import { LabBackpackWorkbench } from './ui/labBackpack.js';
 import { MarsGlobe3D } from './marsGlobe.js';
 import { DashboardController } from './ui/dashboardController.js';
+import { Tutorial } from './ui/tutorial.js';
+import { RoverCutscene } from './ui/roverCutscene.js';
 import { getOlympusMonsCalderaHeights } from './terrain/olympusMonsTerrain.js';
+import { JezeroCraterExploration } from './terrain/jezeroCraterExploration.js';
 
-let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal, regionMarkers, missionSystem;
+let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal, regionMarkers, missionSystem, jezeroExploration;
 let vpms, vpPanel, historyTracker, labBackpack;
 let marsGlobe, dashboardController;
+let tutorial, cutscene;
 let originalHeights = null;
 let currentSimMapId = 'usgs-i-1802-a';
 let pendingSimMap = null;
@@ -36,7 +40,6 @@ function safeToast(msg) {
   }
 }
 
-// 1. Initialize 3D Mars Globe
 try {
   marsGlobe = new MarsGlobe3D('marsGlobeCanvasContainer', {
     onHotspotClick: (hs) => {
@@ -66,6 +69,7 @@ try {
           if (el) el.style.display = '';
         });
         switchSimulationTerrain(mapData);
+        if (tutorial) tutorial.showPrompt();
       }, 500);
     },
     onToast: (msg) => safeToast(msg),
@@ -104,20 +108,30 @@ function switchSimulationTerrain(mapData) {
       }
     }
 
-    // 3. Disable Jezero regional patches so the real Olympus caldera topography is clean
+    // Keep only markers relevant to the selected map.
     if (regionMarkers) {
-      if (typeof regionMarkers.setMapMode === 'function') {
-        regionMarkers.setMapMode('usgs-sim-3470');
-      } else {
-        regionMarkers.setVisible(false);
-      }
+      regionMarkers.setMapMode('usgs-sim-3470');
     }
-
-    // 4. Update mission system map mode if available
     if (missionSystem && typeof missionSystem.setMapMode === 'function') {
       missionSystem.setMapMode('usgs-sim-3470');
     }
     safeToast('🌋 Landed at Olympus Mons Caldera (USGS SIM 3470, Summit Elevation +18,100 m)');
+    if (jezeroExploration) {
+      jezeroExploration.setVisible(false);
+    }
+  } else if (mapId === 'usgs-sim-3464') {
+    if (originalHeights) {
+      hf.data = originalHeights;
+      terrain.build(CONFIG.meshStride);
+    }
+    startRovers();
+    if (regionMarkers) {
+      regionMarkers.setVisible(false);
+    }
+    if (jezeroExploration) {
+      jezeroExploration.setVisible(true);
+    }
+    safeToast('🛸 Landed at Jezero Crater (USGS SIM 3464 — 6 Geological Zones Active)');
   } else {
     // 1. Restore original Valles Marineris / Jezero heights
     if (originalHeights) {
@@ -130,23 +144,24 @@ function switchSimulationTerrain(mapData) {
 
     // 3. Enable regional markers
     if (regionMarkers) {
-      if (typeof regionMarkers.setMapMode === 'function') {
-        regionMarkers.setMapMode('usgs-i-1802-a');
-      } else {
-        regionMarkers.setVisible(true);
-      }
+      regionMarkers.setMapMode('usgs-i-1802-a');
     }
-
-    // 4. Restore mission system map mode
     if (missionSystem && typeof missionSystem.setMapMode === 'function') {
       missionSystem.setMapMode('usgs-i-1802-a');
     }
     safeToast('🚀 Landed at Valles Marineris & Tharsis (USGS I-1802A)');
+    if (jezeroExploration) {
+      jezeroExploration.setVisible(false);
+    }
   }
 }
 
 const hud = new Hud({
-  onExaggeration: v => { frame.setExaggeration(v); terrain.build(); },
+  onExaggeration: v => {
+    frame.setExaggeration(v);
+    terrain.build();
+    if (jezeroExploration) jezeroExploration.rebuildHeights();
+  },
   onStride: v => hud.setMeshInfo(terrain.build(v)),
   onSlope: on => terrain.setSlopeMode(on),
   onTint: on => terrain.setTint(on),
@@ -205,14 +220,20 @@ function triggerMainTask() {
     // 1. Mapper menandai waypoint sampel geologi di posisinya
     const regId = regionMarkers ? regionMarkers.getCurrentRegionId() : null;
     missionSystem.markSampleWaypoint(active.physics, regId);
+    if (jezeroExploration) {
+      jezeroExploration.onAresMarkSample(active.physics);
+    }
   } else if (active.role === 'geological-investigation') {
-    // 2. GeoLab: Bangun lab sains jika belum ada, atau jalankan laser bor
+    // 2. GeoLab: Bangun lab sains jika belum ada, atau jalankan penelitian di Lab
     if (!missionSystem.labStation) {
       missionSystem.buildScienceLab(active.physics);
     } else {
       swarm.triggerActiveTask();
-      hud.showToast(`[GeoLab] Laser Raman & Pengeboran aktif pada singkapan batuan!`);
-      if (vpms) {
+      if (jezeroExploration && jezeroExploration.onGeoLabResearch()) {
+        // Popup penemuan ilmiah Jezero otomatis muncul!
+      } else {
+        hud.showToast(`[GeoLab] Laser Raman & Pengeboran aktif pada singkapan batuan!`);
+      }if (vpms) {
         vpms.captureOnTaskComplete({
           taskId: `DRILL-LASER-${Date.now()}`,
           roverId: '02',
@@ -304,6 +325,21 @@ async function main() {
   // Initialize 6 geological region markers in the 3D world
   regionMarkers = new RegionMarkers(scene, hf, frame, { terrain });
 
+  // Initialize Jezero Crater 6-Zone & 13-POI Exploration
+  jezeroExploration = new JezeroCraterExploration(scene, hf, frame, {
+    getRovers: () => (swarm ? swarm.rovers : []),
+    getActiveRover: () => (swarm ? swarm.getActiveRover() : null),
+    getMissionSystem: () => missionSystem,
+    getLabBackpack: () => labBackpack,
+    onToast: msg => hud.showToast(msg),
+    onInspectComplete: () => {
+      if (missionSystem && typeof missionSystem.sciencePoints === 'number') {
+        missionSystem.sciencePoints += 150;
+        if (missionSystem.onStateChange) missionSystem.onStateChange();
+      }
+    }
+  });
+
   // Hubungkan elevasi wilayah prosedural ke swarm agar robot memanjat gunung api & kawah tanpa tenggelam
   swarm.setReliefSampler((X, Y) => regionMarkers.getReliefAt(X, Y));
 
@@ -316,6 +352,9 @@ async function main() {
   };
 
   const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 3, 600000);
+  // Initialize tutorial (prompt shown later when user clicks Launch 3D Simulation)
+  tutorial = new Tutorial();
+  tutorial.setMissionSystem(missionSystem);
 
   // === Visual Perception & Mission Documentation System ===
   try {
@@ -360,6 +399,14 @@ async function main() {
   scene.add(marker);
 
   rig = new CameraRig(camera, renderer.domElement, hf, frame);
+  // Initialize rover intro cutscene now that camera and rig are ready
+  cutscene = new RoverCutscene({
+    camera,
+    rig,
+    swarm,
+    onComplete: () => tutorial._start(),
+  });
+  tutorial.onAccepted = () => cutscene.play();
   input = new RoverInput(
     () => rig.mode,
     () => dashboardController && dashboardController.isVisible
@@ -428,6 +475,9 @@ async function main() {
     if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 4) return;
     const ray = new THREE.Raycaster();
     ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1), camera);
+    if (jezeroExploration && jezeroExploration.handleClick(ray)) {
+      return;
+    }
     const p = pickTerrain(ray.ray, hf, frame);
     if (p) {
       const [lon, lat] = frame.projToLonLat(p.X, p.Y);
@@ -451,6 +501,13 @@ async function main() {
     const dt = Math.min(clock.getDelta(), 0.1);
     fps += (1 / Math.max(dt, 1e-3) - fps) * 0.05;
 
+    // Cutscene takes over camera when active — skip rig update
+    if (cutscene && cutscene.active) {
+      cutscene.tick(dt);
+      renderer.render(scene, camera);
+      return;
+    }
+
     // Update the 3 specialized rovers and their autonomous mission routines
     swarm.update(dt, input.read());
 
@@ -465,6 +522,10 @@ async function main() {
     // Update region markers proximity check
     if (regionMarkers) {
       regionMarkers.update(active.physics.X, active.physics.Y);
+    }
+
+    if (jezeroExploration) {
+      jezeroExploration.update(active.physics.X, active.physics.Y, dt);
     }
 
     // Directional shadow frustum follows active rover

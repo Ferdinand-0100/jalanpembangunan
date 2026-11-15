@@ -45,6 +45,15 @@ export class MarsGlobe3D {
         rotY: 0.45,
         rotX: -0.22,
       },
+      'usgs-sim-3464': {
+        id: 'usgs-sim-3464',
+        lat: 18.44,
+        lon: 77.45,
+        name: 'Jezero Crater (Mars 2020)',
+        code: 'USGS SIM 3464',
+        rotY: -2.35, // Sesuaikan sudut putar bola Mars menghadap Jezero
+        rotX: -0.15,
+      },
     };
     this.activeHotspotId = 'usgs-i-1802-a';
     this.targetRotY = undefined;
@@ -683,11 +692,14 @@ export class MarsGlobe3D {
 
     const targets = Object.values(this.hotspotPickTargets);
     const hotspotHit = raycaster.intersectObjects(targets, false)[0];
-    if (hotspotHit) {
-      const hotspotId = hotspotHit.object.userData.hotspotId;
-      this.setActiveHotspot(hotspotId);
-      this.onHotspotClick(this.hotspots[hotspotId]);
-    }
+    if (!hotspotHit) return;
+
+    const globeHit = raycaster.intersectObject(this.marsMesh, false)[0];
+    if (globeHit && hotspotHit.distance >= globeHit.distance) return;
+
+    const hotspotId = hotspotHit.object.userData.hotspotId;
+    this.setActiveHotspot(hotspotId);
+    this.onHotspotClick(this.hotspots[hotspotId]);
   }
 
   resize() {
