@@ -35,7 +35,7 @@ export class MapPortal {
         <div class="portal-brand">
           <div class="brand-icon" style="color:var(--data-cyan);">${ICONS.planet(46)}</div>
           <h1 class="brand-title">Mars Geological Maps</h1>
-          <p class="brand-sub">Pilih peta geologi untuk memulai eksplorasi 3D</p>
+          <p class="brand-sub">Select a geological map to begin 3D exploration</p>
         </div>
 
         <!-- Map Cards Grid -->
@@ -47,7 +47,7 @@ export class MapPortal {
         <div class="portal-footer">
           <span>Data: NASA / USGS Astrogeology Science Center</span>
           <span>·</span>
-          <span>Tambah peta baru di <code>web/src/maps/mapRegistry.js</code></span>
+          <span>Add new maps in <code>web/src/maps/mapRegistry.js</code></span>
         </div>
       </div>
     `;
@@ -63,10 +63,10 @@ export class MapPortal {
     if (isPlaceholder) {
       return `
         <div class="map-card placeholder" data-map-id="${map.id}">
-          <div class="card-top-badge placeholder-badge">SLOT TERSEDIA</div>
-          <div class="card-code">+ Tambah Peta</div>
+          <div class="card-top-badge placeholder-badge">AVAILABLE SLOT</div>
+          <div class="card-code">+ Add Map</div>
           <div class="card-title">${map.title}</div>
-          <div class="card-hint">Edit mapRegistry.js untuk menambahkan peta baru</div>
+          <div class="card-hint">Edit mapRegistry.js to add a new map</div>
         </div>
       `;
     }
@@ -85,8 +85,8 @@ export class MapPortal {
           <span>${map.author}, ${map.year}</span>
         </div>
         <div class="card-regions">
-          <span class="region-count">${regionCount} Wilayah</span>
-          ${hasSimulation ? '<span class="enter-hint">Klik untuk masuk →</span>' : ''}
+          <span class="region-count">${regionCount} Region${regionCount === 1 ? '' : 's'}</span>
+          ${hasSimulation ? '<span class="enter-hint">Click to enter →</span>' : ''}
         </div>
       </div>
     `;

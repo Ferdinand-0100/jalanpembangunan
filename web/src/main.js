@@ -194,7 +194,7 @@ const hud = new Hud({
     if (labBackpack) {
       labBackpack.toggle();
     } else {
-      hud.showToast('Laboratorium sedang menyiapkan Meja Riset...');
+      hud.showToast('Laboratory is preparing the Research Workbench...');
     }
   },
 });
@@ -232,30 +232,30 @@ function triggerMainTask() {
       if (jezeroExploration && jezeroExploration.onGeoLabResearch()) {
         // Popup penemuan ilmiah Jezero otomatis muncul!
       } else {
-        hud.showToast(`[GeoLab] Laser Raman & Pengeboran aktif pada singkapan batuan!`);
+        hud.showToast(`[GeoLab] Laser Raman & Drilling active on rock outcrop!`);
       }if (vpms) {
         vpms.captureOnTaskComplete({
           taskId: `DRILL-LASER-${Date.now()}`,
           roverId: '02',
           roverName: 'Curiosity GeoLab',
           roverRole: 'geological-investigation',
-          description: `Pengeboran Inti & Spektrometri Laser Raman Singkapan Batuan Mars`,
+          description: `Core Drilling & Laser Raman Spectrometry on Mars Rock Outcrop`,
           regionId: 'rock-core',
           regionName: 'Field Outcrop Matrix',
           roverPhysics: { ...active.physics },
-          mineral: 'Basaltik Martis Silikat & Logam Magnetik',
-          analysisResult: 'Pola reflektansi laser terdeteksi: 62% Basalt, 24% Piroksen, 14% Olivin.',
+          mineral: 'Martian Silicate Basalt & Magnetic Minerals',
+          analysisResult: 'Laser reflectance pattern detected: 62% Basalt, 24% Pyroxene, 14% Olivine.',
         });
       }
     }
   } else if (active.role === 'transport-support') {
-    // 3. Hermes Transport: Jika ada kargo -> antar ke lab, jika belum -> jemput ke waypoint
+    // 3. Hermes Transport: If cargo present -> deliver to lab, if not -> pickup at waypoint
     if (missionSystem.transportCargo) {
       if (missionSystem.labStation) {
         missionSystem.transportState = 'carrying_to_lab';
-        hud.showToast(`[Hermes Transport] Memulai rute pengantaran ke Stasiun Lab Sains...`);
+        hud.showToast(`[Hermes Transport] Starting delivery route to Science Lab Station...`);
       } else {
-        hud.showToast(`[Perhatian] Bangun Stasiun Lab dahulu menggunakan Robot 02 (GeoLab)!`);
+        hud.showToast(`[Attention] Build the Science Lab Station first using Rover 02 (GeoLab)!`);
       }
     } else if (missionSystem.activeWaypoint) {
       missionSystem.callTransportToWaypoint();
@@ -456,7 +456,7 @@ async function main() {
   // Initialize simple Map Portal as secondary reference if needed
   mapPortal = new MapPortal({
     onLaunchSimulation: mapData => {
-      hud.showToast(`Memasuki simulasi 3D — ${mapData.title}`);
+      hud.showToast(`Entering 3D simulation — ${mapData.title}`);
       switchSimulationTerrain(mapData);
     },
   });
@@ -481,19 +481,19 @@ async function main() {
       e.preventDefault();
       triggerMainTask();
     } else if (e.code === 'KeyB') {
-      // Shortcut B: Bangun Stasiun Lab
+      // Shortcut B: Build Science Lab
       const geoRover = swarm.rovers[1];
       if (geoRover) {
         missionSystem.buildScienceLab(geoRover.physics);
       }
     } else if (e.code === 'KeyC') {
-      // Shortcut C: Panggil Hermes Transport (Shift+C untuk Pendaratan Ekspres Instan)
+      // Shortcut C: Call Hermes Transport (Shift+C for Express Instant Landing)
       missionSystem.callTransportToWaypoint(e.shiftKey);
     } else if (e.code === 'KeyE') {
-      // Shortcut E: Buka / Tutup Backpack Laboratorium
+      // Shortcut E: Open / Close Lab Backpack
       if (labBackpack) labBackpack.toggle();
     } else if (e.code === 'KeyM') {
-      // Shortcut M: Maksimalkan / Perkecil Peta Taktis & Terrain Mars
+      // Shortcut M: Maximize / Minimize Tactical Map & Mars Terrain
       if (minimap) minimap.toggleMaximize();
     }
   });

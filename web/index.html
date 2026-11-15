@@ -1920,14 +1920,14 @@
       </div>
     </div>
     <div id="roverViewerContainer">
-      <div id="roverViewerLoading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-family:var(--font-mono);font-size:10px;">MEMUAT 3D ROVER MODEL...</div>
-      <div class="viewer-hint">Drag: Putar · Right-Drag: Pan · Scroll: Zoom</div>
+      <div id="roverViewerLoading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-family:var(--font-mono);font-size:10px;">LOADING 3D ROVER MODEL...</div>
+      <div class="viewer-hint">Drag: Rotate · Right-Drag: Pan · Scroll: Zoom</div>
     </div>
     <!-- Technical Specifications -->
     <div class="specs-grid">
       <div class="spec-item"><span>Chassis</span><span>Rocker-Bogie 6WD</span></div>
-      <div class="spec-item"><span>Dimensi</span><span>3.0 × 2.7 × 2.2 m</span></div>
-      <div class="spec-item"><span>Massa</span><span>899 kg (Earth)</span></div>
+      <div class="spec-item"><span>Dimensions</span><span>3.0 × 2.7 × 2.2 m</span></div>
+      <div class="spec-item"><span>Mass</span><span>899 kg (Earth)</span></div>
       <div class="spec-item"><span>Branding</span><span style="color:var(--nasa-red)">Official NASA</span></div>
     </div>
   </div>
@@ -1935,27 +1935,27 @@
   <!-- 2. SHOW HISTORY TRACK (Rover Movement History & Telemetry) -->
   <div class="history-card">
     <div class="hist-header">
-      <span class="section-title">REKAM JEJAK PERJALANAN ROVER</span>
+      <span class="section-title">ROVER TRAVEL HISTORY</span>
     </div>
     <button id="historyToggleBtn" class="history-toggle-btn active">
       <span>● SHOW HISTORY TRACK</span>
       <span id="histToggleState" style="color:var(--data-cyan)">[ ON ]</span>
     </button>
     <table class="hist-stats-table">
-      <tr><td>Total Jarak Tempuh</td><td id="histTotalDist">0.0 m</td></tr>
-      <tr><td>Waktu Misi (Elapsed)</td><td id="histElapsedTime">00:00:00</td></tr>
-      <tr><td>Titik Awal (Origin)</td><td id="histStartCoord">-</td></tr>
-      <tr><td>Posisi Terkini</td><td id="histCurrentCoord">-</td></tr>
-      <tr><td>Jumlah Waypoint</td><td id="histWaypointCount">1 Titik</td></tr>
+      <tr><td>Total Distance</td><td id="histTotalDist">0.0 m</td></tr>
+      <tr><td>Mission Time (Elapsed)</td><td id="histElapsedTime">00:00:00</td></tr>
+      <tr><td>Start Point (Origin)</td><td id="histStartCoord">-</td></tr>
+      <tr><td>Current Position</td><td id="histCurrentCoord">-</td></tr>
+      <tr><td>Waypoint Count</td><td id="histWaypointCount">1 Point</td></tr>
     </table>
     <button id="toggleHistLogBtn" class="btn-subtle" style="display:flex;align-items:center;justify-content:center;gap:6px;">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
-      <span>Buka Riwayat Lintasan (Log Telemetri)</span>
+      <span>Open Travel History (Telemetry Log)</span>
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
     <div id="histLogContainer">
       <div style="padding:3px 6px;background:#111822;font-weight:700;color:var(--text-muted);display:grid;grid-template-columns:24px 50px 1fr 45px;">
-        <span>#</span><span>WAKTU</span><span>KOORDINAT (LON/LAT)</span><span style="text-align:right">SPD</span>
+        <span>#</span><span>TIME</span><span>COORDINATES (LON/LAT)</span><span style="text-align:right">SPD</span>
       </div>
       <div id="histLogList"></div>
     </div>
@@ -1963,14 +1963,14 @@
 
   <!-- 3. LIVE FLIGHT TELEMETRY & KINEMATICS -->
   <div class="telemetry-card">
-    <div class="section-title">TELEMETRI GERAK ROVER AKTIF</div>
+    <div class="section-title">ACTIVE ROVER MOTION TELEMETRY</div>
     <div class="telemetry-grid">
       <div class="telem-box">
-        <div class="lbl">KECEPATAN</div>
+        <div class="lbl">SPEED</div>
         <div class="val" id="r-speed">0.0 m/s</div>
       </div>
       <div class="telem-box">
-        <div class="lbl">ELEVASI</div>
+        <div class="lbl">ELEVATION</div>
         <div class="val" id="r-el">0 m</div>
       </div>
       <div class="telem-box">
@@ -1979,7 +1979,7 @@
       </div>
     </div>
     <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;font-family:var(--font-mono);color:var(--text-dim);">
-      <span>Kemiringan: <b id="r-slope" style="color:var(--text-main)">0.0°</b></span>
+      <span>Slope: <b id="r-slope" style="color:var(--text-main)">0.0°</b></span>
       <span>Status: <b id="r-status" style="color:var(--data-cyan)">Nominal</b></span>
     </div>
   </div>
@@ -1987,14 +1987,14 @@
   <!-- 4. MISSION OPERATIONS & WORKFLOW (Pipeline) -->
   <div class="workflow-box">
     <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-      <span class="section-title">ALUR OPERASI SAINS TIM</span>
+      <span class="section-title">TEAM SCIENCE OPERATIONS WORKFLOW</span>
       <span style="font-size:9.5px;color:var(--data-cyan);font-family:var(--font-mono);">STEP 1-4</span>
     </div>
     <div class="wf-steps">
-      <div class="wf-step current" id="step-map">1. Petakan<br>Sampel</div>
-      <div class="wf-step" id="step-transport">2. Muat ke<br>Hermes</div>
-      <div class="wf-step" id="step-lab">3. Bangun<br>Lab Sains</div>
-      <div class="wf-step" id="step-research">4. Riset &amp;<br>Analisis</div>
+      <div class="wf-step current" id="step-map">1. Map<br>Sample</div>
+      <div class="wf-step" id="step-transport">2. Load to<br>Hermes</div>
+      <div class="wf-step" id="step-lab">3. Build<br>Sci Lab</div>
+      <div class="wf-step" id="step-research">4. Research<br>&amp; Analysis</div>
     </div>
   </div>
 
@@ -2003,25 +2003,25 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
       <span id="act-role-title" style="font-weight:700;font-size:11.5px;color:#fff;display:flex;align-items:center;gap:6px;">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--data-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
-        <span>Ares Mapper (Eksplorasi)</span>
+        <span>Ares Mapper (Exploration)</span>
       </span>
-      <span id="act-role-status" style="font-size:10px;font-family:var(--font-mono);color:var(--data-cyan);">Siap</span>
+      <span id="act-role-status" style="font-size:10px;font-family:var(--font-mono);color:var(--data-cyan);">Ready</span>
     </div>
     <button id="mainActionBtn" class="btn-main-action btn-with-icon" style="justify-content:center;">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
-      <span>Tandai Waypoint Sampel (Space)</span>
+      <span>Mark Sample Waypoint (Space)</span>
     </button>
     <button id="secActionBtn" class="btn-sec-action btn-with-icon" style="display:none;justify-content:center;">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-5.28a2 2 0 0 0-.586-1.414L18.414 7.3A2 2 0 0 0 17 6.72H14v11.28"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
-      <span>Panggil Hermes Transport (C)</span>
+      <span>Call Hermes Transport (C)</span>
     </button>
   </div>
 
   <!-- Quest & Science Checklist -->
   <div class="quest-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <span class="section-title" style="margin-bottom:0;">TARGET &amp; RISET SAINS</span>
-      <span id="scienceScore" style="color:var(--status-green);font-family:var(--font-mono);font-size:10.5px;font-weight:700;">0 Poin</span>
+      <span class="section-title" style="margin-bottom:0;">SCIENCE TARGETS &amp; RESEARCH</span>
+      <span id="scienceScore" style="color:var(--status-green);font-family:var(--font-mono);font-size:10.5px;font-weight:700;">0 Points</span>
     </div>
     <div class="quest-list" id="questList"></div>
   </div>
@@ -2029,7 +2029,7 @@
   <!-- Data Sources Credits Drawer -->
   <button id="toggleDetailsBtn" class="btn-subtle" style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:6px;">
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>
-    <span>Sumber Data NASA &amp; USGS Geologi</span>
+    <span>NASA &amp; USGS Geological Data Sources</span>
     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><polyline points="6 9 12 15 18 9"/></svg>
   </button>
   <div id="telemetryDetails" style="display:none;background:rgba(8,12,18,0.7);border:1px solid var(--panel-border-subtle);border-radius:6px;padding:10px;font-size:10.5px;color:var(--text-dim);margin-bottom:10px;">
@@ -2041,7 +2041,7 @@
      BOTTOM QUICK KEYBOARD CONTROLS
      ========================================================================= -->
 <div id="help" style="display:none;">
-  <b>Setir:</b> <kbd>W A S D</kbd> · <b>Peta:</b> <kbd>M</kbd> · <b>Turbo:</b> <kbd>Shift</kbd> · <b>Pilih Robot:</b> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> / <kbd>Tab</kbd> · <b>Aksi:</b> <kbd>Space</kbd> · <b>Lab:</b> <kbd>B</kbd> · <b>Transport:</b> <kbd>C</kbd>
+  <b>Drive:</b> <kbd>W A S D</kbd> · <b>Map:</b> <kbd>M</kbd> · <b>Turbo:</b> <kbd>Shift</kbd> · <b>Select Robot:</b> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> / <kbd>Tab</kbd> · <b>Action:</b> <kbd>Space</kbd> · <b>Lab:</b> <kbd>B</kbd> · <b>Transport:</b> <kbd>C</kbd>
 </div>
 
 <script type="module" src="./src/main.js"></script>

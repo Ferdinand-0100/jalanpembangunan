@@ -565,10 +565,10 @@ export class VisualPerceptionPanel {
       this.showDepthTab(targetDoc);
       this.showPointCloud(targetDoc);
       this.openModal(targetDoc.docId);
-      this.showToast(`[VPMS] Dokumentasi Visual Aktif · ${targetDoc.taskId}`);
+      this.showToast(`[VPMS] Visual Documentation Active · ${targetDoc.taskId}`);
     } else {
       this.#switchTab('camera');
-      this.showToast('[VPMS] Panel Persepsi Visual Terbuka');
+      this.showToast('[VPMS] Visual Perception Panel Open');
     }
   }
 

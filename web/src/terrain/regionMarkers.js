@@ -170,21 +170,21 @@ builders.volcano_large = builders.volcano;
 
 const KIND = { crater: 0, craters: 1, basin: 2, volcano: 3, volcano_large: 3, ridges: 4 };
 
-// 6 wilayah (nama, deskripsi, warna, dan offset sama seperti sebelumnya)
+// 6 regions (name, description, color, and offsets)
 const REGIONS = [
-  { id: 'acidalia', name: 'Acidalia Planitia', desc: 'Dataran rendah utara — endapan sedimen & jejak air purba',
+  { id: 'acidalia', name: 'Acidalia Planitia', desc: 'Northern lowlands — sedimentary deposits & ancient water signatures',
     color: 0x4fc3f7, offsetX: -8000, offsetY: 6000, feature: 'crater', radius: 1500, beaconH: 450, seed: 11 },
-  { id: 'arabia', name: 'Arabia Terra', desc: 'Dataran tinggi tua — kawah tumbukan & erosi permukaan',
+  { id: 'arabia', name: 'Arabia Terra', desc: 'Ancient cratered highlands — impact craters & surface erosion',
     color: 0xffb74d, offsetX: 6000, offsetY: 8000, feature: 'craters', radius: 1700, beaconH: 450, seed: 23 },
-  { id: 'isidis', name: 'Isidis Planitia', desc: 'Cekungan tumbukan raksasa — material ejecta asteroid',
+  { id: 'isidis', name: 'Isidis Planitia', desc: 'Giant impact basin — asteroid ejecta material',
     color: 0xef5350, offsetX: 10000, offsetY: -2000, feature: 'basin', radius: 2300, beaconH: 480, seed: 37 },
-  { id: 'syrtis', name: 'Syrtis Major Planum', desc: 'Perisai vulkanik — jejak aliran lava basaltik',
+  { id: 'syrtis', name: 'Syrtis Major Planum', desc: 'Volcanic shield — basaltic lava flow traces',
     color: 0xab47bc, offsetX: -6000, offsetY: -7000, feature: 'volcano', radius: 2000, beaconH: 520, seed: 41,
     params: { H: 230, seaHeat: 0.28, flows: 5 } },
-  { id: 'elysium', name: 'Elysium', desc: 'Provinsi vulkanik — dataran lava & gunung api raksasa',
+  { id: 'elysium', name: 'Elysium', desc: 'Volcanic province — lava plains & giant volcanoes',
     color: 0xff7043, offsetX: -12000, offsetY: -1000, feature: 'volcano_large', radius: 2800, beaconH: 680, seed: 53,
     params: { H: 480, seaHeat: 0.46, flows: 8 } },
-  { id: 'hesperia', name: 'Hesperia Planum', desc: 'Dataran berpematang — transisi geologi Hesperian',
+  { id: 'hesperia', name: 'Hesperia Planum', desc: 'Wrinkle-ridged plain — Hesperian geological transition',
     color: 0x66bb6a, offsetX: 3000, offsetY: -10000, feature: 'ridges', radius: 1800, beaconH: 420, seed: 67 },
 ];
 

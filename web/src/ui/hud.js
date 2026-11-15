@@ -61,7 +61,7 @@ export class Hud {
         if (h.onToggleHistory) {
           h.onToggleHistory(this.historyTrackEnabled);
         }
-        this.showToast(this.historyTrackEnabled ? 'History Track: Ditampilkan di medan Mars' : 'History Track: Disembunyikan');
+        this.showToast(this.historyTrackEnabled ? 'History Track: Visible on Mars terrain' : 'History Track: Hidden');
       };
     }
 
@@ -72,8 +72,8 @@ export class Hud {
         const c = $('histLogContainer');
         if (c) c.style.display = this.showHistLog ? 'block' : 'none';
         $('toggleHistLogBtn').innerHTML = this.showHistLog
-          ? `${ICONS.chevronUp(11)} Sembunyikan Riwayat Lintasan`
-          : `${ICONS.fileText(12)} Buka Riwayat Lintasan (Log Telemetri) ${ICONS.chevronDown(10)}`;
+          ? `${ICONS.chevronUp(11)} Hide Travel History`
+          : `${ICONS.fileText(12)} Open Travel History (Telemetry Log) ${ICONS.chevronDown(10)}`;
       };
     }
 
@@ -95,8 +95,8 @@ export class Hud {
         const c = $('telemetryDetails');
         if (c) c.style.display = this.showDetails ? 'block' : 'none';
         $('toggleDetailsBtn').innerHTML = this.showDetails
-          ? `${ICONS.chevronUp(11)} Sembunyikan Sumber Data`
-          : `${ICONS.database(12)} Sumber Data NASA & USGS Geologi ${ICONS.chevronDown(10)}`;
+          ? `${ICONS.chevronUp(11)} Hide Data Sources`
+          : `${ICONS.database(12)} NASA & USGS Geological Data Sources ${ICONS.chevronDown(10)}`;
       };
     }
 
@@ -110,7 +110,7 @@ export class Hud {
         const icon = fabBtn.querySelector('.fab-icon-symbol');
         const text = fabBtn.querySelector('.fab-text');
         if (icon) icon.innerHTML = isCollapsed ? ICONS.sliders(13) : ICONS.x(13);
-        if (text) text.textContent = isCollapsed ? 'KONTROL' : 'TUTUP';
+        if (text) text.textContent = isCollapsed ? 'CONTROLS' : 'CLOSE';
         const simModal = $('simSettingsModal');
         if (isCollapsed && simModal) simModal.style.display = 'none';
       };
@@ -216,7 +216,7 @@ export class Hud {
     if ($('histStartCoord')) {
       $('histStartCoord').textContent = stats.startPoint
         ? `${stats.startPoint.lon}°E, ${stats.startPoint.lat}°N (${stats.startPoint.elevation}m)`
-        : 'Menunggu Posisi Awal...';
+        : 'Waiting for Start Position...';
     }
 
     if ($('histCurrentCoord')) {
@@ -226,7 +226,7 @@ export class Hud {
     }
 
     if ($('histWaypointCount')) {
-      $('histWaypointCount').textContent = `${stats.waypointCount} Titik`;
+      $('histWaypointCount').textContent = `${stats.waypointCount} Point${stats.waypointCount === 1 ? '' : 's'}`;
     }
 
     // Update log list if drawer is open
@@ -270,11 +270,11 @@ export class Hud {
     if (!mainBtn || !activeRover) return;
 
     if (activeRover.role === 'surface-mapping') {
-      $('act-role-title').innerHTML = `${ICONS.map(13)} <span>Ares Mapper (Eksplorasi)</span>`;
-      $('act-role-status').textContent = hasWaypoint ? 'Waypoint Ditandai — Siap Dijemput' : 'Siap Menandai Titik Sampel';
+      $('act-role-title').innerHTML = `${ICONS.map(13)} <span>Ares Mapper (Exploration)</span>`;
+      $('act-role-status').textContent = hasWaypoint ? 'Waypoint Marked — Ready for Pickup' : 'Ready to Mark Sample Point';
       $('act-role-status').style.color = 'var(--data-cyan)';
 
-      mainBtn.innerHTML = `${ICONS.pin(13)} <span>Tandai Waypoint Sampel (Space)</span>`;
+      mainBtn.innerHTML = `${ICONS.pin(13)} <span>Mark Sample Waypoint (Space)</span>`;
       mainBtn.style.display = 'flex';
       mainBtn.style.alignItems = 'center';
       mainBtn.style.justifyContent = 'center';
@@ -283,7 +283,7 @@ export class Hud {
       mainBtn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
 
       if (secBtn) {
-        secBtn.innerHTML = `${ICONS.truck(13)} <span>Panggil Hermes Transport (C)</span>`;
+        secBtn.innerHTML = `${ICONS.truck(13)} <span>Call Hermes Transport (C)</span>`;
         secBtn.style.display = hasWaypoint ? 'flex' : 'none';
         secBtn.style.alignItems = 'center';
         secBtn.style.justifyContent = 'center';
@@ -293,11 +293,11 @@ export class Hud {
         secBtn.style.color = '#34d399';
       }
     } else if (activeRover.role === 'geological-investigation') {
-      $('act-role-title').innerHTML = `${ICONS.microscope(13)} <span>Curiosity GeoLab (Riset)</span>`;
-      $('act-role-status').textContent = hasLab ? 'Stasiun Lab Sains Berdiri' : 'Siap Membangun Stasiun Lab';
+      $('act-role-title').innerHTML = `${ICONS.microscope(13)} <span>Curiosity GeoLab (Research)</span>`;
+      $('act-role-status').textContent = hasLab ? 'Science Lab Station Standing' : 'Ready to Build Lab Station';
       $('act-role-status').style.color = '#f43f5e';
 
-      mainBtn.innerHTML = hasLab ? `${ICONS.drill(13)} <span>Laser Raman & Bor Sampel (Space)</span>` : `${ICONS.settings(13)} <span>Bangun Stasiun Lab Sains (Space / B)</span>`;
+      mainBtn.innerHTML = hasLab ? `${ICONS.drill(13)} <span>Laser Raman & Drill Sample (Space)</span>` : `${ICONS.settings(13)} <span>Build Science Lab Station (Space / B)</span>`;
       mainBtn.style.display = 'flex';
       mainBtn.style.alignItems = 'center';
       mainBtn.style.justifyContent = 'center';
@@ -306,7 +306,7 @@ export class Hud {
       mainBtn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
 
       if (secBtn) {
-        secBtn.innerHTML = `${ICONS.gem(13)} <span>Analisis Batuan Sekitar</span>`;
+        secBtn.innerHTML = `${ICONS.gem(13)} <span>Analyze Surrounding Rocks</span>`;
         secBtn.style.display = hasLab ? 'flex' : 'none';
         secBtn.style.alignItems = 'center';
         secBtn.style.justifyContent = 'center';
@@ -316,8 +316,8 @@ export class Hud {
         secBtn.style.color = 'var(--text-muted)';
       }
     } else if (activeRover.role === 'transport-support') {
-      $('act-role-title').innerHTML = `${ICONS.truck(13)} <span>Hermes Container Hauler (Logistik)</span>`;
-      const cargoText = hasCargo ? `Kargo: ${missionSystem.transportCargo.name}` : 'Radar: Memindai Benda Unik Mars...';
+      $('act-role-title').innerHTML = `${ICONS.truck(13)} <span>Hermes Container Hauler (Logistics)</span>`;
+      const cargoText = hasCargo ? `Cargo: ${missionSystem.transportCargo.name}` : 'Radar: Scanning for Unique Objects...';
       $('act-role-status').innerHTML = `${hasCargo ? ICONS.package(12) : ICONS.radar(12)} <span>${cargoText}</span>`;
       $('act-role-status').style.display = 'inline-flex';
       $('act-role-status').style.alignItems = 'center';
@@ -325,11 +325,11 @@ export class Hud {
       $('act-role-status').style.color = hasCargo ? 'var(--status-green)' : 'var(--status-amber)';
 
       if (hasCargo) {
-        mainBtn.innerHTML = hasLab ? `${ICONS.package(13)} <span>Kirim Kontainer ke Stasiun Lab (Space)</span>` : `${ICONS.settings(13)} <span>Bangun Lab Dahulu (Pakai GeoLab)!</span>`;
+        mainBtn.innerHTML = hasLab ? `${ICONS.package(13)} <span>Deliver Container to Lab Station (Space)</span>` : `${ICONS.settings(13)} <span>Build Lab First (Use GeoLab)!</span>`;
         mainBtn.style.background = hasLab ? 'linear-gradient(180deg, #059669 0%, #047857 100%)' : 'rgba(245, 158, 11, 0.2)';
         mainBtn.style.borderColor = hasLab ? 'rgba(255, 255, 255, 0.2)' : 'rgba(245, 158, 11, 0.4)';
       } else {
-        mainBtn.innerHTML = `${ICONS.radar(13)} <span>Kunci Target Radar / Jemput (Space)</span>`;
+        mainBtn.innerHTML = `${ICONS.radar(13)} <span>Lock Radar Target / Pickup (Space)</span>`;
         mainBtn.style.background = 'linear-gradient(180deg, #059669 0%, #047857 100%)';
         mainBtn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
       }
@@ -356,7 +356,7 @@ export class Hud {
 
     // Score display
     if ($('scienceScore')) {
-      $('scienceScore').textContent = `${missionSystem.researchScore} Poin Riset`;
+      $('scienceScore').textContent = `${missionSystem.researchScore} Research Points`;
     }
   }
 

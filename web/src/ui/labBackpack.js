@@ -80,40 +80,40 @@ export class LabBackpackWorkbench {
             <span class="lab-bp-badge">NASA / JPL SCIENCE STATION</span>
             <h2 class="lab-bp-title" style="display:flex;align-items:center;gap:8px;">
               ${ICONS.backpack(16)}
-              <span>BACKPACK LABORATORIUM — MEJA RISET SPESIMEN MARS</span>
+              <span>LABORATORY BACKPACK — MARS SPECIMEN RESEARCH BENCH</span>
             </h2>
           </div>
-          <button class="lab-bp-close-btn" id="labBpCloseBtn" title="Tutup Meja Riset" style="display:inline-flex;align-items:center;gap:6px;">
+          <button class="lab-bp-close-btn" id="labBpCloseBtn" title="Close Research Bench" style="display:inline-flex;align-items:center;gap:6px;">
             ${ICONS.x(12)}
-            <span>TUTUP</span>
+            <span>CLOSE</span>
           </button>
         </div>
 
         <!-- Window Main Content -->
         <div class="lab-bp-body">
-          <!-- SISI KIRI: DAFTAR INVENTORI BACKPACK LABORATORIUM -->
+          <!-- LEFT SIDE: LABORATORY BACKPACK INVENTORY LIST -->
           <div class="lab-bp-sidebar">
             <div class="lab-bp-sidebar-header">
-              <span>DAFTAR SPESIMEN &amp; INVENTORI</span>
-              <span class="lab-bp-count" id="labBpCountBadge">0 / 6 DIAMBIL</span>
+              <span>SPECIMEN LIST &amp; INVENTORY</span>
+              <span class="lab-bp-count" id="labBpCountBadge">0 / 6 COLLECTED</span>
             </div>
             <div class="lab-bp-list" id="labBpItemList">
-              <!-- Item kartu spesimen dirender dinamis -->
+              <!-- Specimen card items rendered dynamically -->
             </div>
             <div class="lab-bp-sidebar-footer">
-              <small>Klik salah satu item untuk meletakkannya di atas meja riset laboratorium</small>
+              <small>Click an item to place it on the laboratory research bench</small>
             </div>
           </div>
 
-          <!-- TENGAH: MEJA RISET 3D INTERAKTIF (EXAMINATION DESK) -->
+          <!-- CENTER: 3D INTERACTIVE EXAMINATION BENCH -->
           <div class="lab-bp-center">
             <div class="lab-bp-viewport-header">
               <span id="labBpDeskLabel" style="display:flex;align-items:center;gap:6px;">
                 ${ICONS.microscope(14)}
-                <span>MEJA RISET PEMERIKSAAN SPESIMEN 3D</span>
+                <span>3D SPECIMEN EXAMINATION BENCH</span>
               </span>
               <div class="lab-bp-view-tools">
-                <button id="labBpResetViewBtn" class="lab-bp-btn-sm btn-with-icon" title="Kembalikan Sudut Pandang">
+                <button id="labBpResetViewBtn" class="lab-bp-btn-sm btn-with-icon" title="Reset View Angle">
                   ${ICONS.rotateCcw(11)}
                   <span>Reset View</span>
                 </button>
@@ -121,92 +121,92 @@ export class LabBackpackWorkbench {
               </div>
             </div>
 
-            <!-- Canvas Container Three.js Meja Riset -->
+            <!-- Canvas Container Three.js Research Bench -->
             <div class="lab-bp-canvas-wrap" id="labBpCanvasContainer">
-              <!-- Three.js Canvas di-mount di sini -->
+              <!-- Three.js Canvas mounted here -->
               <div class="lab-bp-table-glow"></div>
             </div>
 
             <div class="lab-bp-viewport-footer">
-              <span class="lab-bp-status-led" id="labBpLedStatus">● MEJA RISET AKTIF — PEMINDAIAN LASER STEREO ON</span>
+              <span class="lab-bp-status-led" id="labBpLedStatus">● RESEARCH BENCH ACTIVE — STEREO LASER SCAN ON</span>
             </div>
           </div>
 
-          <!-- SISI KANAN: DESKRIPSI LENGKAP & PERSEPSI VISUAL (DEPTH & SNAPSHOT) -->
+          <!-- RIGHT SIDE: FULL DESCRIPTION & VISUAL PERCEPTION (DEPTH & SNAPSHOT) -->
           <div class="lab-bp-detail-panel">
             <div class="lab-bp-detail-header">
               <span class="lab-bp-tag" id="labBpMatterTag" style="display:inline-flex;align-items:center;gap:4px;">
                 ${ICONS.gem(11)}
-                <span>BATUAN PADAT</span>
+                <span>SOLID ROCK</span>
               </span>
-              <h3 class="lab-bp-item-name" id="labBpItemName">Kristal Inti Magma</h3>
-              <div class="lab-bp-item-region" id="labBpItemRegion">Wilayah: Elysium Planitia</div>
+              <h3 class="lab-bp-item-name" id="labBpItemName">Magma Core Crystal</h3>
+              <div class="lab-bp-item-region" id="labBpItemRegion">Region: Elysium Planitia</div>
             </div>
 
-            <!-- Tab Pilihan: Analisis Geologi vs Persepsi Visual Depth -->
+            <!-- Tab Options: Geological Analysis vs Visual Depth Perception -->
             <div class="lab-bp-detail-tabs">
               <button class="lab-bp-tab-btn active" data-tab="analysis" style="display:inline-flex;align-items:center;gap:6px;">
                 ${ICONS.microscope(13)}
-                <span>ANALISIS LAB</span>
+                <span>LAB ANALYSIS</span>
               </button>
               <button class="lab-bp-tab-btn" data-tab="perception" style="display:inline-flex;align-items:center;gap:6px;">
                 ${ICONS.camera(13)}
-                <span>PERSEPSI KAMERA &amp; DEPTH</span>
+                <span>CAMERA PERCEPTION &amp; DEPTH</span>
               </button>
             </div>
 
-            <!-- TAB 1: HASIL ANALISIS SAINS -->
+            <!-- TAB 1: SCIENCE ANALYSIS RESULTS -->
             <div class="lab-bp-tab-content active" id="labBpTabAnalysis">
               <div class="lab-bp-section">
-                <label>METODE PENGAMBILAN HERMES</label>
+                <label>HERMES RETRIEVAL METHOD</label>
                 <div class="lab-bp-pickup-status" id="labBpPickupMethod" style="display:flex;align-items:center;gap:6px;">
                   ${ICONS.claw(13)}
-                  <span>Dicapit menggunakan Hydraulic Claw Gripper</span>
+                  <span>Gripped using Hydraulic Claw Gripper</span>
                 </div>
               </div>
 
               <div class="lab-bp-section">
-                <label>TIPE BATUAN &amp; STRATIGRAFI</label>
+                <label>ROCK TYPE &amp; STRATIGRAPHY</label>
                 <p id="labBpRockType" class="lab-bp-text">—</p>
               </div>
 
               <div class="lab-bp-section">
-                <label>KOMPOSISI MINERAL TERKONFIRMASI</label>
+                <label>CONFIRMED MINERAL COMPOSITION</label>
                 <p id="labBpMineral" class="lab-bp-text-highlight">—</p>
               </div>
 
               <div class="lab-bp-section">
-                <label>HASIL SPEKTROMETRI &amp; ANALISIS LABORATORIUM</label>
+                <label>SPECTROMETRY &amp; LAB ANALYSIS RESULTS</label>
                 <div class="lab-bp-analysis-box" id="labBpAnalysisResult">—</div>
               </div>
 
               <div class="lab-bp-section">
-                <label>SIGNIFIKANSI ILMIAH MARS</label>
+                <label>MARTIAN SCIENTIFIC SIGNIFICANCE</label>
                 <p id="labBpSignificance" class="lab-bp-text-dim">—</p>
               </div>
             </div>
 
-            <!-- TAB 2: PERSEPSI VISUAL SNAPSHOT & SIMULASI DEPTH CAMERA -->
+            <!-- TAB 2: VISUAL PERCEPTION SNAPSHOT & DEPTH CAMERA SIMULATION -->
             <div class="lab-bp-tab-content" id="labBpTabPerception">
               <div class="lab-bp-visual-grid">
-                <!-- Foto Snapshot Kamera Depan -->
+                <!-- Front Camera Snapshot -->
                 <div class="lab-bp-visual-col">
-                  <div class="lab-bp-vis-title">FOTO KAMERA DEPAN ROVER</div>
+                  <div class="lab-bp-vis-title">ROVER FRONT CAMERA PHOTO</div>
                   <div class="lab-bp-vis-frame">
-                    <img id="labBpRgbImage" class="lab-bp-vis-img" alt="Kamera Depan Rover" style="display:none;">
+                    <img id="labBpRgbImage" class="lab-bp-vis-img" alt="Rover Front Camera" style="display:none;">
                     <div id="labBpRgbFallback" class="lab-bp-vis-fallback">
                       <span style="display:flex;align-items:center;justify-content:center;gap:6px;">
                         ${ICONS.camera(13)}
                         <span>FRONT HAZCAM</span>
                       </span>
-                      <small>Snapshot medan terverifikasi</small>
+                      <small>Verified terrain snapshot</small>
                     </div>
                   </div>
                 </div>
 
-                <!-- Simulasi Depth Camera Map -->
+                <!-- Depth Camera Map Simulation -->
                 <div class="lab-bp-visual-col">
-                  <div class="lab-bp-vis-title">SIMULASI DEPTH CAMERA (JARAK METRIK)</div>
+                  <div class="lab-bp-vis-title">DEPTH CAMERA SIMULATION (METRIC DISTANCE)</div>
                   <div class="lab-bp-vis-frame">
                     <img id="labBpDepthImage" class="lab-bp-vis-img" alt="Depth Camera Map" style="display:none;">
                     <div id="labBpDepthFallback" class="lab-bp-vis-fallback">
@@ -220,13 +220,13 @@ export class LabBackpackWorkbench {
                 </div>
               </div>
 
-              <!-- Depth Metrics & Telemetri -->
+              <!-- Depth Metrics & Telemetry -->
               <div class="lab-bp-section" style="margin-top:12px;">
-                <label>TELEMETRI SENSOR &amp; KOORDINAT</label>
+                <label>SENSOR TELEMETRY &amp; COORDINATES</label>
                 <table class="lab-bp-meta-tbl">
-                  <tr><td>Koordinat Mars</td><td id="labBpCoord">18.4° N, 147.2° E</td></tr>
-                  <tr><td>Mode Sensor</td><td>DEPTH SENSOR STEREO SIM</td></tr>
-                  <tr><td>Status Muatan</td><td id="labBpStorageLocation" style="color:#00e5ff;">DI DALAM BACKPACK LAB</td></tr>
+                  <tr><td>Mars Coordinates</td><td id="labBpCoord">18.4° N, 147.2° E</td></tr>
+                  <tr><td>Sensor Mode</td><td>DEPTH SENSOR STEREO SIM</td></tr>
+                  <tr><td>Storage Status</td><td id="labBpStorageLocation" style="color:#00e5ff;">INSIDE LAB BACKPACK</td></tr>
                 </table>
               </div>
             </div>
@@ -708,48 +708,48 @@ export class LabBackpackWorkbench {
   #updateDetailPanel(id, data) {
     const isSolid = data.stateOfMatter === 'solid';
 
-    // Badge Wujud Materi
+    // Matter State Badge
     const matterTag = document.getElementById('labBpMatterTag');
     if (matterTag) {
       matterTag.innerHTML = isSolid
-        ? `<span style="display:inline-flex;align-items:center;gap:4px;">${ICONS.gem(11)} <span>BATUAN PADAT</span></span>`
-        : `<span style="display:inline-flex;align-items:center;gap:4px;">${ICONS.layers(11)} <span>FLUIDA CAIR</span></span>`;
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;">${ICONS.gem(11)} <span>SOLID ROCK</span></span>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;">${ICONS.layers(11)} <span>LIQUID FLUID</span></span>`;
       matterTag.className = isSolid ? 'lab-bp-tag solid' : 'lab-bp-tag liquid';
     }
 
-    // Nama & Wilayah
+    // Name & Region
     const nameEl = document.getElementById('labBpItemName');
     if (nameEl) nameEl.textContent = data.artifactName;
 
     const regEl = document.getElementById('labBpItemRegion');
-    if (regEl) regEl.textContent = `Wilayah Mars: ${data.name}`;
+    if (regEl) regEl.textContent = `Martian Region: ${data.name}`;
 
-    // Cara Pengambilan Hermes
+    // Hermes Retrieval Method
     const pickupEl = document.getElementById('labBpPickupMethod');
     if (pickupEl) {
       pickupEl.innerHTML = isSolid
-        ? `<span style="display:inline-flex;align-items:center;gap:6px;">${ICONS.claw(14)} <span>DICAPIT menggunakan Hydraulic Claw Gripper (Benda Padat)</span></span>`
-        : `<span style="display:inline-flex;align-items:center;gap:6px;">${ICONS.drill(14)} <span>DISEROK menggunakan Suction Dipper Scoop (Benda Cair)</span></span>`;
+        ? `<span style="display:inline-flex;align-items:center;gap:6px;">${ICONS.claw(14)} <span>GRIPPED using Hydraulic Claw Gripper (Solid Object)</span></span>`
+        : `<span style="display:inline-flex;align-items:center;gap:6px;">${ICONS.drill(14)} <span>SCOOPED using Suction Dipper Scoop (Liquid Matter)</span></span>`;
     }
 
-    // Informasi Geologi
+    // Geological Information
     const rockEl = document.getElementById('labBpRockType');
-    if (rockEl) rockEl.textContent = data.rockType || 'Batuan Martis';
+    if (rockEl) rockEl.textContent = data.rockType || 'Martian Rock';
 
     const minEl = document.getElementById('labBpMineral');
-    if (minEl) minEl.textContent = data.mineral || 'Silikat & Logam Terkompresi';
+    if (minEl) minEl.textContent = data.mineral || 'Silicates & Compressed Metals';
 
     const analEl = document.getElementById('labBpAnalysisResult');
-    if (analEl) analEl.textContent = data.analysisResult || 'Hasil spektrometri Raman terverifikasi.';
+    if (analEl) analEl.textContent = data.analysisResult || 'Raman spectrometry results verified.';
 
     const sigEl = document.getElementById('labBpSignificance');
-    if (sigEl) sigEl.textContent = data.significance || 'Signifikansi eksplorasi tinggi.';
+    if (sigEl) sigEl.textContent = data.significance || 'High exploration significance.';
 
-    // Status penyimpanan di backpack
+    // Storage Status in Backpack
     const isCollected = this.isSpecimenCollected(id);
     const storeEl = document.getElementById('labBpStorageLocation');
     if (storeEl) {
-      storeEl.textContent = isCollected ? 'DI DALAM BACKPACK LABORATORIUM' : 'TERDETEKSI DI MEDAN (SIAP DIAMBIL HERMES)';
+      storeEl.textContent = isCollected ? 'INSIDE LABORATORY BACKPACK' : 'DETECTED IN FIELD (READY FOR HERMES PICKUP)';
       storeEl.style.color = isCollected ? '#00e5ff' : '#f59e0b';
     }
 
@@ -812,7 +812,7 @@ export class LabBackpackWorkbench {
 
       const isSelected = this.selectedSpecimenId === key;
       const matterIcon = item.stateOfMatter === 'solid' ? ICONS.gem(13) : ICONS.layers(13);
-      const matterLabel = item.stateOfMatter === 'solid' ? 'Capit (Padat)' : 'Serok (Cair)';
+      const matterLabel = item.stateOfMatter === 'solid' ? 'Claw (Solid)' : 'Scoop (Liquid)';
 
       return `
         <div class="lab-bp-item-card ${isSelected ? 'selected' : ''}" data-id="${key}">
@@ -825,7 +825,7 @@ export class LabBackpackWorkbench {
             <span class="lab-bp-ic-tool">${matterLabel}</span>
           </div>
           <div class="lab-bp-ic-status ${isCollected ? 'collected' : 'pending'}" style="display:inline-flex;align-items:center;gap:4px;">
-            ${isCollected ? `${ICONS.checkCircle(10)} <span>DI BACKPACK LAB</span>` : `${ICONS.circle(10)} <span>TERDETEKSI DI MEDAN</span>`}
+            ${isCollected ? `${ICONS.checkCircle(10)} <span>IN LAB BACKPACK</span>` : `${ICONS.circle(10)} <span>DETECTED IN FIELD</span>`}
           </div>
         </div>
       `;
@@ -834,7 +834,7 @@ export class LabBackpackWorkbench {
     listEl.innerHTML = html;
 
     if (countBadge) {
-      countBadge.textContent = `${collectedCount} / ${totalCount} DIAMBIL`;
+      countBadge.textContent = `${collectedCount} / ${totalCount} COLLECTED`;
     }
 
     listEl.querySelectorAll('.lab-bp-item-card').forEach(card => {
