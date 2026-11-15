@@ -97,6 +97,21 @@ export const MARS_MAPS = [
     ],
   },
   {
+    id: 'usgs-sim-3464',
+    code: 'USGS SIM 3464',
+    title: 'Geologic Map of Jezero Crater & Nili Planum',
+    location: 'Jezero Crater (Mars 2020)',
+    author: 'Vivian Z. Sun & Kathryn M. Stack (USGS / NASA)',
+    scale: '1:75,000',
+    coverage: '18.44° N / 77.45° E',
+    elevationRange: '-2,620 m to -2,200 m',
+    epoch: 'Noachian – Hesperian',
+    materialUnit: 'Lacustrine Delta, Mg-Carbonates & Olivine Cumulates',
+    has3DSimulation: true,
+    description:
+      'Peta geologi resmi Kawah Jezero dan sekitarnya: lokasi pendaratan Perseverance, kompleks Western Fan-Delta, teras karbonat marginal, serta saluran purba Neretva & Pliva Valles.'
+  },
+  {
     id: 'usgs-i-1802-b',
     code: 'USGS I-1802B',
     title: 'Geologic Map of the Eastern Equatorial Region of Mars',

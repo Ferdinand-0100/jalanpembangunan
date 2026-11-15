@@ -21,8 +21,9 @@ import { DashboardController } from './ui/dashboardController.js';
 import { Tutorial } from './ui/tutorial.js';
 import { RoverCutscene } from './ui/roverCutscene.js';
 import { getOlympusMonsCalderaHeights } from './terrain/olympusMonsTerrain.js';
+import { JezeroCraterExploration } from './terrain/jezeroCraterExploration.js';
 
-let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal, regionMarkers, missionSystem;
+let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal, regionMarkers, missionSystem, jezeroExploration;
 let vpms, vpPanel, historyTracker, labBackpack;
 let marsGlobe, dashboardController;
 let tutorial, cutscene;
@@ -89,10 +90,27 @@ function switchSimulationTerrain(mapData) {
     }
 
     // 3. Disable Jezero regional patches so the real Olympus caldera topography is clean
+    // 3. Disable Jezero regional patches so the real Olympus caldera topography is clean
     if (regionMarkers) {
       regionMarkers.setVisible(false);
     }
+    if (jezeroExploration) {
+      jezeroExploration.setVisible(false);
+    }
     hud.showToast('🌋 Landed at Olympus Mons Caldera (USGS SIM 3470, Summit Elevation +18,100 m)');
+  } else if (mapId === 'usgs-sim-3464') {
+    if (originalHeights) {
+      hf.data = originalHeights;
+      terrain.build(CONFIG.meshStride);
+    }
+    startRovers();
+    if (regionMarkers) {
+      regionMarkers.setVisible(false);
+    }
+    if (jezeroExploration) {
+      jezeroExploration.setVisible(true);
+    }
+    hud.showToast('🛸 Landed at Jezero Crater (USGS SIM 3464 — 6 Geological Zones Active)');
   } else {
     // 1. Restore original Valles Marineris / Jezero heights
     if (originalHeights) {
@@ -107,12 +125,19 @@ function switchSimulationTerrain(mapData) {
     if (regionMarkers) {
       regionMarkers.setVisible(true);
     }
+    if (jezeroExploration) {
+      jezeroExploration.setVisible(false);
+    }
     hud.showToast('🚀 Landed at Valles Marineris & Tharsis (USGS I-1802A)');
   }
 }
 
 const hud = new Hud({
-  onExaggeration: v => { frame.setExaggeration(v); terrain.build(); },
+  onExaggeration: v => {
+    frame.setExaggeration(v);
+    terrain.build();
+    if (jezeroExploration) jezeroExploration.rebuildHeights();
+  },
   onStride: v => hud.setMeshInfo(terrain.build(v)),
   onSlope: on => terrain.setSlopeMode(on),
   onTint: on => terrain.setTint(on),
@@ -171,14 +196,20 @@ function triggerMainTask() {
     // 1. Mapper menandai waypoint sampel geologi di posisinya
     const regId = regionMarkers ? regionMarkers.getCurrentRegionId() : null;
     missionSystem.markSampleWaypoint(active.physics, regId);
+    if (jezeroExploration) {
+      jezeroExploration.onAresMarkSample(active.physics);
+    }
   } else if (active.role === 'geological-investigation') {
-    // 2. GeoLab: Bangun lab sains jika belum ada, atau jalankan laser bor
+    // 2. GeoLab: Bangun lab sains jika belum ada, atau jalankan penelitian di Lab
     if (!missionSystem.labStation) {
       missionSystem.buildScienceLab(active.physics);
     } else {
       swarm.triggerActiveTask();
-      hud.showToast(`[GeoLab] Laser Raman & Pengeboran aktif pada singkapan batuan!`);
-      if (vpms) {
+      if (jezeroExploration && jezeroExploration.onGeoLabResearch()) {
+        // Popup penemuan ilmiah Jezero otomatis muncul!
+      } else {
+        hud.showToast(`[GeoLab] Laser Raman & Pengeboran aktif pada singkapan batuan!`);
+      }if (vpms) {
         vpms.captureOnTaskComplete({
           taskId: `DRILL-LASER-${Date.now()}`,
           roverId: '02',
@@ -269,6 +300,21 @@ async function main() {
 
   // Initialize 6 geological region markers in the 3D world
   regionMarkers = new RegionMarkers(scene, hf, frame, { terrain });
+
+  // Initialize Jezero Crater 6-Zone & 13-POI Exploration
+  jezeroExploration = new JezeroCraterExploration(scene, hf, frame, {
+    getRovers: () => (swarm ? swarm.rovers : []),
+    getActiveRover: () => (swarm ? swarm.getActiveRover() : null),
+    getMissionSystem: () => missionSystem,
+    getLabBackpack: () => labBackpack,
+    onToast: msg => hud.showToast(msg),
+    onInspectComplete: () => {
+      if (missionSystem && typeof missionSystem.sciencePoints === 'number') {
+        missionSystem.sciencePoints += 150;
+        if (missionSystem.onStateChange) missionSystem.onStateChange();
+      }
+    }
+  });
 
   // Hubungkan elevasi wilayah prosedural ke swarm agar robot memanjat gunung api & kawah tanpa tenggelam
   swarm.setReliefSampler((X, Y) => regionMarkers.getReliefAt(X, Y));
@@ -400,6 +446,9 @@ async function main() {
     if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 4) return;
     const ray = new THREE.Raycaster();
     ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1), camera);
+    if (jezeroExploration && jezeroExploration.handleClick(ray)) {
+      return;
+    }
     const p = pickTerrain(ray.ray, hf, frame);
     if (p) {
       const [lon, lat] = frame.projToLonLat(p.X, p.Y);
@@ -444,6 +493,10 @@ async function main() {
     // Update region markers proximity check
     if (regionMarkers) {
       regionMarkers.update(active.physics.X, active.physics.Y);
+    }
+
+    if (jezeroExploration) {
+      jezeroExploration.update(active.physics.X, active.physics.Y, dt);
     }
 
     // Directional shadow frustum follows active rover
