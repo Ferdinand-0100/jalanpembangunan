@@ -40,10 +40,11 @@ const STEPS = [
 
 export class Tutorial {
   /**
-   * @param {{ onDone?: () => void }} [opts]
+   * @param {{ onDone?: () => void, onAccepted?: () => void }} [opts]
    */
   constructor(opts = {}) {
     this.onDone = opts.onDone || (() => {});
+    this.onAccepted = opts.onAccepted || null; // called when player clicks Yes — set by main.js
     this.currentStep = 0;
     this.active = false;
     this._missionSystem = null;
@@ -303,7 +304,15 @@ export class Tutorial {
     document.body.appendChild(this._completeEl);
 
     // Button handlers
-    document.getElementById('tutYesBtn').onclick = () => this._start();
+    document.getElementById('tutYesBtn').onclick = () => {
+      this._promptEl.style.display = 'none';
+      if (this.onAccepted) {
+        // Let main.js play the cutscene first; cutscene calls _start() on complete
+        this.onAccepted();
+      } else {
+        this._start();
+      }
+    };
     document.getElementById('tutNoBtn').onclick = () => this._dismiss();
   }
 
@@ -322,7 +331,6 @@ export class Tutorial {
     this.active = false;
     this.onDone();
   }
-
   _showStep(index) {
     const step = STEPS[index];
     if (!step) return;
