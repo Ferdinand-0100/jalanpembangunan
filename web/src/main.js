@@ -29,6 +29,16 @@ let marsGlobe, dashboardController;
 let tutorial, cutscene;
 let originalHeights = null;
 let currentSimMapId = 'usgs-i-1802-a';
+let pendingSimMap = null;
+
+// Helper to safely display toast notification
+function safeToast(msg) {
+  if (hud && typeof hud.showToast === 'function') {
+    hud.showToast(msg);
+  } else {
+    console.log('[Toast]', msg);
+  }
+}
 
 try {
   marsGlobe = new MarsGlobe3D('marsGlobeCanvasContainer', {
@@ -36,11 +46,18 @@ try {
       if (dashboardController) {
         dashboardController.selectMap(hs.id);
       }
-      hud.showToast(`📍 Selected ${hs.name} (${hs.code})`);
+      safeToast(`📍 Selected ${hs.name} (${hs.code})`);
     },
   });
+  window.marsGlobe = marsGlobe;
+} catch (err) {
+  console.error('[MarsGlobe3D] Failed to initialize:', err);
+}
 
+// 2. Initialize Dashboard Controller (Independent try-catch so launch button ALWAYS works!)
+try {
   dashboardController = new DashboardController({
+    marsGlobe: window.marsGlobe,
     onLaunchSimulation: (mapData) => {
       // Dashboard fade-out is handled by DashboardController.hide()
       // Hud & simulator panels below appear after the fade-out delay
@@ -52,23 +69,25 @@ try {
           if (el) el.style.display = '';
         });
         switchSimulationTerrain(mapData);
-        // Show tutorial prompt once the simulator is visible
         if (tutorial) tutorial.showPrompt();
       }, 500);
     },
-    onToast: (msg) => hud.showToast(msg),
+    onToast: (msg) => safeToast(msg),
   });
-
-  window.marsGlobe = marsGlobe;
   window.dashboardController = dashboardController;
 } catch (err) {
-  console.error('[MarsDashboard] Failed to initialize:', err);
+  console.error('[DashboardController] Failed to initialize:', err);
 }
 
 function switchSimulationTerrain(mapData) {
-  if (!hf || !terrain) return;
   const mapId = typeof mapData === 'string' ? mapData : mapData.id;
   currentSimMapId = mapId;
+
+  if (!hf || !terrain) {
+    pendingSimMap = mapData;
+    console.log('[MarsDashboard] Simulation terrain not ready yet, queued launch for:', mapId);
+    return;
+  }
 
   if (mapId === 'usgs-sim-3470') {
     // 1. Build and apply real Olympus Mons Caldera DEM heights
@@ -89,15 +108,17 @@ function switchSimulationTerrain(mapData) {
       }
     }
 
-    // 3. Disable Jezero regional patches so the real Olympus caldera topography is clean
-    // 3. Disable Jezero regional patches so the real Olympus caldera topography is clean
+    // Keep only markers relevant to the selected map.
     if (regionMarkers) {
-      regionMarkers.setVisible(false);
+      regionMarkers.setMapMode('usgs-sim-3470');
     }
+    if (missionSystem && typeof missionSystem.setMapMode === 'function') {
+      missionSystem.setMapMode('usgs-sim-3470');
+    }
+    safeToast('🌋 Landed at Olympus Mons Caldera (USGS SIM 3470, Summit Elevation +18,100 m)');
     if (jezeroExploration) {
       jezeroExploration.setVisible(false);
     }
-    hud.showToast('🌋 Landed at Olympus Mons Caldera (USGS SIM 3470, Summit Elevation +18,100 m)');
   } else if (mapId === 'usgs-sim-3464') {
     if (originalHeights) {
       hf.data = originalHeights;
@@ -110,7 +131,7 @@ function switchSimulationTerrain(mapData) {
     if (jezeroExploration) {
       jezeroExploration.setVisible(true);
     }
-    hud.showToast('🛸 Landed at Jezero Crater (USGS SIM 3464 — 6 Geological Zones Active)');
+    safeToast('🛸 Landed at Jezero Crater (USGS SIM 3464 — 6 Geological Zones Active)');
   } else {
     // 1. Restore original Valles Marineris / Jezero heights
     if (originalHeights) {
@@ -123,12 +144,15 @@ function switchSimulationTerrain(mapData) {
 
     // 3. Enable regional markers
     if (regionMarkers) {
-      regionMarkers.setVisible(true);
+      regionMarkers.setMapMode('usgs-i-1802-a');
     }
+    if (missionSystem && typeof missionSystem.setMapMode === 'function') {
+      missionSystem.setMapMode('usgs-i-1802-a');
+    }
+    safeToast('🚀 Landed at Valles Marineris & Tharsis (USGS I-1802A)');
     if (jezeroExploration) {
       jezeroExploration.setVisible(false);
     }
-    hud.showToast('🚀 Landed at Valles Marineris & Tharsis (USGS I-1802A)');
   }
 }
 
@@ -327,6 +351,7 @@ async function main() {
     hud.updateWorkflow(missionSystem, swarm.getActiveRover());
   };
 
+  const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 3, 600000);
   // Initialize tutorial (prompt shown later when user clicks Launch 3D Simulation)
   tutorial = new Tutorial();
   tutorial.setMissionSystem(missionSystem);
@@ -373,9 +398,7 @@ async function main() {
   marker.visible = false;
   scene.add(marker);
 
-  const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 3, 600000);
   rig = new CameraRig(camera, renderer.domElement, hf, frame);
-
   // Initialize rover intro cutscene now that camera and rig are ready
   cutscene = new RoverCutscene({
     camera,
@@ -391,6 +414,12 @@ async function main() {
 
   startRovers();
   updateSun();
+
+  if (pendingSimMap) {
+    const pMap = pendingSimMap;
+    pendingSimMap = null;
+    switchSimulationTerrain(pMap);
+  }
 
   document.getElementById('sources').innerHTML = meta.sources.map(s => `<li><b>${s.role}:</b> ${s.file}<br><span>${s.credit}</span></li>`).join('');
   hud.setInspect(null);
