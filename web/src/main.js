@@ -18,11 +18,14 @@ import { HistoryTracker } from './rover/historyTracker.js';
 import { LabBackpackWorkbench } from './ui/labBackpack.js';
 import { MarsGlobe3D } from './marsGlobe.js';
 import { DashboardController } from './ui/dashboardController.js';
+import { Tutorial } from './ui/tutorial.js';
+import { RoverCutscene } from './ui/roverCutscene.js';
 import { getOlympusMonsCalderaHeights } from './terrain/olympusMonsTerrain.js';
 
 let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal, regionMarkers, missionSystem;
 let vpms, vpPanel, historyTracker, labBackpack;
 let marsGlobe, dashboardController;
+let tutorial, cutscene;
 let originalHeights = null;
 let currentSimMapId = 'usgs-i-1802-a';
 
@@ -48,6 +51,8 @@ try {
           if (el) el.style.display = '';
         });
         switchSimulationTerrain(mapData);
+        // Show tutorial prompt once the simulator is visible
+        if (tutorial) tutorial.showPrompt();
       }, 500);
     },
     onToast: (msg) => hud.showToast(msg),
@@ -276,6 +281,10 @@ async function main() {
     hud.updateWorkflow(missionSystem, swarm.getActiveRover());
   };
 
+  // Initialize tutorial (prompt shown later when user clicks Launch 3D Simulation)
+  tutorial = new Tutorial();
+  tutorial.setMissionSystem(missionSystem);
+
   // === Visual Perception & Mission Documentation System ===
   try {
     vpms = new VisualPerceptionSystem(
@@ -320,6 +329,15 @@ async function main() {
 
   const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 3, 600000);
   rig = new CameraRig(camera, renderer.domElement, hf, frame);
+
+  // Initialize rover intro cutscene now that camera and rig are ready
+  cutscene = new RoverCutscene({
+    camera,
+    rig,
+    swarm,
+    onComplete: () => tutorial._start(),
+  });
+  tutorial.onAccepted = () => cutscene.play();
   input = new RoverInput(
     () => rig.mode,
     () => dashboardController && dashboardController.isVisible
@@ -404,6 +422,13 @@ async function main() {
   renderer.setAnimationLoop(() => {
     const dt = Math.min(clock.getDelta(), 0.1);
     fps += (1 / Math.max(dt, 1e-3) - fps) * 0.05;
+
+    // Cutscene takes over camera when active — skip rig update
+    if (cutscene && cutscene.active) {
+      cutscene.tick(dt);
+      renderer.render(scene, camera);
+      return;
+    }
 
     // Update the 3 specialized rovers and their autonomous mission routines
     swarm.update(dt, input.read());
