@@ -5,6 +5,7 @@ export class DashboardController {
     this.onLaunchSimulation = options.onLaunchSimulation || (() => {});
     this.onHelpClick = options.onHelpClick || (() => {});
     this.onToast = options.onToast || ((msg) => console.log(msg));
+    this.onShow = options.onShow || (() => {});
 
     this.root = document.getElementById('dashboard-root');
     this.initOverlay = document.getElementById('dash-init-overlay');
@@ -26,6 +27,9 @@ export class DashboardController {
     if (this.root) {
       this.root.classList.remove('dash-hidden');
       this.root.style.display = 'block';
+    }
+    if (typeof this.onShow === 'function') {
+      this.onShow();
     }
   }
 

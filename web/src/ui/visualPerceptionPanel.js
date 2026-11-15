@@ -33,6 +33,30 @@ export class VisualPerceptionPanel {
     this.#bindVpmsCallback();
   }
 
+  collapse() {
+    if (!this.panelEl) return;
+    const body = this.panelEl.querySelector('.vp-panel-body');
+    const toggleBtn = this.panelEl.querySelector('#vpMinimize');
+    if (body) body.style.display = 'none';
+    if (toggleBtn) toggleBtn.textContent = '+';
+  }
+
+  expand() {
+    if (!this.panelEl) return;
+    const body = this.panelEl.querySelector('.vp-panel-body');
+    const toggleBtn = this.panelEl.querySelector('#vpMinimize');
+    if (body) body.style.display = 'flex';
+    if (toggleBtn) toggleBtn.textContent = '−';
+  }
+
+  hide() {
+    if (this.panelEl) this.panelEl.style.display = 'none';
+  }
+
+  show() {
+    if (this.panelEl) this.panelEl.style.display = '';
+  }
+
   /* ──────────────────────────────────────────────────────────────────────────
      BUILD PANEL DOM
      ────────────────────────────────────────────────────────────────────────── */

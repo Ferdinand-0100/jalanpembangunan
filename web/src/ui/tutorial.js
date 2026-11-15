@@ -56,10 +56,32 @@ export class Tutorial {
 
   /** Call once after the scene is ready. Shows the "Would you like a tutorial?" prompt. */
   showPrompt() {
-    this._promptEl.style.display = 'flex';
+    if (this._promptEl) {
+      this._promptEl.style.display = 'flex';
+    }
   }
 
-  /** Feed the MissionSystem reference so we can poll completion. */
+  hidePrompt() {
+    if (this._promptEl) {
+      this._promptEl.style.display = 'none';
+    }
+  }
+
+  stop() {
+    this.hidePrompt();
+    if (this._stepEl) {
+      this._stepEl.style.display = 'none';
+    }
+    if (this._completeEl) {
+      this._completeEl.style.display = 'none';
+    }
+    if (this._checkInterval) {
+      clearInterval(this._checkInterval);
+      this._checkInterval = null;
+    }
+    this.active = false;
+  }
+
   setMissionSystem(ms) {
     this._missionSystem = ms;
   }
