@@ -201,6 +201,8 @@ export function createRoverModel(opts = {}) {
     { x: 1.25, z: 1.35 },
   ];
 
+  const wheelGroups = [];
+
   for (let i = 0; i < wheelPositions.length; i++) {
     const { x, z } = wheelPositions[i];
     const wheelGroup = new THREE.Group();
@@ -225,6 +227,7 @@ export function createRoverModel(opts = {}) {
       );
     }
     group.add(wheelGroup);
+    wheelGroups.push(wheelGroup);
   }
 
   /* ---------------------------------------------------------
@@ -565,6 +568,7 @@ export function createRoverModel(opts = {}) {
     missionTitle,
     tagSprite: sprite,
     roleHooks,
+    wheelGroups,
   };
 
   return group;
