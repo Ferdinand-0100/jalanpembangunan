@@ -864,14 +864,14 @@ export class Minimap {
     miniEl.innerHTML = `
       <div class="minimap-header">
         <div class="minimap-title-group">
-          <span class="minimap-badge" style="display:flex;align-items:center;gap:5px;">${ICONS.satellite(12)} MINIMAP TAKTIS</span>
+          <span class="minimap-badge" style="display:flex;align-items:center;gap:5px;">${ICONS.satellite(12)} TACTICAL MINIMAP</span>
           <span id="miniActiveRoverName" class="minimap-rover-tag">ROV-01</span>
         </div>
         <div class="minimap-controls">
-          <button id="miniLayerBtn" class="mini-icon-btn" title="Ganti Lapisan Peta (Orto / Topo / Lereng / Hybrid)">${ICONS.layers(11)}</button>
-          <button id="miniZoomInBtn" class="mini-icon-btn" title="Perbesar (Zoom In)">${ICONS.plus(11)}</button>
-          <button id="miniZoomOutBtn" class="mini-icon-btn" title="Perkecil (Zoom Out)">${ICONS.minus(11)}</button>
-          <button id="miniMaximizeBtn" class="mini-icon-btn max-btn" title="Maksimalkan Peta (M)">${ICONS.maximize(11)}</button>
+          <button id="miniLayerBtn" class="mini-icon-btn" title="Switch Map Layer (Ortho / Topo / Slope / Hybrid)">${ICONS.layers(11)}</button>
+          <button id="miniZoomInBtn" class="mini-icon-btn" title="Zoom In">${ICONS.plus(11)}</button>
+          <button id="miniZoomOutBtn" class="mini-icon-btn" title="Zoom Out">${ICONS.minus(11)}</button>
+          <button id="miniMaximizeBtn" class="mini-icon-btn max-btn" title="Maximize Map (M)">${ICONS.maximize(11)}</button>
         </div>
       </div>
       <div id="minimapBody" class="minimap-body">
@@ -897,16 +897,16 @@ export class Minimap {
           <div class="agency-badge">NASA <span>JPL</span></div>
           <div class="map-title-box">
             <h2 class="max-map-title">JEZERO CRATER TACTICAL SURFACE RECONNAISSANCE &amp; MAPPING STATION</h2>
-            <div class="max-map-sub">Cakupan Geografis: 17.6°–19.3° LU, 76.6°–78.3° BT · Resolusi: 40m DEM &amp; 20m CTX Orthomosaic</div>
+            <div class="max-map-sub">Geographic Coverage: 17.6°–19.3° N, 76.6°–78.3° E · Resolution: 40m DEM &amp; 20m CTX Orthomosaic</div>
           </div>
         </div>
 
         <div class="max-header-center">
           <div class="layer-pill-group">
-            <button class="layer-btn active" data-layer="ortho">${ICONS.satellite(12)} Citra Orto CTX</button>
-            <button class="layer-btn" data-layer="dem">${ICONS.mountain(12)} DEM Topografi</button>
-            <button class="layer-btn" data-layer="slope">${ICONS.slope(12)} Kemiringan Lereng</button>
-            <button class="layer-btn" data-layer="hybrid">${ICONS.layers(12)} Orto + Kontur</button>
+            <button class="layer-btn active" data-layer="ortho">${ICONS.satellite(12)} CTX Orthoimage</button>
+            <button class="layer-btn" data-layer="dem">${ICONS.mountain(12)} Topographic DEM</button>
+            <button class="layer-btn" data-layer="slope">${ICONS.slope(12)} Slope Steepness</button>
+            <button class="layer-btn" data-layer="hybrid">${ICONS.layers(12)} Ortho + Contours</button>
           </div>
           <label class="tint-toggle-label">
             <input type="checkbox" id="maxTintCheck" checked> Mars Tone
@@ -915,14 +915,14 @@ export class Minimap {
 
         <div class="max-header-right">
           <div class="overlay-toggles">
-            <label><input type="checkbox" id="chkShowTrails" checked> Jejak Lintasan</label>
-            <label><input type="checkbox" id="chkShowRegions" checked> Wilayah Geologi</label>
-            <label><input type="checkbox" id="chkShowWaypoints" checked> Waypoint Misi</label>
-            <label><input type="checkbox" id="chkShowGrid" checked> Grid Koordinat</label>
+            <label><input type="checkbox" id="chkShowTrails" checked> Travel Trails</label>
+            <label><input type="checkbox" id="chkShowRegions" checked> Geological Formations</label>
+            <label><input type="checkbox" id="chkShowWaypoints" checked> Mission Waypoints</label>
+            <label><input type="checkbox" id="chkShowGrid" checked> Coordinate Grid</label>
           </div>
-          <button id="maxMapFitBtn" class="max-action-btn" title="Lihat Seluruh Area Kawah Jezero (88×101 km)">${ICONS.search(12)} Seluruh Peta</button>
-          <button id="maxMapCenterRoverBtn" class="max-action-btn" title="Pusatkan ke Rover Aktif">${ICONS.crosshair(12)} Pusatkan Rover</button>
-          <button id="maxMapCloseBtn" class="max-close-btn" title="Perkecil / Tutup Peta (M / Esc)">${ICONS.minimize(12)} Perkecil (M)</button>
+          <button id="maxMapFitBtn" class="max-action-btn" title="Fit Entire Jezero Crater Area (88×101 km)">${ICONS.search(12)} Fit Map</button>
+          <button id="maxMapCenterRoverBtn" class="max-action-btn" title="Center on Active Rover">${ICONS.crosshair(12)} Center Rover</button>
+          <button id="maxMapCloseBtn" class="max-close-btn" title="Minimize / Close Map (M / Esc)">${ICONS.minimize(12)} Minimize (M)</button>
         </div>
       </header>
 
@@ -932,11 +932,11 @@ export class Minimap {
 
           <!-- Hover HUD Inspector -->
           <div id="maxHoverHUD" class="max-hover-hud" style="display:none;">
-            <div class="hud-row"><b>KOORDINAT:</b> <span id="hoverLonLat">--</span></div>
-            <div class="hud-row"><b>PROJEKSI X/Y:</b> <span id="hoverProj">--</span></div>
-            <div class="hud-row"><b>ELEVASI REAL DEM:</b> <span id="hoverElev" style="color:var(--data-cyan)">--</span></div>
-            <div class="hud-row"><b>KEMIRINGAN LERENG:</b> <span id="hoverSlope">--</span></div>
-            <div class="hud-row"><b>ZONA GEOLOGI:</b> <span id="hoverRegion" style="color:#ffd166">--</span></div>
+            <div class="hud-row"><b>COORDINATES:</b> <span id="hoverLonLat">--</span></div>
+            <div class="hud-row"><b>PROJECTION X/Y:</b> <span id="hoverProj">--</span></div>
+            <div class="hud-row"><b>REAL DEM ELEVATION:</b> <span id="hoverElev" style="color:var(--data-cyan)">--</span></div>
+            <div class="hud-row"><b>SLOPE STEEPNESS:</b> <span id="hoverSlope">--</span></div>
+            <div class="hud-row"><b>GEOLOGICAL FORMATION:</b> <span id="hoverRegion" style="color:#ffd166">--</span></div>
           </div>
 
           <!-- Floating Zoom Controls -->
@@ -959,8 +959,8 @@ export class Minimap {
           <!-- Click Target Action Pill -->
           <div id="mapTargetActionPill" class="target-action-pill" style="display:none;">
             <span id="targetPillTitle">Target: 77.45°E, 18.44°N</span>
-            <button id="targetSetWaypointBtn" class="pill-act-btn">${ICONS.pin(11)} Tandai Waypoint</button>
-            <button id="targetTeleportCamBtn" class="pill-act-btn">${ICONS.telescope(11)} Lihat di 3D</button>
+            <button id="targetSetWaypointBtn" class="pill-act-btn">${ICONS.pin(11)} Mark Waypoint</button>
+            <button id="targetTeleportCamBtn" class="pill-act-btn">${ICONS.telescope(11)} View in 3D</button>
             <button id="targetClosePillBtn" class="pill-close-btn">${ICONS.x(11)}</button>
           </div>
         </div>
@@ -969,19 +969,19 @@ export class Minimap {
         <aside class="max-map-sidebar">
           <!-- Section 1: Rover Swarm Telemetry -->
           <div class="side-card">
-            <div class="side-card-title">SWARM ROVER TELEMETRI (3 UNIT)</div>
+            <div class="side-card-title">SWARM ROVER TELEMETRY (3 UNITS)</div>
             <div id="sidebarRoverCards" class="sidebar-rover-list"></div>
           </div>
 
           <!-- Section 2: 6 Geological Regions Fast-Travel -->
           <div class="side-card">
-            <div class="side-card-title">6 FORMASI &amp; WILAYAH GEOLOGI</div>
+            <div class="side-card-title">6 GEOLOGICAL FORMATIONS &amp; REGIONS</div>
             <div class="sidebar-regions-list" id="sidebarRegionList"></div>
           </div>
 
           <!-- Section 3: Legend & Hazards -->
           <div class="side-card">
-            <div class="side-card-title">LEGENDA ELEVASI &amp; BAHAYA LERENG</div>
+            <div class="side-card-title">ELEVATION &amp; SLOPE HAZARD LEGEND</div>
             <div class="elevation-legend-bar">
               <div class="legend-gradient"></div>
               <div class="legend-labels">
@@ -992,28 +992,28 @@ export class Minimap {
               </div>
             </div>
             <div class="slope-legend-scale">
-              <div class="slope-pill safe">■ &lt;6° Aman</div>
-              <div class="slope-pill mild">■ 6°-12° Landai</div>
-              <div class="slope-pill caution">■ 12°-18° Waspada</div>
-              <div class="slope-pill hazard">■ &gt;18° Bahaya</div>
+              <div class="slope-pill safe">■ &lt;6° Safe</div>
+              <div class="slope-pill mild">■ 6°-12° Mild</div>
+              <div class="slope-pill caution">■ 12°-18° Caution</div>
+              <div class="slope-pill hazard">■ &gt;18° Hazard</div>
             </div>
           </div>
 
           <!-- Section 4: Mission Objects -->
           <div class="side-card">
-            <div class="side-card-title">OBJEK &amp; STASIUN MISI</div>
+            <div class="side-card-title">MISSION OBJECTS &amp; STATIONS</div>
             <div id="sidebarMissionObjects" class="mission-objects-box">
               <div class="m-obj-item">
-                <span style="display:flex;align-items:center;gap:5px;">${ICONS.pin(11)} Sampel Geologi Terkini</span>
-                <span id="sideSampleStatus" style="color:#64748b">Belum Ada</span>
+                <span style="display:flex;align-items:center;gap:5px;">${ICONS.pin(11)} Current Geological Sample</span>
+                <span id="sideSampleStatus" style="color:#64748b">None</span>
               </div>
               <div class="m-obj-item">
-                <span style="display:flex;align-items:center;gap:5px;">${ICONS.microscope(11)} Stasiun Lab Sains</span>
-                <span id="sideLabStatus" style="color:#64748b">Belum Dibangun</span>
+                <span style="display:flex;align-items:center;gap:5px;">${ICONS.microscope(11)} Science Lab Station</span>
+                <span id="sideLabStatus" style="color:#64748b">Not Built</span>
               </div>
               <div class="m-obj-item">
-                <span style="display:flex;align-items:center;gap:5px;">${ICONS.truck(11)} Status Kargo Hermes</span>
-                <span id="sideCargoStatus" style="color:#64748b">Kosong</span>
+                <span style="display:flex;align-items:center;gap:5px;">${ICONS.truck(11)} Hermes Cargo Status</span>
+                <span id="sideCargoStatus" style="color:#64748b">Empty</span>
               </div>
             </div>
           </div>
@@ -1223,7 +1223,7 @@ export class Minimap {
           { X: this.selectedTarget.X, Y: this.selectedTarget.Y },
           this.selectedTarget.regionId
         );
-        if (this.hud) this.hud.showToast(`Waypoint Misi Ditetapkan pada ${this.selectedTarget.lon.toFixed(4)}°E, ${this.selectedTarget.lat.toFixed(4)}°N`);
+        if (this.hud) this.hud.showToast(`Mission Waypoint Set at ${this.selectedTarget.lon.toFixed(4)}°E, ${this.selectedTarget.lat.toFixed(4)}°N`);
         const p = $('mapTargetActionPill');
         if (p) p.style.display = 'none';
       }
@@ -1233,7 +1233,7 @@ export class Minimap {
         const w = this.frame.toWorld(this.selectedTarget.X, this.selectedTarget.Y, this.selectedTarget.elev);
         this.rig.controls.target.set(w.x, w.y, w.z);
         this.toggleMaximize(false);
-        if (this.hud) this.hud.showToast(`Kamera 3D Diarahkan ke Titik Pilihan`);
+        if (this.hud) this.hud.showToast(`3D Camera Directed to Selected Target`);
       }
     });
 
@@ -1275,7 +1275,7 @@ export class Minimap {
       modal.style.display = this.isMaximized ? 'flex' : 'none';
       if (this.isMaximized) {
         this.centerOnActiveRover();
-        if (this.hud) this.hud.showToast('Peta Taktis Kawah Jezero Dimaksimalkan');
+        if (this.hud) this.hud.showToast('Jezero Crater Tactical Map Maximized');
       }
     }
   }
@@ -1384,7 +1384,7 @@ export class Minimap {
     const slope = this.hf.slopeDeg(pX, pY);
 
     // Identify Region
-    let regName = 'Kawah Jezero (Delta & Basin)';
+    let regName = 'Jezero Crater (Delta & Basin)';
     if (this.regionMarkers && this.regionMarkers.markers) {
       for (const m of this.regionMarkers.markers) {
         const d = Math.hypot(pX - m.projX, pY - m.projY);
@@ -1400,7 +1400,7 @@ export class Minimap {
     document.getElementById('hoverLonLat').textContent = `${lon.toFixed(4)}°E, ${lat.toFixed(4)}°N`;
     document.getElementById('hoverProj').textContent = `X:${Math.round(pX)} Y:${Math.round(pY)}`;
     document.getElementById('hoverElev').textContent = `${elev.toFixed(1)} m`;
-    document.getElementById('hoverSlope').textContent = `${slope.toFixed(1)}° (${slope < 12 ? 'Traversable' : 'Terjal'})`;
+    document.getElementById('hoverSlope').textContent = `${slope.toFixed(1)}° (${slope < 12 ? 'Traversable' : 'Steep'})`;
     document.getElementById('hoverRegion').textContent = regName;
 
     this.hoverPos = { pX, pY, mouseX, mouseY };
@@ -1423,7 +1423,7 @@ export class Minimap {
     pill.style.display = 'flex';
     pill.style.left = `${mouseX}px`;
     pill.style.top = `${mouseY}px`;
-    document.getElementById('targetPillTitle').textContent = `Koordinat: ${lon.toFixed(4)}°E, ${lat.toFixed(4)}°N`;
+    document.getElementById('targetPillTitle').textContent = `Coordinates: ${lon.toFixed(4)}°E, ${lat.toFixed(4)}°N`;
   }
 
   /* ------------------------------------------------------------------ */
@@ -1900,7 +1900,7 @@ export class Minimap {
       ctx.font = '700 9.5px "JetBrains Mono", monospace';
       ctx.fillStyle = '#ffd166';
       ctx.textAlign = 'center';
-      ctx.fillText('● SAMPEL', x, y - (isMini ? 8 : 12));
+      ctx.fillText('● SAMPLE', x, y - (isMini ? 8 : 12));
       ctx.restore();
     }
 
@@ -2057,10 +2057,10 @@ export class Minimap {
           <div class="src-meta">
             <span class="src-callsign" style="color:${r.accentHex || '#00e5ff'}">${r.callsign || ('ROV-0' + (i+1))} · ${r.name || 'Rover'}</span>
             <span class="src-coords">${lon.toFixed(4)}°E, ${lat.toFixed(4)}°N · Elv: ${Math.round(p.elevation ?? 0)}m</span>
-            <span style="font-size:8.5px;color:#64748b;">Spd: ${(p.speed ?? 0).toFixed(1)} m/s · Jarak: ${dist} m</span>
+            <span style="font-size:8.5px;color:#64748b;">Spd: ${(p.speed ?? 0).toFixed(1)} m/s · Dist: ${dist} m</span>
           </div>
           <button class="src-btn focus-rover-btn" data-idx="${i}" style="display:inline-flex;align-items:center;gap:4px;">
-            <span>Fokus</span>
+            <span>Focus</span>
             ${ICONS.crosshair(11)}
           </button>
         </div>
@@ -2081,30 +2081,30 @@ export class Minimap {
       const sSample = document.getElementById('sideSampleStatus');
       if (sSample) {
         if (this.missionSystem.activeWaypoint) {
-          sSample.innerHTML = `${ICONS.pin(11)} <span>Waypoint Ditetapkan</span>`;
+          sSample.innerHTML = `${ICONS.pin(11)} <span>Waypoint Set</span>`;
           sSample.style.color = '#f59e0b';
         } else {
-          sSample.textContent = 'Belum Ada';
+          sSample.textContent = 'None';
           sSample.style.color = '#64748b';
         }
       }
       const sLab = document.getElementById('sideLabStatus');
       if (sLab) {
         if (this.missionSystem.labStation) {
-          sLab.innerHTML = `${ICONS.microscope(11)} <span>Aktif Beroperasi</span>`;
+          sLab.innerHTML = `${ICONS.microscope(11)} <span>Operational</span>`;
           sLab.style.color = '#10b981';
         } else {
-          sLab.textContent = 'Belum Dibangun';
+          sLab.textContent = 'Not Built';
           sLab.style.color = '#64748b';
         }
       }
       const sCargo = document.getElementById('sideCargoStatus');
       if (sCargo) {
         if (this.missionSystem.transportCargo) {
-          sCargo.innerHTML = `${ICONS.package(11)} <span>Membawa Sampel</span>`;
+          sCargo.innerHTML = `${ICONS.package(11)} <span>Carrying Sample</span>`;
           sCargo.style.color = '#00e5ff';
         } else {
-          sCargo.textContent = 'Kosong';
+          sCargo.textContent = 'Empty';
           sCargo.style.color = '#64748b';
         }
       }

@@ -19,7 +19,7 @@ export const SWARM_ROBOTS = [
     accent: 0x00d4ff, // Cyan
     accentHex: '#00d4ff',
     startOffset: [0, 0],
-    description: 'Eksplorasi awal, pemetaan topografi medan, pencarian wilayah baru & rute aman.',
+    description: 'Initial exploration, terrain topographic mapping, scouting new areas & safe routes.',
     equipment: 'LiDAR 360°, Phased Radar, Solar Arrays',
   },
   {
@@ -32,7 +32,7 @@ export const SWARM_ROBOTS = [
     accent: 0xff3b5c, // Crimson
     accentHex: '#ff3b5c',
     startOffset: [32, -22],
-    description: 'Investigasi geologi, analisis mineral batuan, pengeboran sampel inti & laser Raman.',
+    description: 'Geological investigation, rock mineral analysis, core sample drilling & Raman laser.',
     equipment: 'Heavy Core Drill, SuperCam Raman Laser, Sample Drum',
   },
   {
@@ -45,7 +45,7 @@ export const SWARM_ROBOTS = [
     accent: 0x00ff88, // Emerald Green
     accentHex: '#00ff88',
     startOffset: [-32, -32],
-    description: 'Spesialis transportasi misi, penampungan tabung sampel (caching) & relay komunikasi orbiter.',
+    description: 'Mission transport specialist, sample tube caching & orbiter communication relay.',
     equipment: '10-Slot Cache Rack, Orbital High-Gain Relay, Heavy Chassis',
   },
 ];
@@ -159,7 +159,7 @@ export class RoverSwarm {
   setSwarmMode(mode) {
     if (['autonomous', 'formation', 'hold'].includes(mode)) {
       this.swarmMode = mode;
-      this.onMissionLog(`Mode Swarm diubah ke: ${mode.toUpperCase()}`);
+      this.onMissionLog(`Swarm mode changed to: ${mode.toUpperCase()}`);
     }
   }
 
@@ -171,20 +171,20 @@ export class RoverSwarm {
     if (active.role === ROVER_ROLES.SURFACE_MAPPING) {
       active.agent.mappedKm2 += 0.25;
       active.agent.waypointsFound++;
-      this.onMissionLog(`[Ares Mapper] Memetakan sektor: ${active.agent.targetFeature} (+0.25 km²)!`);
+      this.onMissionLog(`[Ares Mapper] Mapping sector: ${active.agent.targetFeature} (+0.25 km²)!`);
     } else if (active.role === ROVER_ROLES.GEOLOGICAL_INVESTIGATION) {
       active.agent.startManualDrill();
-      this.onMissionLog(`[GeoLab] Pengeboran dimulai pada: ${active.agent.currentRock.name} (Laser Raman aktif)`);
+      this.onMissionLog(`[GeoLab] Drilling started on: ${active.agent.currentRock.name} (Raman Laser active)`);
     } else if (active.role === ROVER_ROLES.TRANSPORT_SUPPORT) {
       const geoRover = this.rovers[1];
       if (geoRover && geoRover.agent.samplesSealed > active.agent.tubesCached) {
         active.agent.cacheSample();
         this.#updateTubeVisuals();
-        this.onMissionLog(`[Hermes Transport] Sampel baru berhasil diambil & disimpan! Slot: ${active.agent.tubesCached}/10`);
+        this.onMissionLog(`[Hermes Transport] New sample successfully collected & cached! Slot: ${active.agent.tubesCached}/10`);
       } else {
         active.agent.cacheSample();
         this.#updateTubeVisuals();
-        this.onMissionLog(`[Hermes Transport] Menyimpan tabung cadangan ke rak logistik! Slot: ${active.agent.tubesCached}/10`);
+        this.onMissionLog(`[Hermes Transport] Storing reserve tube to logistics rack! Slot: ${active.agent.tubesCached}/10`);
       }
     }
   }

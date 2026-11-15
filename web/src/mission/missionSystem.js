@@ -29,80 +29,80 @@ export const REGION_SCIENCE_DATA = {
   elysium: {
     id: 'elysium',
     name: 'Elysium',
-    stateOfMatter: 'solid', // Benda Padat -> Diambil dengan CAPIT (Claw)
-    artifactName: 'Kristal Inti Magma (Magma Core Crystal)',
-    rockType: 'Lava Basaltik & Kaldera Vulkanik',
-    mineral: 'Olivin Basaltik & Silikat Magmatik',
+    stateOfMatter: 'solid',
+    artifactName: 'Magma Core Crystal',
+    rockType: 'Basaltic Lava & Volcanic Caldera',
+    mineral: 'Basaltic Olivine & Magmatic Silicates',
     color: 0xff5500,
     offsetX: -8000,
     offsetY: 6000,
-    significance: 'Bukti aktivitas vulkanisme termuda di Mars.',
-    analysisResult: 'Komposisi: 52% Basalt, 28% Piroksen, 14% Olivin, 6% Magnetit. Suhu pendinginan magma terkonfirmasi!',
+    significance: 'Evidence of the youngest volcanism on Mars.',
+    analysisResult: 'Composition: 52% Basalt, 28% Pyroxene, 14% Olivine, 6% Magnetite. Magma cooling temperature confirmed!',
   },
   syrtis: {
     id: 'syrtis',
     name: 'Syrtis Major Planum',
-    stateOfMatter: 'solid', // Benda Padat -> Diambil dengan CAPIT (Claw)
-    artifactName: 'Permata Mantel Olivin (Mantle Peridotite Gem)',
-    rockType: 'Perisai Lava Basalt Gelap',
-    mineral: 'Plagioklas Kalsik & Piroksen Besi',
+    stateOfMatter: 'solid',
+    artifactName: 'Mantle Peridotite Gem',
+    rockType: 'Dark Basaltic Lava Shield',
+    mineral: 'Calcic Plagioclase & Iron Pyroxene',
     color: 0x00ff88,
     offsetX: -6000,
     offsetY: -7000,
-    significance: 'Stratigrafi evolusi mantel purba Mars.',
-    analysisResult: 'Komposisi: 60% Plagioklas, 24% Klinopiroksen, 11% Ilmenit. Albedo gelap berasal dari kristalisasi lava murni!',
+    significance: 'Stratigraphy of ancient Martian mantle evolution.',
+    analysisResult: 'Composition: 60% Plagioclase, 24% Clinopyroxene, 11% Ilmenite. Dark albedo originates from pure crystalline lava!',
   },
   acidalia: {
     id: 'acidalia',
     name: 'Acidalia Planitia',
-    stateOfMatter: 'liquid', // Benda Cair -> Diambil dengan SEROK (Liquid Scoop)
-    artifactName: 'Fluida Akuifer Hidrotermal (Hydrothermal Brine Liquid)',
-    rockType: 'Reservoir Fluida Danau & Mata Air Hidrotermal',
-    mineral: 'Larutan Garam Sulfat, Smektit & Air Purba',
+    stateOfMatter: 'liquid',
+    artifactName: 'Hydrothermal Brine Liquid',
+    rockType: 'Lacustrine Fluid Reservoir & Hydrothermal Springs',
+    mineral: 'Sulfate Salt Solution, Smectite & Ancient Water',
     color: 0x00d4ff,
     offsetX: -8000,
     offsetY: 6000,
-    significance: 'Bukti cairan fluida hidrotermal bawah permukaan masa lampau.',
-    analysisResult: 'Komposisi: 74% Air Larutan Garam Mg-Sulfat, 18% Asam Silikat Terlarut, 8% Klorida. Fluida cair purba terbukti!',
+    significance: 'Evidence of past subsurface hydrothermal fluid circulation.',
+    analysisResult: 'Composition: 74% Dissolved Mg-Sulfate Brine, 18% Dissolved Silicic Acid, 8% Chlorides. Ancient liquid fluid proven!',
   },
   arabia: {
     id: 'arabia',
     name: 'Arabia Terra',
-    stateOfMatter: 'solid', // Benda Padat -> Diambil dengan CAPIT (Claw)
-    artifactName: 'Meteorit Logam Chondrite (Metallic Chondrite)',
-    rockType: 'Breksia Kawah Tumbukan Kuno',
-    mineral: 'Kerak Noachian Primitif & Logam Asteroid',
+    stateOfMatter: 'solid',
+    artifactName: 'Metallic Chondrite Meteorite',
+    rockType: 'Ancient Impact Crater Breccia',
+    mineral: 'Primitive Noachian Crust & Asteroidal Metals',
     color: 0xffb74d,
     offsetX: 6000,
     offsetY: 8000,
-    significance: 'Lapisan kerak tertua Mars berusia > 4,1 miliar tahun.',
-    analysisResult: 'Komposisi: 68% Breksia Impak, 19% Felsik, 10% Zirkon, 3% Nikel Murni. Berusia 4,12 miliar tahun!',
+    significance: 'Oldest Martian crustal layer dating back > 4.1 billion years.',
+    analysisResult: 'Composition: 68% Impact Breccia, 19% Felsic, 10% Zircon, 3% Pure Nickel. Dated at 4.12 billion years!',
   },
   isidis: {
     id: 'isidis',
     name: 'Isidis Planitia',
-    stateOfMatter: 'solid', // Benda Padat -> Diambil dengan CAPIT (Claw)
-    artifactName: 'Kaca Benturan Kosmik (Impactite Tektite Glass)',
-    rockType: 'Ejecta Tumbukan Asteroid Raksasa',
-    mineral: 'Impactite & Magnesit Karbonat',
+    stateOfMatter: 'solid',
+    artifactName: 'Impactite Tektite Glass',
+    rockType: 'Giant Asteroid Impact Ejecta',
+    mineral: 'Impactite & Magnesite Carbonate',
     color: 0xef5350,
     offsetX: 10000,
     offsetY: -2000,
-    significance: 'Material lontaran mantel dalam akibat benturan kosmik.',
-    analysisResult: 'Komposisi: 48% Karbonat Magnesit, 35% Shocked Quartz, 12% Nikel-Besi. Terbentuk dari impak asteroid 1.500 km!',
+    significance: 'Deep mantle ejecta excavated by cosmic impact.',
+    analysisResult: 'Composition: 48% Magnesite Carbonate, 35% Shocked Quartz, 12% Nickel-Iron. Formed by 1,500 km asteroid impact!',
   },
   hesperia: {
     id: 'hesperia',
     name: 'Hesperia Planum',
     stateOfMatter: 'liquid',
-    artifactName: 'Fluida Geotermal Celah Pematang (Liquid Geothermal Brine)',
-    rockType: 'Kolam Fluida Mineral Geotermal Celah Tektonik',
-    mineral: 'Fluida Kaya Besi, Sulfida & Zeolit Terlarut',
+    artifactName: 'Wrinkle Ridge Geothermal Brine',
+    rockType: 'Tectonic Ridge Thermal Fluid Pool',
+    mineral: 'Iron-Rich Fluid, Dissolved Sulfides & Zeolites',
     color: 0x66bb6a,
     offsetX: 3000,
     offsetY: -10000,
-    significance: 'Penanda sirkulasi fluida geotermal pasca-kompresi tektonik global.',
-    analysisResult: 'Komposisi: 62% Larutan Besi-Sulfat, 22% Zeolit Koloid, 16% Senyawa Karbonat. Sumber geotermal aktif!',
+    significance: 'Marker of post-compression global tectonic geothermal fluid circulation.',
+    analysisResult: 'Composition: 62% Iron-Sulfate Solution, 22% Colloidal Zeolites, 16% Carbonates. Active geothermal source!',
   },
 };
 
@@ -111,92 +111,92 @@ export const OLYMPUS_SCIENCE_DATA = {
     id: 'zeus_patera',
     name: 'Zeus Patera',
     stateOfMatter: 'solid',
-    artifactName: 'Breksia Sesar Graben (Graben Fault Breccia)',
-    rockType: 'Basalt Tholeiitik & Sesar Peregangan Kaldera',
-    mineral: 'Plagioklas Terdialas, Piroksen & Oksida Besi',
+    artifactName: 'Graben Fault Breccia',
+    rockType: 'Tholeiitic Basalt & Caldera Extensional Faults',
+    mineral: 'Diallage Plagioclase, Pyroxene & Iron Oxides',
     color: 0xffb74d,
     offsetX: -2000,
     offsetY: 4000,
-    significance: 'Bukti peregangan tektonik ekstensional lantai kaldera tertua di Olympus Mons.',
-    analysisResult: 'Komposisi: 58% Tholeiitic Basalt, 26% Plagioklas Terdialas, 16% Oksida Besi. Sesar graben berarah Barat Laut-Tenggara terkonfirmasi!',
+    significance: 'Evidence of extensional tectonic rifting on the oldest caldera floor of Olympus Mons.',
+    analysisResult: 'Composition: 58% Tholeiitic Basalt, 26% Diallage Plagioclase, 16% Iron Oxides. NW-SE trending graben fault confirmed!',
   },
   hera_patera: {
     id: 'hera_patera',
     name: 'Hera Patera',
     stateOfMatter: 'solid',
-    artifactName: 'Fragmen Basal Busur Tebing (Arcuate Scarp Basalt)',
-    rockType: 'Dinding Sesar Runtuhan Kaldera Barat',
-    mineral: 'Piroksen Kalsik, Olivin Kuno & Ilmenit',
+    artifactName: 'Arcuate Scarp Basalt Fragment',
+    rockType: 'Western Caldera Normal Fault Scarp Wall',
+    mineral: 'Calcic Pyroxene, Ancient Olivine & Ilmenite',
     color: 0xff7043,
     offsetX: -17500,
     offsetY: 1500,
-    significance: 'Bukti episode keruntuhan bertahap dinding kaldera sisi barat sedalam 2,7 km.',
-    analysisResult: 'Komposisi: 64% Pyroxene, 22% Olivin Kuno, 14% Ilmenit. Jejak geseran sesar normal terverifikasi!',
+    significance: 'Evidence of stepwise 2.7 km collapse episodes on the western caldera wall.',
+    analysisResult: 'Composition: 64% Pyroxene, 22% Ancient Olivine, 14% Ilmenite. Normal fault shear slickensides verified!',
   },
   hermes_patera: {
     id: 'hermes_patera',
     name: 'Hermes Patera',
     stateOfMatter: 'solid',
-    artifactName: 'Pahoehoe Pematang Busur (Ridge Arch Crust)',
-    rockType: 'Kerak Lava Melengkung Deformasi Tektonik',
-    mineral: 'Basalt Kaca Vulkanik, Anorthite & Magnetit',
+    artifactName: 'Ridge Arch Pahoehoe Crust',
+    rockType: 'Tectonically Deformed Curved Lava Crust',
+    mineral: 'Glassy Basalt, Anorthite & Magnetite',
     color: 0xab47bc,
     offsetX: 4000,
     offsetY: -6000,
-    significance: 'Struktur ridge arches dan wrinkle ridges akibat deformasi lava di bawah kerak beku.',
-    analysisResult: 'Komposisi: 48% Glassy Basalt, 34% Anorthite, 18% Vesikular Magnetit. Deformasi kompresi lava danau terbukti!',
+    significance: 'Ridge arch and wrinkle ridge morphology from lava deformation beneath frozen crust.',
+    analysisResult: 'Composition: 48% Glassy Basalt, 34% Anorthite, 18% Vesicular Magnetite. Compressional deformation in lava lake proven!',
   },
   dionysus_patera: {
     id: 'dionysus_patera',
     name: 'Dionysus Patera',
     stateOfMatter: 'liquid',
-    artifactName: 'Kondensat Gas Fumarol (Fumarolic Sulfur Brine)',
-    rockType: 'Fluida Hidrotermal & Sublimat Belerang Vulkanik',
-    mineral: 'Larutan Belerang-Klorida & Sulfat Besi Terlarut',
+    artifactName: 'Fumarolic Sulfur Condensate Brine',
+    rockType: 'Hydrothermal Fluid & Volcanic Sulfur Sublimates',
+    mineral: 'Sulfur-Chloride Solution & Dissolved Iron Sulfate',
     color: 0x4fc3f7,
     offsetX: -3500,
     offsetY: -9000,
-    significance: 'Aktivitas sisa gas fumarol dasar cekungan Dionysus yang terhubung dengan Hermes.',
-    analysisResult: 'Komposisi: 68% Larutan Sulfur-Klorida, 20% Asam Sulfat Encer, 12% Silika Koloid. Sisa aktivitas volatil terdeteksi!',
+    significance: 'Residual fumarolic gas activity at the base of Dionysus basin connected to Hermes.',
+    analysisResult: 'Composition: 68% Sulfur-Chloride Solution, 20% Dilute Sulfuric Acid, 12% Colloidal Silica. Residual volatile activity detected!',
   },
   athena_patera: {
     id: 'athena_patera',
     name: 'Athena Patera',
     stateOfMatter: 'solid',
-    artifactName: 'Basal Pikrit Kaldera Bulat (Picritic Basalt)',
-    rockType: 'Lava Basaltik Primitif Kaldera Melingkar',
-    mineral: 'Forsteritik Olivin, Diopside & Kromit',
+    artifactName: 'Picritic Basalt of Circular Caldera',
+    rockType: 'Primitive Basaltic Lava of Circular Caldera',
+    mineral: 'Forsteritic Olivine, Diopside & Chromite',
     color: 0x66bb6a,
     offsetX: 14500,
     offsetY: 12500,
-    significance: 'Lava primer mantel dalam dari episode erupsi independen magma chamber timur laut.',
-    analysisResult: 'Komposisi: 54% Forsteritic Olivine, 32% Diopside, 14% Kromit. Magma primitif tanpa diferensiasi lanjut!',
+    significance: 'Primary deep-mantle lava from an independent northeast magma chamber eruption.',
+    analysisResult: 'Composition: 54% Forsteritic Olivine, 32% Diopside, 14% Chromite. Primitive undifferentiated magma!',
   },
   apollo_patera: {
     id: 'apollo_patera',
     name: 'Apollo Patera',
     stateOfMatter: 'solid',
-    artifactName: 'Vitrofir Danau Lava Apollo (Chilled Vitrophyre)',
-    rockType: 'Kaca Vulkanik Pembekuan Super-Cepat',
-    mineral: 'Silikat Amorf Kaca, Mikrokristalin Feldspar',
+    artifactName: 'Apollo Chilled Vitrophyre',
+    rockType: 'Rapidly Quenched Volcanic Glass',
+    mineral: 'Amorphous Silicate Glass, Microcrystalline Feldspar',
     color: 0xef5350,
     offsetX: -14000,
     offsetY: -12500,
-    significance: 'Batuan kaca vulkanik sebelum permukaan tertimbun selimut lontaran Pangboche.',
-    analysisResult: 'Komposisi: 72% Amorphous Silicate Glass, 18% Mikrokristalin Feldspar, 10% Oksida Besi. Laju pendinginan ekstrem!',
+    significance: 'Volcanic glass rock prior to burial under Pangboche crater ejecta blanket.',
+    analysisResult: 'Composition: 72% Amorphous Silicate Glass, 18% Microcrystalline Feldspar, 10% Iron Oxide. Extreme cooling rate!',
   },
   pangboche_crater: {
     id: 'pangboche_crater',
     name: 'Pangboche Crater',
     stateOfMatter: 'solid',
-    artifactName: 'Kaca Impak Ejecta Pangboche (Pangboche Impactite Glass)',
-    rockType: 'Ejecta Tumbukan Asteroid 10,4 km & Shocked Mineral',
-    mineral: 'Shocked Quartz, Plagioklas Terdialas, Nikel-Iridium',
+    artifactName: 'Pangboche Impactite Ejecta Glass',
+    rockType: '10.4 km Asteroid Impact Ejecta & Shocked Minerals',
+    mineral: 'Shocked Quartz, Shocked Plagioclase, Nickel-Iridium',
     color: 0xffffff,
     offsetX: -9500,
     offsetY: -11500,
-    significance: 'Material lontaran kawah tumbukan 10,4 km termuda yang menutupi lantai Apollo & Dionysus, membuktikan urutan umur relatif.',
-    analysisResult: 'Komposisi: 45% Shocked Quartz & Plagioclase, 38% Impact Melt Glass, 17% Nikel-Iridium Asteroid. Bukti tumbukan kosmik pasca-kaldera!',
+    significance: 'Ejecta blanket from youngest 10.4 km crater covering Apollo & Dionysus, proving relative age sequence.',
+    analysisResult: 'Composition: 45% Shocked Quartz & Plagioclase, 38% Impact Melt Glass, 17% Asteroidal Nickel-Iridium. Post-caldera cosmic impact confirmed!',
   },
 };
 
@@ -233,13 +233,13 @@ export class MissionSystem {
 
     // Quest Checklist
     this.quests = [
-      { id: 'build_lab', title: 'Bangun Stasiun Lab Sains (GeoLab)', completed: false },
-      { id: 'radar_pickup', title: 'Radar Hermes Deteksi & Ambil Benda Unik', completed: false },
-      { id: 'deliver_lab', title: 'Hermes Kirim Kontainer ke Stasiun Lab', completed: false },
-      { id: 'elysium_sample', title: 'Riset Kristal Magma Elysium', completed: false },
-      { id: 'acidalia_sample', title: 'Riset Es Hidrotermal Acidalia', completed: false },
-      { id: 'arabia_sample', title: 'Riset Meteorit Logam Arabia', completed: false },
-      { id: 'isidis_sample', title: 'Riset Kaca Tektite Isidis', completed: false },
+      { id: 'build_lab', title: 'Build Science Lab Station (GeoLab)', completed: false },
+      { id: 'radar_pickup', title: 'Hermes Radar Detects & Picks Up Unique Object', completed: false },
+      { id: 'deliver_lab', title: 'Hermes Delivers Container to Lab Station', completed: false },
+      { id: 'elysium_sample', title: 'Research Elysium Magma Crystal', completed: false },
+      { id: 'acidalia_sample', title: 'Research Acidalia Hydrothermal Ice', completed: false },
+      { id: 'arabia_sample', title: 'Research Arabia Metal Meteorite', completed: false },
+      { id: 'isidis_sample', title: 'Research Isidis Tektite Glass', completed: false },
     ];
 
     // Notification callbacks
@@ -259,23 +259,23 @@ export class MissionSystem {
     this.artifacts = [];
     if (mapId === 'usgs-sim-3470') {
       this.quests = [
-        { id: 'build_lab', title: 'Bangun Stasiun Lab Sains (GeoLab)', completed: false },
-        { id: 'radar_pickup', title: 'Radar Hermes Deteksi & Ambil Benda Unik', completed: false },
-        { id: 'deliver_lab', title: 'Hermes Kirim Kontainer ke Stasiun Lab', completed: false },
-        { id: 'zeus_sample', title: 'Riset Breksia Sesar Graben Zeus Patera', completed: false },
-        { id: 'pangboche_sample', title: 'Riset Kaca Impak Ejecta Kawah Pangboche', completed: false },
-        { id: 'dionysus_sample', title: 'Riset Fluida Belerang Fumarol Dionysus', completed: false },
-        { id: 'athena_sample', title: 'Riset Basal Pikrit Kaldera Bulat Athena', completed: false },
+        { id: 'build_lab', title: 'Build Science Lab Station (GeoLab)', completed: false },
+        { id: 'radar_pickup', title: 'Hermes Radar Detects & Picks Up Unique Object', completed: false },
+        { id: 'deliver_lab', title: 'Hermes Delivers Container to Lab Station', completed: false },
+        { id: 'zeus_sample', title: 'Research Zeus Patera Graben Fault Breccia', completed: false },
+        { id: 'pangboche_sample', title: 'Research Pangboche Crater Ejecta Impactite', completed: false },
+        { id: 'dionysus_sample', title: 'Research Dionysus Fumarolic Sulfur Fluid', completed: false },
+        { id: 'athena_sample', title: 'Research Athena Circular Caldera Picritic Basalt', completed: false },
       ];
     } else {
       this.quests = [
-        { id: 'build_lab', title: 'Bangun Stasiun Lab Sains (GeoLab)', completed: false },
-        { id: 'radar_pickup', title: 'Radar Hermes Deteksi & Ambil Benda Unik', completed: false },
-        { id: 'deliver_lab', title: 'Hermes Kirim Kontainer ke Stasiun Lab', completed: false },
-        { id: 'elysium_sample', title: 'Riset Kristal Magma Elysium', completed: false },
-        { id: 'acidalia_sample', title: 'Riset Es Hidrotermal Acidalia', completed: false },
-        { id: 'arabia_sample', title: 'Riset Meteorit Logam Arabia', completed: false },
-        { id: 'isidis_sample', title: 'Riset Kaca Tektite Isidis', completed: false },
+        { id: 'build_lab', title: 'Build Science Lab Station (GeoLab)', completed: false },
+        { id: 'radar_pickup', title: 'Hermes Radar Detects & Picks Up Unique Object', completed: false },
+        { id: 'deliver_lab', title: 'Hermes Delivers Container to Lab Station', completed: false },
+        { id: 'elysium_sample', title: 'Research Elysium Magma Crystal', completed: false },
+        { id: 'acidalia_sample', title: 'Research Acidalia Hydrothermal Ice', completed: false },
+        { id: 'arabia_sample', title: 'Research Arabia Metal Meteorite', completed: false },
+        { id: 'isidis_sample', title: 'Research Isidis Tektite Glass', completed: false },
       ];
     }
     this.#initUniqueArtifacts();
@@ -329,7 +329,7 @@ export class MissionSystem {
       group.add(beam);
 
       // Label Billboard Melayang
-      const matterTag = data.stateOfMatter === 'solid' ? '[PADAT]' : '[CAIR]';
+      const matterTag = data.stateOfMatter === 'solid' ? '[SOLID]' : '[LIQUID]';
       const label = this.#createFloatingLabel(`${matterTag} ${data.artifactName}`, '#' + new THREE.Color(data.color).getHexString());
       label.position.y = 195;
       group.add(label);
@@ -607,29 +607,29 @@ export class MissionSystem {
     const w = this.frame.toWorld(X, Y, elev);
 
     const regionInfo = REGION_SCIENCE_DATA[currentRegionId] || {
-      name: 'Singkapan Kawah Jezero',
-      mineral: 'Batuan Sedimen Karbonat & Lempung Smektit',
-      artifactName: 'Batuan Sedimen Karbonat Delta (Benda Menonjol)',
-      analysisResult: 'Kaya akan lempung smektit berpotensi mengawetkan biosignature purba Mars!',
+      name: 'Jezero Crater Outcrop',
+      mineral: 'Carbonate Sedimentary Rock & Smectite Clay',
+      artifactName: 'Delta Carbonate Sedimentary Rock (Prominent Outcrop)',
+      analysisResult: 'Rich in smectite clays with high potential to preserve ancient Martian biosignatures!',
       color: 0x00d4ff,
     };
 
     const group = new THREE.Group();
     group.position.set(w.x, w.y, w.z);
 
-    // 1. FORMATION BATUAN MENONJOL DI TANAH (Prominent Outcrop Rocks)
+    // 1. PROMINENT OUTCROP ROCKS ON GROUND
     const rockMat = new THREE.MeshStandardMaterial({
       color: 0x3d271d,
       roughness: 0.9,
       metalness: 0.1,
     });
-    // Batuan dasar menonjol
+    // Base outcrop rock
     const baseRock = new THREE.Mesh(new THREE.DodecahedronGeometry(12, 1), rockMat);
     baseRock.scale.set(1.4, 0.8, 1.2);
     baseRock.position.y = 4;
     group.add(baseRock);
 
-    // 2. KRISTAL / SPESIMEN MENONJOL YANG SIAP DICAPIT HERMES
+    // 2. PROMINENT SPECIMEN READY FOR HERMES PICKUP
     const crystalGeo = new THREE.OctahedronGeometry(9, 0);
     const crystalMat = new THREE.MeshStandardMaterial({
       color: 0x00aacc,
@@ -642,21 +642,21 @@ export class MissionSystem {
     prominentRock.position.set(0, 14, 0);
     group.add(prominentRock);
 
-    // 3. Cincin Pendar Penanda di Tanah
+    // 3. Ground Indicator Glow Ring
     const ringMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide, transparent: true, opacity: 0.65 });
     const ring = new THREE.Mesh(new THREE.RingGeometry(18, 22, 24), ringMat);
     ring.rotation.x = -Math.PI / 2;
     ring.position.y = 1.5;
     group.add(ring);
 
-    // 4. Suar Pilar Cahaya Vertikal
+    // 4. Vertical Light Pillar Beacon
     const beamMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.45 });
     const beam = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 3, 220, 8), beamMat);
     beam.position.y = 110;
     group.add(beam);
 
-    // 5. Label Billboard Melayang
-    const label = this.#createFloatingLabel(`💎 BATUAN MENONJOL: ${regionInfo.artifactName}`, '#00e5ff');
+    // 5. Floating Billboard Label
+    const label = this.#createFloatingLabel(`💎 PROMINENT ROCK: ${regionInfo.artifactName}`, '#00e5ff');
     label.position.y = 230;
     group.add(label);
 
@@ -679,17 +679,17 @@ export class MissionSystem {
       isWaypoint: true,
     };
 
-    this.onNotify(`💎 [Ares Mapper] Benda Batuan Menonjol ditemukan di ${regionInfo.name}! Siap diambil Hermes.`);
+    this.onNotify(`💎 [Ares Mapper] Prominent rock outcrop found in ${regionInfo.name}! Ready for Hermes pickup.`);
     this.onStateChange();
 
-    // Dokumentasi Visual Snapshot & Depth Camera untuk Task Pemetaan Ares Mapper
+    // Visual Perception Documentation (Snapshot & Depth Camera) for Ares Mapper
     if (typeof this.onTaskComplete === 'function') {
       this.onTaskComplete({
         taskId: `MAP-WP-${Date.now()}`,
         roverId: '01',
         roverName: 'Ares Mapper',
         roverRole: 'surface-mapping',
-        description: `Pemetaan & Penemuan Batuan Menonjol: ${regionInfo.artifactName}`,
+        description: `Mapping & Discovery of Prominent Rock Outcrop: ${regionInfo.artifactName}`,
         regionId: currentRegionId || 'jezero_delta',
         regionName: regionInfo.name,
         roverPhysics: { ...roverPhysics },
@@ -702,38 +702,38 @@ export class MissionSystem {
   }
 
   /* ---------------------------------------------------------
-   * 4. PANGGIL HERMES TRANSPORT MENUJU TARGET TERDEKAT
-   * Mendukung Pendorong Supersonik (atau Sub-Orbital Drop bila jarak > 10 km)
+   * 4. CALL HERMES TRANSPORT TO NEAREST TARGET
+   * Supports Supersonic Thrusters (or Sub-Orbital Drop if distance > 10 km)
    * --------------------------------------------------------- */
   callTransportToWaypoint(instantDrop = false) {
     if (this.activeWaypoint) {
       if (instantDrop && this.rovers?.[2]) {
         this.rovers[2].physics.setPosition(this.activeWaypoint.X - 35, this.activeWaypoint.Y - 35);
-        this.onNotify(`🚀 [Sub-Orbital Drop] Hermes Container mendarat tepat di samping Waypoint!`);
+        this.onNotify(`🚀 [Sub-Orbital Drop] Hermes Container landed right next to Waypoint!`);
       }
       this.transportState = 'moving_to_target';
       this.targetDestination = { X: this.activeWaypoint.X, Y: this.activeWaypoint.Y, type: 'waypoint' };
-      this.onNotify(`🚀 [Hermes Transport] Pendorong Roket Menyala! Meluncur supersonik menuju waypoint...`);
+      this.onNotify(`🚀 [Hermes Transport] Rocket thrusters engaged! Cruising supersonically to waypoint...`);
       this.onStateChange();
       return true;
     }
 
-    // Jika belum ada waypoint, cari Benda Unik terdekat yang belum diambil
+    // If no waypoint yet, find the closest uncollected unique artifact
     const uncollected = this.artifacts.filter(a => !a.collected);
     if (uncollected.length > 0) {
       const target = uncollected[0];
       if (instantDrop && this.rovers?.[2]) {
         this.rovers[2].physics.setPosition(target.X - 35, target.Y - 35);
-        this.onNotify(`🚀 [Sub-Orbital Drop] Hermes Container mendarat tepat di dekat ${target.name}!`);
+        this.onNotify(`🚀 [Sub-Orbital Drop] Hermes Container landed right near ${target.name}!`);
       }
       this.transportState = 'moving_to_target';
       this.targetDestination = { X: target.X, Y: target.Y, type: 'artifact', artifact: target };
-      this.onNotify(`🚀 [Hermes Transport] Pendorong Roket Menyala! Mengunci ${target.name}...`);
+      this.onNotify(`🚀 [Hermes Transport] Rocket thrusters engaged! Locking on ${target.name}...`);
       this.onStateChange();
       return true;
     }
 
-    this.onNotify(`[Info] Semua benda unik sudah diambil atau tandai waypoint baru dengan Ares Mapper!`);
+    this.onNotify(`[Info] All unique specimens collected, or mark a new waypoint with Ares Mapper!`);
     return false;
   }
 
@@ -742,7 +742,7 @@ export class MissionSystem {
    * --------------------------------------------------------- */
   buildScienceLab(roverPhysics) {
     if (this.labStation) {
-      this.onNotify(`[GeoLab] Stasiun Lab Sains sudah aktif berdiri!`);
+      this.onNotify(`[GeoLab] Science Lab Station is already established and active!`);
       return this.labStation;
     }
 
@@ -819,29 +819,29 @@ export class MissionSystem {
     };
 
     this.completeQuest('build_lab');
-    this.onNotify(`🎉 [GeoLab] Stasiun Lab Sains Alpha berhasil didirikan! Siap meneliti spesimen.`);
+    this.onNotify(`🎉 [GeoLab] Mars Science Lab Alpha successfully established! Ready to examine specimens.`);
     this.onStateChange();
 
-    // Dokumentasi Visual Snapshot & Depth Camera untuk Pembangunan Lab Sains oleh GeoLab
+    // Visual Perception Documentation (Snapshot & Depth Camera) for Lab Station Construction by GeoLab
     if (typeof this.onTaskComplete === 'function') {
       this.onTaskComplete({
         taskId: `BUILD-LAB-${Date.now()}`,
         roverId: '02',
         roverName: 'Curiosity GeoLab',
         roverRole: 'geological-investigation',
-        description: `Pembangunan Stasiun Lab Sains Lapangan di Mars`,
+        description: `Construction of Field Science Lab Station on Mars`,
         regionId: 'science-base',
-        regionName: 'Stasiun Lab Sains Alpha',
+        regionName: 'Science Lab Station Alpha',
         roverPhysics: { ...roverPhysics },
-        mineral: 'Struktur Komposit Modular & Reaktor Nuklir RTG',
-        analysisResult: 'Laboratorium Sains beroperasi penuh dengan inkubator batuan & spektrometer laser!',
+        mineral: 'Modular Composite Structure & RTG Nuclear Reactor',
+        analysisResult: 'Science Laboratory fully operational with rock incubators & laser spectrometer!',
       });
     }
 
-    // Jika Hermes sudah memegang kargo di kontainernya, langsung perintahkan Hermes ke Lab!
+    // If Hermes is already holding cargo in its container, command Hermes directly to Lab!
     if (this.transportCargo) {
       this.transportState = 'carrying_to_lab';
-      this.onNotify(`[Hermes Transport] Stasiun Lab terdeteksi! Meluncur kencang mengantar kargo ke Lab...`);
+      this.onNotify(`[Hermes Transport] Lab Station detected! Speeding to deliver cargo to Lab...`);
     }
 
     return this.labStation;
@@ -929,7 +929,7 @@ export class MissionSystem {
           stateOfMatter: art.stateOfMatter || 'solid',
           regionName: art.regionName,
           mineral: art.mineral,
-          rockType: art.rockType || 'Batuan Sedimen Delta',
+          rockType: art.rockType || 'Delta Sedimentary Rock',
           analysisResult: art.analysisResult,
         };
 
@@ -941,10 +941,10 @@ export class MissionSystem {
 
         this.completeQuest('radar_pickup');
 
-        const actionText = isSolid ? 'MENCAPIT BATUAN MENONJOL' : 'MENYEROK BENDA CAIR';
-        this.onNotify(`🦾 [${actionText} SUKSES] ${art.artifactName || art.name} terangkat & masuk ke Kontainer Hermes!`);
+        const actionText = isSolid ? 'GRIPPED PROMINENT ROCK' : 'SCOOPED LIQUID MATTER';
+        this.onNotify(`🦾 [${actionText} SUCCESS] ${art.artifactName || art.name} loaded into Hermes Container!`);
 
-        // Dokumentasi Visual Snapshot & Depth Camera untuk Task Pengambilan
+        // Visual Perception Documentation (Snapshot & Depth Camera) for Retrieval
         if (typeof this.onTaskComplete === 'function') {
           this.onTaskComplete({
             taskId: `SAMPLE-${(art.id || 'SP').toUpperCase()}-${Date.now()}`,
@@ -952,8 +952,8 @@ export class MissionSystem {
             roverName: 'Hermes Transport',
             roverRole: 'transport-support',
             description: isSolid
-              ? `Pengambilan Batuan Menonjol via Capit Hidrolik: ${art.artifactName || art.name}`
-              : `Pengambilan Benda Cair via Serok Suction: ${art.name}`,
+              ? `Retrieval of Prominent Rock via Hydraulic Claw: ${art.artifactName || art.name}`
+              : `Retrieval of Liquid Matter via Suction Scoop: ${art.name}`,
             regionId: art.id || 'jezero_delta',
             regionName: art.regionName,
             roverPhysics: { ...tPhys },
@@ -964,26 +964,26 @@ export class MissionSystem {
 
         this.samplingProcess = null;
 
-        // SETELAH DIAMBIL -> LANGSUNG MELUNCUR KE STASIUN LAB!
+        // AFTER RETRIEVAL -> CRUISE TO SCIENCE LAB STATION!
         if (this.labStation) {
           this.transportState = 'carrying_to_lab';
-          this.onNotify(`🚀 [Hermes Container] Membawa spesimen ke Lab! Tekan B pada GeoLab jika belum ada Lab.`);
+          this.onNotify(`🚀 [Hermes Container] Transporting specimen to Lab! Press B on GeoLab if no Lab yet.`);
         } else {
           this.transportState = 'idle';
-          this.onNotify(`⚠️ [Perhatian] Spesimen aman di Kontainer! Gunakan Robot 02 (GeoLab) tekan B untuk mendirikan Lab Sains.`);
+          this.onNotify(`⚠️ [Attention] Specimen safe in Container! Use Rover 02 (GeoLab) and press B to establish Science Lab.`);
         }
         this.onStateChange();
       }
     } else if (!this.transportCargo) {
-      // 1. Deteksi Waypoint Batuan Menonjol Ares Mapper jika didekati
+      // 1. Detect Ares Mapper Prominent Rock Waypoint if approached
       if (this.activeWaypoint && !this.samplingProcess) {
         const distW = Math.hypot(tPhys.X - this.activeWaypoint.X, tPhys.Y - this.activeWaypoint.Y);
         if (distW < 75.0) {
-          // MEMULAI ANIMASI PENCAPITAN BATUAN MENONJOL DI WAYPOINT
+          // START PROMINENT ROCK CLAW GRIP ANIMATION AT WAYPOINT
           this.samplingProcess = {
             artifact: this.activeWaypoint,
             timer: 0,
-            duration: 2.2, // 2.2 detik animasi pencapitan nyata
+            duration: 2.2,
           };
 
           if (hooks) {
@@ -991,24 +991,22 @@ export class MissionSystem {
             hooks.samplingProgress = 0;
           }
 
-          this.onNotify(`🦾 [ROBOTIC CLAW] Mengunci Batuan Menonjol! Lengan capit Hermes menjulur mencapit batuan...`);
+          this.onNotify(`🦾 [ROBOTIC CLAW] Locking on Prominent Rock! Hermes robotic claw extending to grip...`);
         }
       }
 
-      // 2. Deteksi Benda Unik Wilayah jika didekati
+      // 2. Detect Regional Unique Artifact if approached
       if (!this.samplingProcess) {
         for (const art of this.artifacts) {
           if (art.collected) continue;
 
           const dist = Math.hypot(tPhys.X - art.X, tPhys.Y - art.Y);
-          // Jika terpantau dalam jangkauan radar Hermes (< radarRadius)
           if (dist < 75.0) {
-            // MEMULAI PROSEDUR PENGAMBILAN DENGAN CAPIT ATAU SEROK
             const isSolid = art.stateOfMatter === 'solid';
             this.samplingProcess = {
               artifact: art,
               timer: 0,
-              duration: 2.2, // 2.2 detik animasi pencapitan / penyerokan realistis
+              duration: 2.2,
             };
 
             if (hooks) {
@@ -1017,9 +1015,9 @@ export class MissionSystem {
             }
 
             if (isSolid) {
-              this.onNotify(`🦾 [ROBOTIC CLAW] Mengunci ${art.name} (Benda Padat)! Lengan hidrolik menjulur mencapit...`);
+              this.onNotify(`🦾 [ROBOTIC CLAW] Locking on ${art.name} (Solid Object)! Hydraulic arm extending to grip...`);
             } else {
-              this.onNotify(`🥄 [SUCTION SCOOP] Mengunci ${art.name} (Benda Cair)! Lengan serok menjulur menciduk fluida...`);
+              this.onNotify(`🥄 [SUCTION SCOOP] Locking on ${art.name} (Liquid Matter)! Suction scoop arm extending to collect fluid...`);
             }
             break;
           }
@@ -1141,7 +1139,7 @@ export class MissionSystem {
       hooks.cargoSpecimen.visible = false;
     }
 
-    this.onNotify(`[ANALISIS LAB SELESAI] ${cargo.name} diteliti! ${cargo.analysisResult} (+350 Poin Sains)`);
+    this.onNotify(`[LAB ANALYSIS COMPLETE] ${cargo.name} examined! ${cargo.analysisResult} (+350 Science Points)`);
     this.onStateChange();
 
     setTimeout(() => {
@@ -1155,7 +1153,7 @@ export class MissionSystem {
     if (q && !q.completed) {
       q.completed = true;
       this.researchScore += 150;
-      this.onNotify(`TARGET TERCAPAI: ${q.title} (+150 Poin)`);
+      this.onNotify(`OBJECTIVE COMPLETED: ${q.title} (+150 Points)`);
       this.onStateChange();
     }
   }
