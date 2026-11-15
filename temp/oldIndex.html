@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Mars Geological Map Exploration — 3D Planetary Dashboard (NASA / USGS)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./src/dashboard.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/addons/"}}</script>
+  <style>
+    /* =========================================================================
+       AEROSPACE ENGINEERING WORKSTATION THEME — NASA / JPL MISSION CONTROL
+       ========================================================================= */
+    :root {
+      --bg-space: #07090d;
+      --panel-bg: rgba(13, 17, 23, 0.94);
+      --panel-border: #1f2937;
+      --panel-border-focus: #374151;
+      --text-main: #ffffff;
+      --text-muted: #ffffff;
+      --text-dim: #ffffff;
+      --nasa-blue: #0b3d91;
+      --nasa-red: #e03c31;
+      --data-cyan: #00e5ff;
+      --status-green: #10b981;
+      --status-amber: #f59e0b;
+      --status-red: #ef4444;
+      --font-mono: 'IBM Plex Mono', monospace;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-space);
+      font: 12px/1.45 var(--font-sans);
+      color: var(--text-main);
+      user-select: none;
+    }
+
+    #app { position: fixed; inset: 0; }
+
+    /* Aerospace Technical Panels */
+    .panel {
+      position: fixed;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+      z-index: 10;
+    }
+
+    /* RIGHT-SIDE ROBOT DETAIL PANEL (Dominant engineering card) */
+    #robotDetailPanel {
+      top: 12px;
+      right: 12px;
+      width: 380px;
+      max-height: calc(100vh - 24px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: #374151 transparent;
+    }
+    #robotDetailPanel::-webkit-scrollbar { width: 5px; }
+    #robotDetailPanel::-webkit-scrollbar-thumb { background: #374151; border-radius: 2px; }
+
+    /* TOP-LEFT MINIMAL SIMULATION CONTROL BAR */
+    #topControlBar {
+      top: 12px;
+      left: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    /* Floating Simulation Settings Dropdown */
+    #simSettingsModal {
+      top: 48px;
+      left: 12px;
+      width: 270px;
+      display: none;
+      z-index: 20;
+    }
+
+    /* Quick Live Status Chip */
+    .top-chip {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(8px);
+    }
+    .top-chip b { color: var(--text-main); }
+
+    /* Bottom Help Bar */
+    #help {
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(13, 17, 23, 0.95);
+      border: 1px solid var(--panel-border);
+      padding: 5px 16px;
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      z-index: 10;
+      font-family: var(--font-mono);
+    }
+    kbd {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-weight: 700;
+      color: var(--data-cyan);
+      font-size: 10px;
+    }
+
+    /* Typography & Hierarchy */
+    h3 {
+      margin: 0 0 8px;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 4px;
+    }
+    .section-title {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    /* Mission Header */
+    .agency-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+    .nasa-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: var(--nasa-red);
+      font-size: 14px;
+      font-family: var(--font-mono);
+    }
+    .nasa-tag span {
+      background: var(--nasa-red);
+      color: #fff;
+      padding: 1px 5px;
+      border-radius: 2px;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+    }
+    .mission-name {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      text-align: right;
+    }
+
+    /* Robot Selector Tabs */
+    .robot-selector-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+    .r-btn {
+      padding: 6px 4px;
+      font-size: 10px;
+      text-align: center;
+      background: #111620;
+      border: 1px solid var(--panel-border);
+      border-radius: 3px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      transition: all 0.15s ease;
+      font-family: var(--font-mono);
+    }
+    .r-btn:hover { background: #1a2230; color: #fff; border-color: var(--panel-border-focus); }
+    .r-btn.active {
+      background: #151e2c;
+      color: #fff;
+      font-weight: 700;
+      border-color: var(--data-cyan);
+    }
+
+    /* INTERACTIVE 3D ROBOT VIEWER CONTAINER */
+    .viewer-card {
+      background: #090c10;
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .viewer-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 8px;
+      background: #0f141c;
+      border-bottom: 1px solid var(--panel-border);
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+    }
+    .viewer-tools-group { display: flex; gap: 4px; }
+    .viewer-btn {
+      background: #161e2a;
+      border: 1px solid #243040;
+      color: var(--text-muted);
+      border-radius: 2px;
+      padding: 2px 7px;
+      font-size: 10px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+    }
+    .viewer-btn:hover { background: #223044; color: #fff; border-color: var(--data-cyan); }
+    .viewer-btn.active { background: #00e5ff22; color: var(--data-cyan); border-color: var(--data-cyan); }
+
+    #roverViewerContainer {
+      position: relative;
+      width: 100%;
+      height: 210px;
+      background: #070a0e;
+    }
+    .viewer-hint {
+      position: absolute;
+      bottom: 5px;
+      left: 8px;
+      font-size: 9px;
+      font-family: var(--font-mono);
+      color: #475569;
+      pointer-events: none;
+    }
+
+    /* Robot Mechanical Specs Sheet */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 8px;
+      padding: 6px 8px;
+      background: #0c1017;
+      border-top: 1px solid var(--panel-border);
+      font-size: 9.5px;
+      font-family: var(--font-mono);
+    }
+    .spec-item { display: flex; justify-content: space-between; color: var(--text-dim); }
+    .spec-item span:last-child { color: var(--text-muted); font-weight: 600; }
+
+    /* SHOW HISTORY TRACK SECTION */
+    .history-card {
+      background: #0e131b;
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    .hist-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .history-toggle-btn {
+      width: 100%;
+      background: #111a26;
+      border: 1px solid #1e2e42;
+      color: var(--text-muted);
+      border-radius: 3px;
+      padding: 7px 10px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.15s ease;
+    }
+    .history-toggle-btn.active {
+      background: #08202d;
+      border-color: var(--data-cyan);
+      color: var(--data-cyan);
+    }
+    .history-toggle-btn:hover { border-color: var(--data-cyan); }
+
+    .hist-stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+      font-size: 10px;
+      font-family: var(--font-mono);
+    }
+    .hist-stats-table td {
+      padding: 3px 0;
+      border-bottom: 1px solid #161f2b;
+    }
+    .hist-stats-table td:first-child { color: var(--text-dim); width: 110px; }
+    .hist-stats-table td:last-child { color: var(--text-main); font-weight: 600; text-align: right; }
+
+    .btn-subtle {
+      width: 100%;
+      background: transparent;
+      border: 1px dashed #243142;
+      color: var(--text-dim);
+      font-size: 10px;
+      padding: 4px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      margin-top: 6px;
+    }
+    .btn-subtle:hover { background: #131c26; color: var(--text-muted); }
+
+    #histLogContainer {
+      display: none;
+      margin-top: 6px;
+      max-height: 120px;
+      overflow-y: auto;
+      border: 1px solid #1e293b;
+      border-radius: 3px;
+      background: #090d12;
+      font-size: 9px;
+      font-family: var(--font-mono);
+    }
+    .hist-log-row {
+      display: grid;
+      grid-template-columns: 24px 50px 1fr 45px;
+      padding: 2px 4px;
+      border-bottom: 1px solid #141b24;
+      color: var(--text-dim);
+    }
+    .hist-log-row:nth-child(even) { background: #0c1117; }
+    .hist-log-row span:last-child { text-align: right; color: var(--text-muted); }
+
+    /* LIVE FLIGHT KINEMATICS */
+    .telemetry-card {
+      background: #0c1017;
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      text-align: center;
+      font-family: var(--font-mono);
+    }
+    .telem-box {
+      background: #111722;
+      border: 1px solid #1c2736;
+      border-radius: 3px;
+      padding: 4px 2px;
+    }
+    .telem-box .lbl { font-size: 9px; color: var(--text-dim); }
+    .telem-box .val { font-size: 11px; font-weight: 700; color: var(--data-cyan); }
+
+    /* MISSION PIPELINE (Workflow) */
+    .workflow-box {
+      background: #0c1017;
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    .wf-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 3px;
+    }
+    .wf-step {
+      background: #101620;
+      border: 1px solid #1b2636;
+      border-radius: 3px;
+      padding: 4px 2px;
+      text-align: center;
+      font-size: 8.5px;
+      font-family: var(--font-mono);
+      color: #4b5563;
+      line-height: 1.25;
+    }
+    .wf-step.current { border-color: var(--data-cyan); color: var(--data-cyan); background: #00e5ff11; font-weight: 700; }
+    .wf-step.active { border-color: var(--status-amber); color: var(--status-amber); background: #f59e0b11; font-weight: 700; }
+    .wf-step.done { border-color: var(--status-green); color: var(--status-green); background: #10b98111; }
+
+    /* Contextual Action Card */
+    .action-card {
+      background: #0e141d;
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    .btn-main-action {
+      width: 100%;
+      background: var(--nasa-blue);
+      color: #fff;
+      border: 1px solid #1e4fa3;
+      border-radius: 3px;
+      padding: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .btn-main-action:hover { background: #1251b8; }
+    .btn-sec-action {
+      width: 100%;
+      margin-top: 5px;
+      background: #162232;
+      color: var(--text-muted);
+      border: 1px solid #283a52;
+      border-radius: 3px;
+      padding: 6px;
+      font-size: 10.5px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+    }
+    .btn-sec-action:hover { background: #203147; color: #fff; }
+
+    /* Science Quests Checklist */
+    .quest-box {
+      background: #0c1017;
+      border: 1px solid var(--panel-border);
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    .quest-list { display: flex; flex-direction: column; gap: 3px; max-height: 100px; overflow-y: auto; }
+    .quest-item { display: flex; align-items: center; gap: 6px; font-size: 9.5px; font-family: var(--font-mono); color: var(--text-muted); }
+    .quest-item.completed { color: var(--status-green); text-decoration: line-through; opacity: 0.8; }
+
+    /* Form Inputs */
+    label { display: block; margin: 6px 0 2px; color: var(--text-dim); font-size: 10px; font-family: var(--font-mono); }
+    select, input[type=range] {
+      width: 100%;
+      background: #111722;
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
+      border-radius: 3px;
+      padding: 4px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(13, 17, 23, 0.96);
+      border: 1px solid var(--data-cyan);
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 4px;
+      font-size: 11.5px;
+      font-family: var(--font-mono);
+      box-shadow: 0 4px 20px rgba(0, 229, 255, 0.25);
+      display: none;
+      z-index: 9999;
+      backdrop-filter: blur(8px);
+    }
+
+    #loading {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* Sembunyikan di bawah dashboard z-500 agar tidak bloking 3D Globe */
+      background: transparent;
+      font-size: 15px;
+      font-family: var(--font-mono);
+      color: transparent;
+      text-align: center;
+      padding: 30px;
+      z-index: 10;
+      pointer-events: none;
+    }
+    #loading.err { color: var(--status-red); }
+
+    /* Map Portal Overlay */
+    .map-portal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 9, 13, 0.98);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    }
+    .portal-landing { display: flex; flex-direction: column; align-items: center; gap: 30px; padding: 40px 20px; max-width: 900px; width: 100%; }
+    .portal-brand { text-align: center; }
+    .brand-icon { font-size: 52px; margin-bottom: 8px; }
+    .brand-title { margin: 0; font-size: 26px; color: #fff; font-weight: 800; letter-spacing: 1px; font-family: var(--font-mono); }
+    .brand-sub { margin: 6px 0 0; font-size: 12.5px; color: var(--text-muted); font-family: var(--font-mono); }
+    .map-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; width: 100%; }
+    .map-card { background: #0f141d; border: 1px solid #233042; border-radius: 6px; padding: 18px; cursor: pointer; transition: all 0.2s ease; position: relative; }
+    .map-card:hover { transform: translateY(-2px); border-color: var(--data-cyan); box-shadow: 0 6px 24px rgba(0, 229, 255, 0.15); }
+    .map-card.placeholder { border-style: dashed; opacity: 0.4; cursor: default; }
+    .card-code { font-size: 18px; font-weight: 800; color: var(--data-cyan); font-family: var(--font-mono); }
+    .card-title { font-size: 12px; color: #e2e8f0; margin: 6px 0 8px; line-height: 1.4; }
+    .card-meta { font-size: 10px; color: var(--text-dim); font-family: var(--font-mono); display: flex; gap: 6px; }
+    .card-regions { display: flex; justify-content: space-between; align-items: center; font-size: 10.5px; border-top: 1px solid #1a2533; padding-top: 8px; margin-top: 8px; }
+    .card-top-badge { position: absolute; top: 12px; right: 12px; padding: 2px 7px; border-radius: 3px; font-size: 9.5px; font-family: var(--font-mono); font-weight: 700; }
+    .ready-badge { background: #00e5ff18; color: var(--data-cyan); border: 1px solid #00e5ff44; }
+    .placeholder-badge { background: #37415122; color: #64748b; border: 1px solid #37415144; }
+  </style>
+</head>
+<body>
+
+<!-- =========================================================================
+     MARS GEOLOGICAL MAP EXPLORATION — 3D PLANETARY DASHBOARD
+     ========================================================================= -->
+<div id="dashboard-root">
+  <div class="dashboard-container">
+
+    <!-- 1. TOP MINIMALIST NAVIGATION -->
+    <header class="dash-top-nav">
+      <div class="nav-left">
+        <span class="nav-dots">•••</span>
+        <span class="nav-brand-title font-display">MARSMIND</span>
+      </div>
+      <div class="nav-right">
+        <button id="dashHelpBtn" class="nav-text-btn">HELP</button>
+        <div class="nav-status-indicator">
+          <span class="status-pulse-dot"></span>
+          <span>TELEMETRY ONLINE: VM-001</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. EXPANSIVE HERO STAGE (WEBGL BACKGROUND + FLOATING OVERLAYS) -->
+    <section class="globe-hero-stage">
+
+      <!-- Full-bleed 3D Three.js Canvas Container -->
+      <div id="marsGlobeCanvasContainer" class="globe-canvas-wrap"></div>
+
+      <!-- Dynamic Bracket Connecting SVG Line -->
+      <svg id="globeCalloutSvg" class="stage-bracket-svg">
+        <path id="calloutBracketPath" d="" fill="none" stroke="#FF8955" stroke-width="1.6" stroke-linecap="round"/>
+        <circle id="calloutStartDot" cx="0" cy="0" r="3.5" fill="#FFFFFF"/>
+        <circle id="calloutEndDot" cx="0" cy="0" r="3" fill="#FF8955"/>
+      </svg>
+
+      <!-- Floating Left: Clean Typography -->
+      <div class="stage-floating-left">
+        <div class="tag-meta-line">NASA · USGS PLANETARY GEOLOGIC MAPPING</div>
+        <h1 class="stage-main-title">Mars Geological Map Exploration</h1>
+        <div class="stage-agency-credit">
+          <div class="credit-label">Official Geological Database: <b>USGS Astrogeology GIS Hub</b></div>
+          <a href="https://astrogeology-usgs.hub.arcgis.com/pages/interactive-maps-mars" target="_blank" class="btn-usgs-left" id="btnUsgsLeft">
+            <span>Explore USGS Planetary Mapping ↗</span>
+          </a>
+        </div>
+        <nav id="dashboardMapList" class="dashboard-map-list" aria-label="Select a Mars map">
+          <h2 class="dashboard-map-list-title">AVAILABLE MAPS</h2>
+          <div class="dashboard-map-list-items"></div>
+        </nav>
+      </div>
+
+      <!-- Floating Right: USGS Geologic Map Dynamic Callout Card -->
+      <div class="stage-floating-right">
+        <div id="calloutCard" class="callout-card">
+          <div class="callout-card-top">
+            <span class="callout-badge badge-ready">● 3D SIMULATOR READY</span>
+            <span id="calloutScale" class="callout-scale">1:15,000,000</span>
+          </div>
+          <h2 id="calloutLocation" class="callout-location">Valles Marineris &amp; Tharsis</h2>
+          <div id="calloutCodeTitle" class="callout-code-title">USGS I-1802A · Western Equatorial Region of Mars</div>
+          <div id="calloutAuthor" class="callout-author">David H. Scott &amp; Kenneth L. Tanaka (USGS / NASA)</div>
+
+          <div class="callout-specs-list">
+            <div class="callout-spec-item">
+              <span class="spec-label">Coordinates</span>
+              <span id="calloutCoords" class="spec-value">8.00° S / 285.00° E (75° W)</span>
+            </div>
+            <div class="callout-spec-item">
+              <span class="spec-label">Elevation</span>
+              <span id="calloutElevation" class="spec-value">-7,000 m to +21,287 m</span>
+            </div>
+            <div class="callout-spec-item">
+              <span class="spec-label">Geologic Era</span>
+              <span id="calloutEra" class="spec-value">Hesperian – Amazonian</span>
+            </div>
+            <div class="callout-spec-item">
+              <span class="spec-label">Stratigraphy</span>
+              <span id="calloutStratigraphy" class="spec-value">Basaltic Strata &amp; Tectonic Chasmata</span>
+            </div>
+          </div>
+
+          <p id="calloutDesc" class="callout-desc">
+            Official USGS geologic map covering the grand western Martian landscape: the immense Valles Marineris canyon system (>4,000 km), Olympus Mons volcano (21 km), and the volcanic plains of Tharsis. Directly synchronized with the 3D surface rover simulation.
+          </p>
+
+          <div class="callout-actions">
+            <button id="btnCalloutLaunch" class="btn-callout-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <span>LAUNCH 3D SIMULATION</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Bottom: Elliptical Rotation Guide -->
+      <div class="stage-floating-guide" title="Click and drag Mars globe for 360° rotation">
+        <div class="globe-orbit-guide">
+          <svg class="orbit-ellipse-svg" width="130" height="42" viewBox="0 0 130 42">
+            <ellipse cx="65" cy="21" rx="58" ry="16" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.2" stroke-dasharray="3,3"/>
+            <circle id="orbitDot" cx="123" cy="21" r="3.4" fill="#FF8955"/>
+          </svg>
+          <span class="orbit-guide-label">Rotate Mars Globe</span>
+          <span class="orbit-guide-hint">Drag to rotate 360° · Scroll to zoom</span>
+        </div>
+      </div>
+
+    </section>
+  </div>
+</div>
+
+<!-- Telemetry Launch Sequence Overlay -->
+<div id="dash-init-overlay" class="dash-init-overlay" style="display: none;">
+  <div class="dash-init-content">
+    <div class="dash-init-spinner">
+      <div class="spinner-ring"></div>
+      <div class="spinner-core"></div>
+    </div>
+    <div class="dash-init-title font-display">INITIALIZING MARS 3D SIMULATOR</div>
+    <div class="dash-init-subtitle">CONNECTING AUTONOMOUS ROVER TELEMETRY TO SURFACE</div>
+    <div class="dash-init-progress-bar">
+      <div id="dashInitProgressBar" class="dash-init-progress-fill"></div>
+    </div>
+    <div id="dashInitStatusText" class="dash-init-status">LOADING HIGH-RESOLUTION DEM TERRAIN MODEL...</div>
+    <div class="dash-init-telemetry-logs" id="dashInitLogs">
+      <div>[INIT] NASA Deep Space Network Uplink: ESTABLISHED</div>
+      <div>[GEO] USGS Astrogeology I-1802A Map Datum: ALIGNED</div>
+      <div>[SWARM] 3 Autonomous Rover Swarm Units (Ares, GeoLab, Hermes): ONLINE</div>
+    </div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div id="dashHelpModal" class="dash-help-modal" style="display: none;">
+  <div class="dash-help-backdrop"></div>
+  <div class="dash-help-panel">
+    <div class="dash-help-header">
+      <span class="dash-help-title font-display">MARS GEOLOGICAL EXPLORATION GUIDE</span>
+      <button id="dashHelpCloseBtn" class="dash-help-close">&times;</button>
+    </div>
+    <div class="dash-help-body">
+      <div class="help-section">
+        <h4>1. 3D MARS GLOBE CONTROLS</h4>
+        <ul>
+          <li><b>360° Rotation:</b> Left click &amp; drag anywhere across the screen to rotate Mars with realistic inertial physics.</li>
+          <li><b>Zoom In / Out:</b> Use mouse scroll or trackpad pinch. Calibrated with zero-clipping limits (4.3x to 7.6x distance).</li>
+          <li><b>3D Hotspot:</b> Dynamic telemetry pin at Valles Marineris coordinates (8.00° S, 285.00° E) connects live planetary data.</li>
+        </ul>
+      </div>
+      <div class="help-section">
+        <h4>2. MARS RECONNAISSANCE ORBITER (MRO)</h4>
+        <p>The elliptical orbit with pulsing telemetry beacon visualizes MRO's actual orbital path mapping MOLA topography and CTX imagery.</p>
+      </div>
+      <div class="help-section">
+        <h4>3. USGS GEOLOGIC MAP &amp; ROVER SIMULATION</h4>
+        <p>Active dataset <b>USGS I-1802A</b> maps grand formations across western Mars (Valles Marineris, Olympus Mons, Tharsis). Click <b>'LAUNCH 3D SIMULATION'</b> to deploy the autonomous 3-rover swarm directly onto the Martian surface.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="app"></div>
+<div id="loading">NASA / JPL Mars Jezero Exploration Workstation Memuat Data…</div>
+<div id="toast"></div>
+
+<!-- =========================================================================
+     TOP-LEFT: MINIMAL WORKSTATION TOOLBAR & DROPDOWN SETTINGS
+     (Left side remains completely open for Mars exploration)
+     ========================================================================= -->
+<div id="topControlBar" style="display:none">
+  <button id="openMapPortalBtn" class="top-chip" style="cursor:pointer;background:#0d1a2d;border-color:#1e3a63;color:#e2e8f0;font-weight:700;">
+    🗺️ PETA GEOLOGI
+  </button>
+  <button id="toggleBackpackBtn" class="top-chip" style="cursor:pointer;background:#0c2236;border-color:#00e5ff;color:#00e5ff;font-weight:800;letter-spacing:0.3px;box-shadow:0 0 12px rgba(0,229,255,0.25);">
+    🎒 BACKPACK LABORATORIUM
+  </button>
+  <button id="toggleSettingsBtn" class="top-chip" style="cursor:pointer;">
+    ⚙️ SIMULASI &amp; KAMERA ▼
+  </button>
+  <div class="top-chip">
+    <span>SPD: <b id="topSpeed">0.0 m/s</b></span>
+    <span>ELV: <b id="topElev">0 m</b></span>
+    <span>FPS: <b id="fps">60</b></span>
+  </div>
+  <div class="top-chip" id="inspect" style="display:none;"></div>
+</div>
+
+<!-- Compact Simulation Settings Dropdown -->
+<div id="simSettingsModal" class="panel">
+  <h3>
+    <span>Parameter Simulasi</span>
+    <button id="closeSettingsBtn" style="background:transparent;border:0;color:var(--text-dim);cursor:pointer;font-family:var(--font-mono);">✕</button>
+  </h3>
+  <label>Mode Kamera</label>
+  <select id="cam">
+    <option value="follow">Follow Rover (Orbit/Zoom/Pan)</option>
+    <option value="orbit">Free Orbit</option>
+    <option value="fly">Free-Fly (WASD + Look)</option>
+  </select>
+
+  <label>Mode Swarm Robot</label>
+  <select id="swarmMode">
+    <option value="hold" selected>Manual / Standby di Tempat</option>
+    <option value="formation">Formasi Kawal (Ikuti Rover Utama)</option>
+    <option value="autonomous">Patroli Otonom</option>
+  </select>
+
+  <label>Skala Visual Rover <span id="rscaleV" style="color:var(--data-cyan)">15×</span></label>
+  <input id="rscale" type="range" min="1" max="60" value="15">
+
+  <label>Vertical Exaggeration <span id="exagV" style="color:var(--data-cyan)">1.0×</span></label>
+  <input id="exag" type="range" min="1" max="5" step="0.5" value="1">
+
+  <label>Resolusi Medan <span id="meshInfo" style="color:var(--text-dim)"></span></label>
+  <select id="stride">
+    <option value="8">Low (320 m)</option>
+    <option value="4" selected>Medium (160 m)</option>
+    <option value="2">High (80 m)</option>
+    <option value="1">Full (40 m, detail)</option>
+  </select>
+
+  <label>Sudut Matahari</label>
+  <input id="sunEl" type="range" min="5" max="80" value="40">
+  <input id="sunAz" type="range" min="0" max="360" value="135">
+
+  <div style="margin-top:8px;">
+    <label><input id="slope" type="checkbox"> Slope Map (Gradien Kemiringan)</label>
+    <label><input id="tint" type="checkbox" checked> Pewarnaan Mars-Tone</label>
+  </div>
+  <button id="resetRover" style="margin-top:8px;background:#1e293b;border:1px solid #334155;color:#fff;border-radius:3px;padding:6px;width:100%;cursor:pointer;font-family:var(--font-mono);">↺ Reset Posisi Awal</button>
+</div>
+
+<!-- =========================================================================
+     RIGHT-SIDE: NASA ROBOT DETAIL PANEL + INTERACTIVE 3D VIEWER + HISTORY TRACK
+     ========================================================================= -->
+<div id="robotDetailPanel" class="panel" style="display:none">
+  <!-- Agency & Expedition Header -->
+  <div class="agency-header">
+    <div>
+      <div class="nasa-tag">NASA <span>JPL</span></div>
+      <div style="font-size:9.5px;color:var(--text-dim);font-family:var(--font-mono);margin-top:2px;">MARS EXPLORATION SWARM</div>
+    </div>
+    <div class="mission-name">
+      <div id="activeCallsign" style="color:var(--data-cyan);font-weight:700;">ROV-01</div>
+      <div>JEZERO CRATER EXPEDITION</div>
+    </div>
+  </div>
+
+  <!-- Robot Selection Tabs (1: Ares, 2: GeoLab, 3: Hermes) -->
+  <div class="robot-selector-grid" id="robotSelector">
+    <button class="r-btn active" data-index="0">
+      <span>🗺️ <b>01. ARES</b></span>
+      <span style="color:var(--data-cyan)">MAPPER</span>
+    </button>
+    <button class="r-btn" data-index="1">
+      <span>🔬 <b>02. GEOLAB</b></span>
+      <span style="color:#ff3b5c">SCIENCE</span>
+    </button>
+    <button class="r-btn" data-index="2">
+      <span>🚛 <b>03. HERMES</b></span>
+      <span style="color:var(--status-green)">CARGO</span>
+    </button>
+  </div>
+
+  <!-- 1. INTERACTIVE 3D ROBOT VIEWER CARD -->
+  <div class="viewer-card">
+    <div class="viewer-toolbar">
+      <span>INSPECTION VIEWER · 3D</span>
+      <div class="viewer-tools-group">
+        <button id="viewerResetBtn" class="viewer-btn" title="Reset View Framing">↺ Reset</button>
+        <button id="viewerZoomInBtn" class="viewer-btn" title="Zoom In">+</button>
+        <button id="viewerZoomOutBtn" class="viewer-btn" title="Zoom Out">-</button>
+        <button id="viewerRotateBtn" class="viewer-btn" title="Toggle Auto Turntable">⟳ Auto</button>
+      </div>
+    </div>
+    <div id="roverViewerContainer">
+      <div id="roverViewerLoading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-family:var(--font-mono);font-size:10px;">MEMUAT 3D ROVER MODEL...</div>
+      <div class="viewer-hint">Drag: Putar · Right-Drag: Pan · Scroll: Zoom</div>
+    </div>
+    <!-- Technical Specifications -->
+    <div class="specs-grid">
+      <div class="spec-item"><span>Chassis</span><span>Rocker-Bogie 6WD</span></div>
+      <div class="spec-item"><span>Dimensi</span><span>3.0 × 2.7 × 2.2 m</span></div>
+      <div class="spec-item"><span>Massa</span><span>899 kg (Earth)</span></div>
+      <div class="spec-item"><span>Branding</span><span style="color:var(--nasa-red)">Official NASA</span></div>
+    </div>
+  </div>
+
+  <!-- 2. SHOW HISTORY TRACK (Rover Movement History & Telemetry) -->
+  <div class="history-card">
+    <div class="hist-header">
+      <span class="section-title">REKAM JEJAK PERJALANAN ROVER</span>
+    </div>
+    <button id="historyToggleBtn" class="history-toggle-btn active">
+      <span>● SHOW HISTORY TRACK</span>
+      <span id="histToggleState" style="color:var(--data-cyan)">[ ON ]</span>
+    </button>
+    <table class="hist-stats-table">
+      <tr><td>Total Jarak Tempuh</td><td id="histTotalDist">0.0 m</td></tr>
+      <tr><td>Waktu Misi (Elapsed)</td><td id="histElapsedTime">00:00:00</td></tr>
+      <tr><td>Titik Awal (Origin)</td><td id="histStartCoord">-</td></tr>
+      <tr><td>Posisi Terkini</td><td id="histCurrentCoord">-</td></tr>
+      <tr><td>Jumlah Waypoint</td><td id="histWaypointCount">1 Titik</td></tr>
+    </table>
+    <button id="toggleHistLogBtn" class="btn-subtle">📜 Buka Riwayat Lintasan (Log Telemetri) ▼</button>
+    <div id="histLogContainer">
+      <div style="padding:3px 6px;background:#111822;font-weight:700;color:var(--text-muted);display:grid;grid-template-columns:24px 50px 1fr 45px;">
+        <span>#</span><span>WAKTU</span><span>KOORDINAT (LON/LAT)</span><span style="text-align:right">SPD</span>
+      </div>
+      <div id="histLogList"></div>
+    </div>
+  </div>
+
+  <!-- 3. LIVE FLIGHT TELEMETRY & KINEMATICS -->
+  <div class="telemetry-card">
+    <div class="section-title">TELEMETRI GERAK ROVER AKTIF</div>
+    <div class="telemetry-grid">
+      <div class="telem-box">
+        <div class="lbl">KECEPATAN</div>
+        <div class="val" id="r-speed">0.0 m/s</div>
+      </div>
+      <div class="telem-box">
+        <div class="lbl">ELEVASI</div>
+        <div class="val" id="r-el">0 m</div>
+      </div>
+      <div class="telem-box">
+        <div class="lbl">HEADING</div>
+        <div class="val" id="r-hd">0°</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;font-family:var(--font-mono);color:var(--text-dim);">
+      <span>Kemiringan: <b id="r-slope" style="color:var(--text-main)">0.0°</b></span>
+      <span>Status: <b id="r-status" style="color:var(--data-cyan)">Nominal</b></span>
+    </div>
+  </div>
+
+  <!-- 4. MISSION OPERATIONS & WORKFLOW (Pipeline) -->
+  <div class="workflow-box">
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+      <span class="section-title">ALUR OPERASI SAINS TIM</span>
+      <span style="font-size:9.5px;color:var(--data-cyan);font-family:var(--font-mono);">STEP 1-4</span>
+    </div>
+    <div class="wf-steps">
+      <div class="wf-step current" id="step-map">1. Petakan<br>Sampel</div>
+      <div class="wf-step" id="step-transport">2. Muat ke<br>Hermes</div>
+      <div class="wf-step" id="step-lab">3. Bangun<br>Lab Sains</div>
+      <div class="wf-step" id="step-research">4. Riset &amp;<br>Analisis</div>
+    </div>
+  </div>
+
+  <!-- Contextual Action Controls -->
+  <div class="action-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <span id="act-role-title" style="font-weight:700;font-size:11px;font-family:var(--font-mono);color:#fff;">🗺️ Ares Mapper</span>
+      <span id="act-role-status" style="font-size:9.5px;font-family:var(--font-mono);color:var(--data-cyan);">Siap</span>
+    </div>
+    <button id="mainActionBtn" class="btn-main-action">📍 Tandai Waypoint Sampel (Space)</button>
+    <button id="secActionBtn" class="btn-sec-action" style="display:none;">🚛 Panggil Hermes Transport (C)</button>
+  </div>
+
+  <!-- Quest & Science Checklist -->
+  <div class="quest-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <span class="section-title">TARGET &amp; RISET SAINS</span>
+      <span id="scienceScore" style="color:var(--status-green);font-family:var(--font-mono);font-size:10px;">0 Poin</span>
+    </div>
+    <div class="quest-list" id="questList"></div>
+  </div>
+
+  <!-- Data Sources Credits Drawer -->
+  <button id="toggleDetailsBtn" class="btn-subtle" style="margin-bottom:6px;">📊 Sumber Data NASA &amp; USGS Geologi ▼</button>
+  <div id="telemetryDetails" style="display:none;background:#090d12;border:1px solid #1e293b;border-radius:3px;padding:8px;font-size:10px;font-family:var(--font-mono);color:var(--text-dim);margin-bottom:10px;">
+    <ul id="sources" style="margin:0;padding-left:14px;line-height:1.4;"></ul>
+  </div>
+</div>
+
+<!-- =========================================================================
+     BOTTOM QUICK KEYBOARD CONTROLS
+     ========================================================================= -->
+<div id="help" style="display:none">
+  <b>Setir:</b> <kbd>W A S D</kbd> · <b>Turbo:</b> <kbd>Shift</kbd> · <b>Pilih Robot:</b> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> / <kbd>Tab</kbd> · <b>Aksi:</b> <kbd>Space</kbd> · <b>Lab:</b> <kbd>B</kbd> · <b>Transport:</b> <kbd>C</kbd>
+</div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

@@ -5,6 +5,7 @@
   <title>NASA / JPL — Mars Rover Exploration Workstation &amp; 3D Terrain Simulator</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/addons/"}}</script>
+  <link rel="stylesheet" href="./src/dashboard.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -37,6 +38,14 @@
       --text-muted: #94a3b8;
       --text-dim: #64748b;
       --text-accent: #38bdf8;
+      /* dashboard.css compatibility aliases */
+      --text-primary: #ffffff;
+      --text-secondary: #ffffff;
+      --border-subtle: rgba(255, 255, 255, 0.16);
+      --border-active: rgba(255, 137, 85, 0.75);
+      --accent-ochre: #ff8955;
+      --accent-orange: #ff6633;
+      --surface-card: rgba(13, 17, 23, 0.90);
       --nasa-blue: #0b3d91;
       --nasa-blue-hover: #134db3;
       --nasa-red: #e03c31;
@@ -118,7 +127,7 @@
       gap: 8px;
       z-index: 30;
       max-width: calc(100vw - 420px);
-      overflow: visible;
+      overflow: hidden;
     }
 
     .top-nav-fab {
@@ -175,8 +184,8 @@
       transition: opacity 0.25s ease, transform 0.25s ease;
       opacity: 1;
       transform: translateX(0);
-      max-width: calc(100vw - 420px);
-      padding-bottom: 2px;
+      flex: 1;
+      min-width: 0;
     }
     #topControlBar::-webkit-scrollbar { display: none; }
 
@@ -191,6 +200,7 @@
     .top-chip {
       height: 34px;
       background: rgba(11, 16, 26, 0.82);
+      flex-shrink: 0;
       border: 1px solid var(--panel-border);
       border-radius: 8px;
       padding: 0 12px;
@@ -865,6 +875,7 @@
 
     /* Bottom Help Bar */
     #help {
+      position: fixed;
       bottom: 12px;
       left: 50%;
       transform: translateX(-50%);
@@ -1395,6 +1406,143 @@
   </style>
 </head>
 <body>
+
+<!-- =========================================================================
+     MARS GEOLOGICAL MAP EXPLORATION — 3D PLANETARY DASHBOARD
+     ========================================================================= -->
+<div id="dashboard-root">
+  <div class="dashboard-container">
+    <header class="dash-top-nav">
+      <div class="nav-left">
+        <span class="nav-dots">•••</span>
+        <span class="nav-brand-title font-display">MARSMIND</span>
+      </div>
+      <div class="nav-right">
+        <button id="dashHelpBtn" class="nav-text-btn">HELP</button>
+        <div class="nav-status-indicator">
+          <span class="status-pulse-dot"></span>
+          <span>TELEMETRY ONLINE: VM-001</span>
+        </div>
+      </div>
+    </header>
+    <section class="globe-hero-stage">
+      <div id="marsGlobeCanvasContainer" class="globe-canvas-wrap"></div>
+      <svg id="globeCalloutSvg" class="stage-bracket-svg">
+        <path id="calloutBracketPath" d="" fill="none" stroke="#FF8955" stroke-width="1.6" stroke-linecap="round"/>
+        <circle id="calloutStartDot" cx="0" cy="0" r="3.5" fill="#FFFFFF"/>
+        <circle id="calloutEndDot" cx="0" cy="0" r="3" fill="#FF8955"/>
+      </svg>
+      <div class="stage-floating-left">
+        <div class="tag-meta-line">NASA · USGS PLANETARY GEOLOGIC MAPPING</div>
+        <h1 class="stage-main-title">Mars Geological Map Exploration</h1>
+        <div class="stage-agency-credit">
+          <div class="credit-label">Official Geological Database: <b>USGS Astrogeology GIS Hub</b></div>
+          <a href="https://astrogeology-usgs.hub.arcgis.com/pages/interactive-maps-mars" target="_blank" class="btn-usgs-left" id="btnUsgsLeft">
+            <span>Explore USGS Planetary Mapping ↗</span>
+          </a>
+        </div>
+        <nav id="dashboardMapList" class="dashboard-map-list" aria-label="Select a Mars map">
+          <h2 class="dashboard-map-list-title">AVAILABLE MAPS</h2>
+          <div class="dashboard-map-list-items"></div>
+        </nav>
+      </div>
+      <div class="stage-floating-right">
+        <div id="calloutCard" class="callout-card">
+          <div class="callout-card-top">
+            <span class="callout-badge badge-ready">● 3D SIMULATOR READY</span>
+            <span id="calloutScale" class="callout-scale">1:15,000,000</span>
+          </div>
+          <h2 id="calloutLocation" class="callout-location">Valles Marineris &amp; Tharsis</h2>
+          <div id="calloutCodeTitle" class="callout-code-title">USGS I-1802A · Western Equatorial Region of Mars</div>
+          <div id="calloutAuthor" class="callout-author">David H. Scott &amp; Kenneth L. Tanaka (USGS / NASA)</div>
+          <div class="callout-specs-list">
+            <div class="callout-spec-item">
+              <span class="spec-label">Coordinates</span>
+              <span id="calloutCoords" class="spec-value">8.00° S / 285.00° E (75° W)</span>
+            </div>
+            <div class="callout-spec-item">
+              <span class="spec-label">Elevation</span>
+              <span id="calloutElevation" class="spec-value">-7,000 m to +21,287 m</span>
+            </div>
+            <div class="callout-spec-item">
+              <span class="spec-label">Geologic Era</span>
+              <span id="calloutEra" class="spec-value">Hesperian – Amazonian</span>
+            </div>
+            <div class="callout-spec-item">
+              <span class="spec-label">Stratigraphy</span>
+              <span id="calloutStratigraphy" class="spec-value">Basaltic Strata &amp; Tectonic Chasmata</span>
+            </div>
+          </div>
+          <p id="calloutDesc" class="callout-desc">
+            Official USGS geologic map covering the grand western Martian landscape: the immense Valles Marineris canyon system (&gt;4,000 km), Olympus Mons volcano (21 km), and the volcanic plains of Tharsis. Directly synchronized with the 3D surface rover simulation.
+          </p>
+          <div class="callout-actions">
+            <button id="btnCalloutLaunch" class="btn-callout-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              <span>LAUNCH 3D SIMULATION</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="stage-floating-guide">
+        <div class="globe-orbit-guide">
+          <svg class="orbit-ellipse-svg" width="130" height="42" viewBox="0 0 130 42">
+            <ellipse cx="65" cy="21" rx="58" ry="16" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.2" stroke-dasharray="3,3"/>
+            <circle id="orbitDot" cx="123" cy="21" r="3.4" fill="#FF8955"/>
+          </svg>
+          <span class="orbit-guide-label">Rotate Mars Globe</span>
+          <span class="orbit-guide-hint">Drag to rotate 360° · Scroll to zoom</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Telemetry Launch Sequence Overlay -->
+<div id="dash-init-overlay" class="dash-init-overlay" style="display:none;">
+  <div class="dash-init-content">
+    <div class="dash-init-spinner">
+      <div class="spinner-ring"></div>
+      <div class="spinner-core"></div>
+    </div>
+    <div class="dash-init-title font-display">INITIALIZING MARS 3D SIMULATOR</div>
+    <div class="dash-init-subtitle">CONNECTING AUTONOMOUS ROVER TELEMETRY TO SURFACE</div>
+    <div class="dash-init-progress-bar">
+      <div id="dashInitProgressBar" class="dash-init-progress-fill"></div>
+    </div>
+    <div id="dashInitStatusText" class="dash-init-status">LOADING HIGH-RESOLUTION DEM TERRAIN MODEL...</div>
+    <div class="dash-init-telemetry-logs" id="dashInitLogs">
+      <div>[INIT] NASA Deep Space Network Uplink: ESTABLISHED</div>
+      <div>[GEO] USGS Astrogeology I-1802A Map Datum: ALIGNED</div>
+      <div>[SWARM] 3 Autonomous Rover Swarm Units (Ares, GeoLab, Hermes): ONLINE</div>
+    </div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div id="dashHelpModal" class="dash-help-modal" style="display:none;">
+  <div class="dash-help-backdrop"></div>
+  <div class="dash-help-panel">
+    <div class="dash-help-header">
+      <span class="dash-help-title font-display">MARS GEOLOGICAL EXPLORATION GUIDE</span>
+      <button id="dashHelpCloseBtn" class="dash-help-close">&times;</button>
+    </div>
+    <div class="dash-help-body">
+      <div class="help-section">
+        <h4>1. 3D MARS GLOBE CONTROLS</h4>
+        <ul>
+          <li><b>360° Rotation:</b> Left click &amp; drag to rotate Mars.</li>
+          <li><b>Zoom:</b> Mouse scroll or trackpad pinch.</li>
+        </ul>
+      </div>
+      <div class="help-section">
+        <h4>2. USGS GEOLOGIC MAP &amp; ROVER SIMULATION</h4>
+        <p>Click <b>'LAUNCH 3D SIMULATION'</b> to deploy the autonomous 3-rover swarm onto the Martian surface.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="app"></div>
 <div id="loading">NASA / JPL Mars Jezero Exploration Workstation Memuat Data…</div>
 <div id="toast"></div>
@@ -1403,13 +1551,13 @@
      TOP-LEFT: MINIMAL WORKSTATION TOOLBAR & DROPDOWN SETTINGS
      (Left side remains completely open for Mars exploration)
      ========================================================================= -->
-<div id="topNavWrapper" class="top-nav-wrapper">
+<div id="topNavWrapper" class="top-nav-wrapper" style="display:none;">
   <!-- Floating Action Button (FAB) to toggle toolbar -->
-  <button id="topNavFab" class="top-nav-fab" title="Sembunyikan / Tampilkan Bilah Kontrol (H)">
+  <button id="topNavFab" class="top-nav-fab active" title="Sembunyikan / Tampilkan Bilah Kontrol (H)">
     <span class="fab-icon-symbol">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="1" x2="7" y1="14" y2="14"/><line x1="9" x2="15" y1="8" y2="8"/><line x1="17" x2="23" y1="16" y2="16"/></svg>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </span>
-    <span class="fab-text">KONTROL</span>
+    <span class="fab-text">TUTUP</span>
   </button>
 
   <div id="topControlBar" class="top-control-bar">
@@ -1492,7 +1640,7 @@
 <!-- =========================================================================
      TOP-RIGHT: TACTICAL MINIMAP HUD (Sebelah Kiri Robot Detail Panel)
      ========================================================================= -->
-<div id="minimapWidget" class="minimap-widget">
+<div id="minimapWidget" class="minimap-widget" style="display:none;">
   <div class="minimap-header">
     <div class="minimap-title-group">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--data-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></svg>
@@ -1501,10 +1649,7 @@
     </div>
     <div class="minimap-controls">
       <button id="miniLayerBtn" class="mini-icon-btn" title="Ganti Lapisan Peta (Orto / Topo / Lereng / Hybrid)">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 12.5-8.58 3.91a2 2 0 0 1-1.66 0L2 12.5"/><path d="m22 17.5-8.58 3.91a2 2 0 0 1-1.66 0L2 17.5"/></svg>
-      </button>
-      <button id="miniCenterBtn" class="mini-icon-btn" title="Pusatkan ke Rover">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></svg>
       </button>
       <button id="miniZoomInBtn" class="mini-icon-btn" title="Perbesar (Zoom In)">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1514,9 +1659,6 @@
       </button>
       <button id="miniMaximizeBtn" class="mini-icon-btn max-btn" title="Maksimalkan Peta (M)">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
-      </button>
-      <button id="miniCollapseBtn" class="mini-icon-btn" title="Sembunyikan / Buka">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><polyline points="18 15 12 9 6 15"/></svg>
       </button>
     </div>
   </div>
@@ -1716,7 +1858,7 @@
 <!-- =========================================================================
      RIGHT-SIDE: NASA ROBOT DETAIL PANEL + INTERACTIVE 3D VIEWER + HISTORY TRACK
      ========================================================================= -->
-<div id="robotDetailPanel" class="panel">
+<div id="robotDetailPanel" class="panel" style="display:none;">
   <!-- Agency & Expedition Header -->
   <div class="agency-header">
     <div>
@@ -1896,7 +2038,7 @@
 <!-- =========================================================================
      BOTTOM QUICK KEYBOARD CONTROLS
      ========================================================================= -->
-<div id="help">
+<div id="help" style="display:none;">
   <b>Setir:</b> <kbd>W A S D</kbd> · <b>Peta:</b> <kbd>M</kbd> · <b>Turbo:</b> <kbd>Shift</kbd> · <b>Pilih Robot:</b> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> / <kbd>Tab</kbd> · <b>Aksi:</b> <kbd>Space</kbd> · <b>Lab:</b> <kbd>B</kbd> · <b>Transport:</b> <kbd>C</kbd>
 </div>
 
