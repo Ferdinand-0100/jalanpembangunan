@@ -77,7 +77,9 @@ function switchSimulationTerrain(mapData) {
       swarm.spawnAt(centerX, centerY, 0);
       const active = swarm.getActiveRover();
       if (rig && active) {
-        rig.controls.target.copy(active.mesh.position);
+        rig.setMode('follow');
+        const w = frame.toWorld(active.physics.X, active.physics.Y, active.physics.elevation);
+        rig.placeBehind(new THREE.Vector3(w.x, w.y, w.z), active.physics.heading);
       }
     }
 
