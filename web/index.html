@@ -117,7 +117,8 @@
       align-items: center;
       gap: 8px;
       z-index: 30;
-      max-width: calc(100vw - 740px);
+      max-width: calc(100vw - 420px);
+      overflow: visible;
     }
 
     .top-nav-fab {
@@ -169,10 +170,13 @@
       align-items: center;
       gap: 6px;
       overflow-x: auto;
+      overflow-y: visible;
       scrollbar-width: none;
       transition: opacity 0.25s ease, transform 0.25s ease;
       opacity: 1;
       transform: translateX(0);
+      max-width: calc(100vw - 420px);
+      padding-bottom: 2px;
     }
     #topControlBar::-webkit-scrollbar { display: none; }
 
