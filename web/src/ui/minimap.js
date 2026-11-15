@@ -243,7 +243,6 @@ export class Minimap {
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       }
       @media (max-width: 1280px) {
         .minimap-widget {
@@ -277,13 +276,10 @@ export class Minimap {
         pointer-events: none;
         z-index: 2;
       }
-      .minimap-widget.collapsed {
-        height: 34px !important;
-        width: 220px;
-      }
-      .minimap-widget.collapsed .minimap-body,
-      .minimap-widget.collapsed .minimap-footer {
-        display: none !important;
+      .minimap-widget.dragging {
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.95), 0 0 16px rgba(0, 229, 255, 0.4);
+        border-color: rgba(0, 229, 255, 0.5);
+        transition: none;
       }
 
       .minimap-header {
@@ -294,7 +290,9 @@ export class Minimap {
         background: #0d141e;
         border-bottom: 1px solid #1c2636;
         height: 32px;
+        cursor: grab;
       }
+      .minimap-header:active { cursor: grabbing; }
       .minimap-title-group {
         display: flex;
         align-items: center;
@@ -871,11 +869,9 @@ export class Minimap {
         </div>
         <div class="minimap-controls">
           <button id="miniLayerBtn" class="mini-icon-btn" title="Ganti Lapisan Peta (Orto / Topo / Lereng / Hybrid)">${ICONS.layers(11)}</button>
-          <button id="miniCenterBtn" class="mini-icon-btn" title="Pusatkan ke Rover">${ICONS.crosshair(11)}</button>
           <button id="miniZoomInBtn" class="mini-icon-btn" title="Perbesar (Zoom In)">${ICONS.plus(11)}</button>
           <button id="miniZoomOutBtn" class="mini-icon-btn" title="Perkecil (Zoom Out)">${ICONS.minus(11)}</button>
           <button id="miniMaximizeBtn" class="mini-icon-btn max-btn" title="Maksimalkan Peta (M)">${ICONS.maximize(11)}</button>
-          <button id="miniCollapseBtn" class="mini-icon-btn" title="Sembunyikan / Buka">${ICONS.minus(11)}</button>
         </div>
       </div>
       <div id="minimapBody" class="minimap-body">
@@ -1040,35 +1036,46 @@ export class Minimap {
     // --- Minimap Controls ---
     onClick('miniMaximizeBtn', () => this.toggleMaximize());
     onClick('miniExpandHint', () => this.toggleMaximize());
-    onClick('miniCollapseBtn', () => {
-      this.isCollapsed = !this.isCollapsed;
-      const w = $('minimapWidget');
-      if (w) w.classList.toggle('collapsed', this.isCollapsed);
-      const b = $('miniCollapseBtn');
-      if (b) b.innerHTML = this.isCollapsed ? ICONS.plus(11) : ICONS.minus(11);
-      b.title = this.isCollapsed ? 'Buka Minimap' : 'Sembunyikan Minimap';
-    });
-    // Click on the header title area while collapsed to re-expand
-    const headerTitleGroup = document.querySelector('#minimapWidget .minimap-title-group');
-    if (headerTitleGroup) {
-      headerTitleGroup.style.cursor = 'pointer';
-      headerTitleGroup.onclick = () => {
-        if (this.isCollapsed) {
-          this.isCollapsed = false;
-          const w = $('minimapWidget');
-          if (w) w.classList.remove('collapsed');
-          const b = $('miniCollapseBtn');
-          if (b) { b.innerHTML = ICONS.minus(11); b.title = 'Sembunyikan Minimap'; }
-        }
-      };
+    // Drag-to-move: drag the header to reposition the widget
+    const widget = $('minimapWidget');
+    const header = widget?.querySelector('.minimap-header');
+    if (widget && header) {
+      let dragActive = false;
+      let startX = 0, startY = 0, startLeft = 0, startTop = 0;
+
+      header.addEventListener('pointerdown', e => {
+        if (e.target.closest('button')) return;
+        dragActive = true;
+        header.setPointerCapture(e.pointerId);
+        widget.classList.add('dragging');
+        const rect = widget.getBoundingClientRect();
+        widget.style.right = 'auto';
+        widget.style.left = rect.left + 'px';
+        widget.style.top = rect.top + 'px';
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = rect.left;
+        startTop = rect.top;
+        e.preventDefault();
+      });
+
+      header.addEventListener('pointermove', e => {
+        if (!dragActive) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        const newLeft = Math.max(0, Math.min(window.innerWidth - widget.offsetWidth, startLeft + dx));
+        const newTop = Math.max(0, Math.min(window.innerHeight - widget.offsetHeight, startTop + dy));
+        widget.style.left = newLeft + 'px';
+        widget.style.top = newTop + 'px';
+      });
+
+      header.addEventListener('pointerup', () => {
+        dragActive = false;
+        widget.classList.remove('dragging');
+      });
     }
-    onClick('miniCenterBtn', () => {
-      const active = this.swarm?.getActiveRover ? this.swarm.getActiveRover() : null;
-      if (active?.physics) {
-        this.miniCenter.X = active.physics.X;
-        this.miniCenter.Y = active.physics.Y;
-      }
-    });
+
+    // Click on the header title area while collapsed to re-expand — removed (no collapse feature)
     onClick('miniZoomInBtn', () => {
       this.miniRadius = Math.max(1000, this.miniRadius * 0.7);
     });

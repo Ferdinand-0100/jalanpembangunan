@@ -64,7 +64,7 @@ try {
       // Hud & simulator panels below appear after the fade-out delay
       setTimeout(() => {
         // Display all simulator panels
-        const simPanels = ['topControlBar', 'simSettingsModal', 'robotDetailPanel', 'help'];
+        const simPanels = ['topNavWrapper', 'simSettingsModal', 'robotDetailPanel', 'help', 'minimapWidget'];
         simPanels.forEach(id => {
           const el = document.getElementById(id);
           if (el) el.style.display = '';
@@ -176,8 +176,7 @@ const hud = new Hud({
   onSecondaryAction: () => triggerSecondaryTask(),
   onOpenMapPortal: () => {
     if (dashboardController) {
-      // Sembunyikan panel simulator dulu, lalu buka dashboard
-      const simPanels = ['topControlBar', 'simSettingsModal', 'robotDetailPanel', 'help'];
+      const simPanels = ['topNavWrapper', 'simSettingsModal', 'robotDetailPanel', 'help', 'minimapWidget'];
       simPanels.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';

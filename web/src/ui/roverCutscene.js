@@ -89,7 +89,7 @@ export class RoverCutscene {
     this._transitioning = false;
 
     // Hide simulator UI panels during cutscene
-    const panels = ['topControlBar', 'robotDetailPanel', 'help'];
+    const panels = ['topNavWrapper', 'robotDetailPanel', 'help', 'minimapWidget'];
     panels.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.dataset.csHidden = el.style.display;
@@ -222,7 +222,7 @@ export class RoverCutscene {
     }, 500);
 
     // Restore simulator UI panels
-    const panels = ['topControlBar', 'robotDetailPanel', 'help'];
+    const panels = ['topNavWrapper', 'robotDetailPanel', 'help', 'minimapWidget'];
     panels.forEach(id => {
       const el = document.getElementById(id);
       if (el) {
