@@ -1,4 +1,18 @@
 import * as THREE from 'three';
+import { OLYMPUS_REGIONS } from './olympusMonsTerrain.js';
+
+/** Forces all sprites inside a group to always render on top of terrain. */
+function forceSpritesOnTop(group, renderOrder = 999) {
+  group.traverse(obj => {
+    if (obj.isSprite) {
+      obj.renderOrder = renderOrder;
+      if (obj.material) {
+        obj.material.depthTest = false;
+        obj.material.depthWrite = false;
+      }
+    }
+  });
+}
 
 /**
  * RegionMarkers — 6 wilayah geologi dengan relief 3D prosedural yang MENEMPEL pada terrain.
@@ -299,13 +313,21 @@ export class RegionMarkers {
     this.lift = options.lift ?? 2.5;
     this.cells = options.cells ?? 192;
     this.markers = [];
-    this.proximityRadius = 3000; // meters — jarak untuk trigger popup
+    this.olympusMarkers = [];
+    this.activeMapId = 'usgs-i-1802-a';
+    this.proximityRadius = 3200;
     this.activePopup = null;
     this.uTime = { value: 0 };
     this._glowTex = null;
 
     this.#createPopupDOM();
     this.#buildMarkers();
+    this.#buildOlympusMarkers();
+  }
+
+  setMapMode(mapId) {
+    this.activeMapId = mapId;
+    this.setVisible(!this._disabled);
   }
 
   #createPopupDOM() {
@@ -360,6 +382,7 @@ export class RegionMarkers {
       let light = null;
       if (KIND[region.feature] === 3) light = this.#addLavaGlow(group, region, patch.centerY);
 
+      forceSpritesOnTop(group);
       this.scene.add(group);
       this.markers.push({
         id: region.id, name: region.name, desc: region.desc, color: region.color,
@@ -368,12 +391,60 @@ export class RegionMarkers {
     }
   }
 
+  #buildOlympusMarkers() {
+    this.olympusMarkers = [];
+    const hf = this.hf;
+    const centerX = hf.left + (hf.cols * hf.cell) / 2;
+    const centerY = hf.top - (hf.rows * hf.cell) / 2;
+
+    for (const region of OLYMPUS_REGIONS) {
+      const cx = centerX + region.ox;
+      const cy = centerY + region.oy;
+      const cw = { x: 0, y: 0, z: 0 };
+      this.frame.toWorld(cx, cy, hf.sample(cx, cy), cw);
+
+      const group = new THREE.Group();
+      group.position.set(cw.x, cw.y, cw.z);
+
+      const beam = this.#addBeacon(group, region.color, 0, region.beaconH);
+      this.#addLabel(group, region.name, region.color, region.beaconH + 130);
+      this.#addZoneRing(group, region, cx, cy, cw);
+
+      group.visible = (this.activeMapId === 'usgs-sim-3470');
+      this.scene.add(group);
+
+      this.olympusMarkers.push({
+        id: region.id,
+        name: region.title,
+        desc: region.desc,
+        color: region.color,
+        projX: cx,
+        projY: cy,
+        group,
+        beam,
+        phase: Math.random() * TAU,
+      });
+    }
+  }
+
+  setVisible(visible) {
+    this._disabled = !visible;
+    const isOlympus = (this.activeMapId === 'usgs-sim-3470');
+    for (const m of this.markers) {
+      if (m.group) m.group.visible = visible && !isOlympus;
+    }
+    for (const om of this.olympusMarkers) {
+      if (om.group) om.group.visible = visible && isOlympus;
+    }
+    if (this.popupEl) this.popupEl.style.display = 'none';
+  }
+
   /**
    * Mengembalikan elevasi tambahan (meter) dari relief wilayah prosedural pada koordinat projected (X, Y).
    * Digunakan oleh RoverPhysics agar robot dapat memanjat gunung api, kawah, dan bukit tanpa tenggelam.
    */
   getReliefAt(X, Y) {
-    if (!this.patchData) return 0;
+    if (this._disabled || !this.patchData) return 0;
     let extra = 0;
     const o = { h: 0, heat: 0 };
     for (let i = 0; i < this.patchData.length; i++) {
@@ -533,7 +604,8 @@ vWN = normalize(mat3(modelMatrix) * objectNormal);`);
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.minFilter = THREE.LinearFilter;
-    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, fog: false }));
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false, fog: false }));
+    sprite.renderOrder = 999;
     sprite.scale.set(1100, 275, 1);
     sprite.position.y = y;
     group.add(sprite);
@@ -573,8 +645,9 @@ vWN = normalize(mat3(modelMatrix) * objectNormal);`);
       this._glowTex = new THREE.CanvasTexture(c);
     }
     const glow = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: this._glowTex, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, fog: false,
+      map: this._glowTex, blending: THREE.AdditiveBlending, transparent: true, depthTest: false, depthWrite: false, fog: false,
     }));
+    glow.renderOrder = 998;
     glow.scale.setScalar(region.radius * 0.32);
     glow.position.y = centerY + 40;
     group.add(glow);
@@ -592,11 +665,16 @@ vWN = normalize(mat3(modelMatrix) * objectNormal);`);
    * @param {number} roverProjY — posisi projected Y robot aktif
    */
   update(roverProjX, roverProjY) {
+    if (this._disabled) {
+      if (this.popupEl) this.popupEl.style.display = 'none';
+      return;
+    }
     const t = performance.now() / 1000;
     this.uTime.value = t;
 
+    const activeList = (this.activeMapId === 'usgs-sim-3470') ? this.olympusMarkers : this.markers;
     let closest = null, closestDist = Infinity;
-    for (const m of this.markers) {
+    for (const m of activeList) {
       const dist = Math.hypot(roverProjX - m.projX, roverProjY - m.projY);
       m.beam.material.opacity = 0.28 + 0.08 * Math.sin(t * 1.5 + m.phase);
       if (m.light) m.light.intensity = 3.6 + 0.7 * Math.sin(t * 2.1 + m.phase) + 0.4 * Math.sin(t * 5.3 + m.phase * 2);

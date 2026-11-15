@@ -82,8 +82,9 @@ export class RoverPhysics {
         const gx = (this.sampleElevation(nx + e, ny) - this.sampleElevation(nx - e, ny)) / (2 * e);
         const gy = (this.sampleElevation(nx, ny + e) - this.sampleElevation(nx, ny - e)) / (2 * e);
         const along = Math.atan(gx * s + gy * c) * 180 / Math.PI * Math.sign(this.speed);
-        if (Math.abs(along) > o.maxSlopeDeg) {
-          blocked = `slope ${Math.abs(along).toFixed(0)}° > ${o.maxSlopeDeg}° limit`;
+        const effectiveLimit = sprint ? 85 : (o.maxSlopeDeg || 65);
+        if (Math.abs(along) > effectiveLimit) {
+          blocked = `slope ${Math.abs(along).toFixed(0)}° > ${effectiveLimit}° limit`;
         } else {
           this.X = nx;
           this.Y = ny;

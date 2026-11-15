@@ -25,7 +25,8 @@ export class LabBackpackWorkbench {
 
     this.isOpen = false;
     this.selectedSpecimenId = 'elysium'; // Default selected
-
+    this.customDataset = null; // Dataset khusus map aktif (mis. Jezero Crater)
+    
     // 3D Scene Meja Riset
     this.renderer = null;
     this.scene = null;
@@ -42,6 +43,26 @@ export class LabBackpackWorkbench {
     this.#init3DScene();
   }
 
+  /**
+   * Mengganti isi inventori & model 3D meja riset sesuai map aktif.
+   * Kirim null untuk kembali ke dataset bawaan map teman (REGION_SCIENCE_DATA).
+   */
+  setCustomDataset(datasetMap, defaultId = null) {
+    this.customDataset = datasetMap || null;
+    const activeMap = this.#getActiveDataset();
+    const keys = Object.keys(activeMap);
+    if (keys.length > 0) {
+      this.selectedSpecimenId = defaultId && activeMap[defaultId] ? defaultId : keys[0];
+    }
+    this.#refreshSidebarList();
+    if (this.isOpen && this.selectedSpecimenId) {
+      this.placeArtifactOnDesk(this.selectedSpecimenId);
+    }
+  }
+
+  #getActiveDataset() {
+    return this.customDataset || REGION_SCIENCE_DATA;
+  }
   /* ---------------------------------------------------------
    * 1. MEMBANGUN STRUKTUR DOM DI LAYAR
    * --------------------------------------------------------- */
@@ -358,7 +379,8 @@ export class LabBackpackWorkbench {
       this.currentArtifactMesh = null;
     }
 
-    const data = REGION_SCIENCE_DATA[specimenId];
+    const dataset = this.#getActiveDataset();
+    const data = dataset[specimenId];
     if (!data) return;
 
     const group = new THREE.Group();
@@ -384,6 +406,94 @@ export class LabBackpackWorkbench {
   }
 
   #createSpecimen3D(id, data) {
+    // --- MODEL 3D KHUSUS SPESIMEN JEZERO CRATER ---
+    if (data && data.meshKind) {
+      const isResearched = !!data.researched;
+
+      // Sebelum diteliti Robot B: tampilkan kapsul sampel misterius bersegel
+      if (!isResearched) {
+        const mysteryGroup = new THREE.Group();
+        const capsule = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.24, 0.24, 0.48, 20),
+          new THREE.MeshStandardMaterial({
+            color: 0x1e293b,
+            emissive: 0x38bdf8,
+            emissiveIntensity: 0.35,
+            metalness: 0.85,
+            roughness: 0.25
+          })
+        );
+        const halo = new THREE.Mesh(
+          new THREE.TorusGeometry(0.32, 0.015, 10, 32),
+          new THREE.MeshBasicMaterial({ color: 0xf59e0b })
+        );
+        halo.rotation.x = Math.PI / 2;
+        mysteryGroup.add(capsule, halo);
+        return mysteryGroup;
+      }
+
+      // Setelah diteliti Robot B: tampilkan model 3D geologi asli yang tajam & jelas
+      if (data.meshKind === 'olivine_crystal') {
+        const g = new THREE.Group();
+        const mat = new THREE.MeshStandardMaterial({
+          color: 0x65a30d,
+          emissive: 0x84cc16,
+          emissiveIntensity: 1.4,
+          roughness: 0.15,
+          metalness: 0.75
+        });
+        [
+          { r: 0.2, h: 0.62, x: 0, z: 0, rx: 0.08, rz: -0.05 },
+          { r: 0.13, h: 0.44, x: 0.2, z: 0.1, rx: 0.3, rz: -0.22 },
+          { r: 0.12, h: 0.4, x: -0.18, z: 0.12, rx: -0.25, rz: 0.2 }
+        ].forEach(s => {
+          const m = new THREE.Mesh(new THREE.ConeGeometry(s.r, s.h, 6), mat);
+          m.position.set(s.x, s.h * 0.35 - 0.18, s.z);
+          m.rotation.set(s.rx, 0.4, s.rz);
+          g.add(m);
+        });
+        return g;
+      }
+
+      if (data.meshKind === 'layered_butte' || data.meshKind === 'carbonate_terrace') {
+        const g = new THREE.Group();
+        const cols =
+          data.meshKind === 'carbonate_terrace'
+            ? [0xd6d3d1, 0xf5f5f4, 0xffffff]
+            : [0x9a3412, 0xd97706, 0xfacc15];
+        cols.forEach((col, i) => {
+          const slab = new THREE.Mesh(
+            new THREE.BoxGeometry(0.65 - i * 0.13, 0.12, 0.5 - i * 0.1),
+            new THREE.MeshStandardMaterial({ color: col, roughness: 0.45, metalness: 0.2 })
+          );
+          slab.position.set(i * 0.03, -0.16 + i * 0.12, -i * 0.02);
+          slab.rotation.y = 0.35;
+          g.add(slab);
+        });
+        return g;
+      }
+
+      // Default batuan berurat mineral / megabreksi Jezero
+      const rockGroup = new THREE.Group();
+      const rock = new THREE.Mesh(
+        new THREE.DodecahedronGeometry(0.34, 1),
+        new THREE.MeshStandardMaterial({
+          color: 0x475569,
+          emissive: data.color || 0x00e5ff,
+          emissiveIntensity: 0.55,
+          roughness: 0.35,
+          metalness: 0.6
+        })
+      );
+      const vein = new THREE.Mesh(
+        new THREE.TorusGeometry(0.33, 0.02, 10, 32),
+        new THREE.MeshBasicMaterial({ color: data.color || 0x38bdf8 })
+      );
+      vein.rotation.set(0.6, 0.3, 0);
+      rockGroup.add(rock, vein);
+      return rockGroup;
+    }
+
     if (id === 'elysium') {
       // BATUAN MAGMA MENONJOL: Kristal Obsidian Berurat Lava Pijar
       const group = new THREE.Group();
@@ -466,6 +576,109 @@ export class LabBackpackWorkbench {
         metalness: 0.85,
       });
       return new THREE.Mesh(geo, mat);
+    } else if (id === 'zeus_patera') {
+      // PADAT: Breksia Sesar Graben Zeus
+      const group = new THREE.Group();
+      const boxGeo = new THREE.BoxGeometry(0.38, 0.28, 0.32);
+      const boxMat = new THREE.MeshStandardMaterial({ color: 0x2b2416, roughness: 0.8, metalness: 0.3 });
+      group.add(new THREE.Mesh(boxGeo, boxMat));
+      const veinGeo = new THREE.BoxGeometry(0.39, 0.06, 0.1);
+      const veinMat = new THREE.MeshStandardMaterial({
+        color: 0xffaa00,
+        emissive: 0xff8800,
+        emissiveIntensity: 2.2,
+        metalness: 0.85,
+        roughness: 0.15,
+      });
+      group.add(new THREE.Mesh(veinGeo, veinMat));
+      return group;
+    } else if (id === 'hera_patera') {
+      // PADAT: Fragmen Basal Tebing Busur Hera
+      const geo = new THREE.CylinderGeometry(0.32, 0.42, 0.22, 6);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x331c12,
+        emissive: 0xff5522,
+        emissiveIntensity: 1.4,
+        roughness: 0.5,
+        metalness: 0.6,
+      });
+      return new THREE.Mesh(geo, mat);
+    } else if (id === 'hermes_patera') {
+      // PADAT: Pahoehoe Pematang Busur Hermes
+      const geo = new THREE.TorusKnotGeometry(0.26, 0.075, 48, 8);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x35103b,
+        emissive: 0xab47bc,
+        emissiveIntensity: 1.8,
+        roughness: 0.2,
+        metalness: 0.75,
+      });
+      return new THREE.Mesh(geo, mat);
+    } else if (id === 'dionysus_patera') {
+      // CAIR: Bejana Fumarol Gas & Belerang Dionysus
+      const group = new THREE.Group();
+      const beakerMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.35 });
+      const beaker = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.3, 0.45, 24), beakerMat);
+      group.add(beaker);
+      const fluidMat = new THREE.MeshStandardMaterial({
+        color: 0x00e5ff,
+        emissive: 0x00aacc,
+        emissiveIntensity: 1.8,
+        roughness: 0.08,
+        metalness: 0.8,
+        transparent: true,
+        opacity: 0.85,
+      });
+      const fluid = new THREE.Mesh(new THREE.CylinderGeometry(0.29, 0.28, 0.38, 24), fluidMat);
+      fluid.position.y = -0.02;
+      group.add(fluid);
+      return group;
+    } else if (id === 'athena_patera') {
+      // PADAT: Basal Pikrit Kaldera Bulat Athena
+      const geo = new THREE.OctahedronGeometry(0.36, 1);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x082b14,
+        emissive: 0x38ef7d,
+        emissiveIntensity: 2.2,
+        roughness: 0.12,
+        metalness: 0.85,
+      });
+      return new THREE.Mesh(geo, mat);
+    } else if (id === 'apollo_patera') {
+      // PADAT: Vitrofir Danau Lava Apollo
+      const geo = new THREE.DodecahedronGeometry(0.34, 0);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x260307,
+        emissive: 0xef4444,
+        emissiveIntensity: 1.8,
+        roughness: 0.08,
+        metalness: 0.9,
+      });
+      return new THREE.Mesh(geo, mat);
+    } else if (id === 'pangboche_crater') {
+      // PADAT: Kaca Impak Ejecta Pangboche
+      const group = new THREE.Group();
+      const coreGeo = new THREE.IcosahedronGeometry(0.3, 0);
+      const coreMat = new THREE.MeshStandardMaterial({
+        color: 0x222630,
+        emissive: 0xffffff,
+        emissiveIntensity: 2.4,
+        roughness: 0.12,
+        metalness: 0.95,
+      });
+      group.add(new THREE.Mesh(coreGeo, coreMat));
+      const flangeGeo = new THREE.TorusGeometry(0.34, 0.05, 16, 32);
+      const flangeMat = new THREE.MeshStandardMaterial({
+        color: 0x556677,
+        emissive: 0x88ccff,
+        emissiveIntensity: 1.5,
+        roughness: 0.2,
+        metalness: 0.9,
+      });
+      const flange = new THREE.Mesh(flangeGeo, flangeMat);
+      flange.rotation.x = Math.PI / 3;
+      group.add(flange);
+      return group;
     } else {
       // MONOLIT FLUIDA GEOTERMAL HESPERIA
       const group = new THREE.Group();
@@ -577,16 +790,23 @@ export class LabBackpackWorkbench {
   /* ---------------------------------------------------------
    * 6. RENDER DAFTAR SPESIMEN DI SIDEBAR KIRI
    * --------------------------------------------------------- */
+  getScienceDataDict() {
+    return (this.mission && typeof this.mission.getScienceDataDict === 'function')
+      ? this.mission.getScienceDataDict()
+      : REGION_SCIENCE_DATA;
+  }
+
   #refreshSidebarList() {
     const listEl = document.getElementById('labBpItemList');
     const countBadge = document.getElementById('labBpCountBadge');
     if (!listEl) return;
 
+    const dataset = this.#getActiveDataset();
     let collectedCount = 0;
-    const totalCount = Object.keys(REGION_SCIENCE_DATA).length;
+    const totalCount = Object.keys(dataset).length;
 
-    const html = Object.keys(REGION_SCIENCE_DATA).map(key => {
-      const item = REGION_SCIENCE_DATA[key];
+    const html = Object.keys(dataset).map(key => {
+      const item = dataset[key];
       const isCollected = this.isSpecimenCollected(key);
       if (isCollected) collectedCount++;
 
@@ -617,7 +837,6 @@ export class LabBackpackWorkbench {
       countBadge.textContent = `${collectedCount} / ${totalCount} DIAMBIL`;
     }
 
-    // Bind event klik pada setiap kartu item
     listEl.querySelectorAll('.lab-bp-item-card').forEach(card => {
       card.addEventListener('click', () => {
         this.placeArtifactOnDesk(card.dataset.id);
@@ -626,10 +845,12 @@ export class LabBackpackWorkbench {
   }
 
   isSpecimenCollected(id) {
+    const dataset = this.#getActiveDataset();
+    if (dataset[id] && typeof dataset[id].collected === 'boolean') {
+      return dataset[id].collected;
+    }
     if (!this.mission) return false;
-    // Cek apakah ada di muatan kontainer aktif
     if (this.mission.transportCargo && this.mission.transportCargo.id === id) return true;
-    // Cek apakah artefak di medan sudah ditandai collected
     if (this.mission.artifacts) {
       const art = this.mission.artifacts.find(a => a.id === id);
       if (art && art.collected) return true;
@@ -682,10 +903,11 @@ export class LabBackpackWorkbench {
     this.isOpen = true;
     this.overlayEl.style.display = 'flex';
 
-    const targetId = specimenId || this.selectedSpecimenId || 'elysium';
+    const dataset = this.#getActiveDataset();
+    const firstKey = Object.keys(dataset)[0] || 'elysium';
+    const targetId = specimenId && dataset[specimenId] ? specimenId : (dataset[this.selectedSpecimenId] ? this.selectedSpecimenId : firstKey);
     this.placeArtifactOnDesk(targetId);
 
-    // Mulai loop animasi 3D Meja Lab
     this.#startAnimation();
   }
 
