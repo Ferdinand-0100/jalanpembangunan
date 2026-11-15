@@ -74,10 +74,621 @@
     #topControlBar {
       top: 12px;
       left: 12px;
+      max-width: calc(100vw - 740px);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 15;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    #topControlBar::-webkit-scrollbar { display: none; }
+
+    /* =========================================================================
+       NASA JPL TACTICAL MINIMAP & MAXIMIZED SURFACE RECONNAISSANCE STATION
+       ========================================================================= */
+    /* 1. COMPACT HUD MINIMAP (Kanan Atas, Sebelah Robot Detail Panel) */
+    .minimap-widget {
+      position: fixed;
+      top: 12px;
+      right: 404px;
+      width: 320px;
+      background: rgba(11, 15, 23, 0.95);
+      border: 1px solid #1f2a3c;
+      border-radius: 4px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.85), 0 0 1px rgba(0, 229, 255, 0.3);
+      backdrop-filter: blur(12px);
+      z-index: 25;
+      user-select: none;
+      font-family: var(--font-mono, monospace);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @media (max-width: 1280px) {
+      .minimap-widget {
+        right: 396px;
+        width: 270px;
+      }
+    }
+    @media (max-width: 960px) {
+      .minimap-widget {
+        right: 12px;
+        top: auto;
+        bottom: 12px;
+        width: 260px;
+      }
+    }
+    .minimap-widget::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; width: 6px; height: 6px;
+      border-top: 2px solid var(--data-cyan, #00e5ff);
+      border-left: 2px solid var(--data-cyan, #00e5ff);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .minimap-widget::after {
+      content: "";
+      position: absolute;
+      bottom: 0; right: 0; width: 6px; height: 6px;
+      border-bottom: 2px solid var(--data-cyan, #00e5ff);
+      border-right: 2px solid var(--data-cyan, #00e5ff);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .minimap-widget.collapsed {
+      height: 34px !important;
+      width: 220px;
+    }
+    .minimap-widget.collapsed .minimap-body,
+    .minimap-widget.collapsed .minimap-footer {
+      display: none !important;
+    }
+
+    .minimap-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 8px;
+      background: #0d141e;
+      border-bottom: 1px solid #1c2636;
+      height: 32px;
+    }
+    .minimap-title-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .minimap-badge {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--data-cyan, #00e5ff);
+      letter-spacing: 0.5px;
+    }
+    .minimap-rover-tag {
+      font-size: 9.5px;
+      background: #141f2e;
+      border: 1px solid #23354c;
+      color: #e2e8f0;
+      padding: 1px 5px;
+      border-radius: 2px;
+      font-weight: 700;
+    }
+    .minimap-controls {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .mini-icon-btn {
+      background: #131b26;
+      border: 1px solid #243346;
+      color: #94a3b8;
+      border-radius: 2px;
+      width: 22px;
+      height: 20px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 10px;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+    .mini-icon-btn:hover {
+      background: #1d2a3c;
+      color: #fff;
+      border-color: var(--data-cyan, #00e5ff);
+    }
+    .mini-icon-btn.max-btn {
+      color: var(--data-cyan, #00e5ff);
+      font-weight: 800;
+    }
+
+    .minimap-body {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      background: #07090d;
+      overflow: hidden;
+      cursor: grab;
+    }
+    .minimap-body:active { cursor: grabbing; }
+    #minimapCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .minimap-compass {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--data-cyan, #00e5ff);
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1;
+      opacity: 0.85;
+    }
+    .minimap-compass::before {
+      content: "▲";
+      font-size: 8px;
+      color: var(--nasa-red, #e03c31);
+    }
+    .minimap-scale-bar {
+      position: absolute;
+      bottom: 5px;
+      left: 8px;
+      font-size: 8.5px;
+      color: #94a3b8;
+      pointer-events: none;
+      border-bottom: 2px solid #00e5ff;
+      padding-bottom: 1px;
+      line-height: 1;
+    }
+
+    .minimap-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 8px;
+      background: #090e15;
+      border-top: 1px solid #16202c;
+      font-size: 9.5px;
+      color: #64748b;
+    }
+    .mini-hint {
+      color: var(--data-cyan, #00e5ff);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* 2. MAXIMIZED TACTICAL MAPPING STATION (Full-screen Modal) */
+    .max-map-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: rgba(7, 10, 15, 0.98);
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      font-family: var(--font-sans, sans-serif);
+      color: #f1f5f9;
+      user-select: none;
+      overflow: hidden;
+    }
+    .max-map-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: #0a0f17;
+      border-bottom: 1px solid #1f2c3e;
+      flex-shrink: 0;
+      gap: 12px;
+    }
+    .max-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .agency-badge {
+      font-family: var(--font-mono, monospace);
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--nasa-red, #e03c31);
+      letter-spacing: 1.2px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .agency-badge span {
+      background: var(--nasa-red, #e03c31);
+      color: #fff;
+      padding: 1px 4px;
+      border-radius: 2px;
+      font-size: 9px;
+    }
+    .max-map-title {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 800;
+      color: #f8fafc;
+      letter-spacing: 0.5px;
+      font-family: var(--font-mono, monospace);
+    }
+    .max-map-sub {
+      font-size: 10px;
+      color: #64748b;
+      font-family: var(--font-mono, monospace);
+      margin-top: 1px;
+    }
+    .max-header-center {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .layer-pill-group {
+      display: flex;
+      background: #111823;
+      border: 1px solid #1e2c3e;
+      border-radius: 4px;
+      padding: 2px;
+      gap: 2px;
+    }
+    .layer-btn {
+      background: transparent;
+      border: 0;
+      color: #94a3b8;
+      padding: 5px 10px;
+      border-radius: 3px;
+      font-size: 10.5px;
+      cursor: pointer;
+      font-family: var(--font-mono, monospace);
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .layer-btn:hover { color: #fff; background: #1a2536; }
+    .layer-btn.active {
+      background: var(--nasa-blue, #0b3d91);
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(11, 61, 145, 0.5);
+    }
+    .tint-toggle-label {
+      font-size: 10px;
+      font-family: var(--font-mono, monospace);
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .max-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .overlay-toggles {
+      display: flex;
+      gap: 8px;
+      font-size: 10px;
+      font-family: var(--font-mono, monospace);
+      color: #94a3b8;
+    }
+    .overlay-toggles label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .max-action-btn {
+      background: #141e2c;
+      border: 1px solid #24354c;
+      color: #e2e8f0;
+      border-radius: 3px;
+      padding: 5px 10px;
+      font-size: 10.5px;
+      font-family: var(--font-mono, monospace);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .max-action-btn:hover { background: #1f3047; border-color: var(--data-cyan, #00e5ff); color: #fff; }
+    .max-close-btn {
+      background: #1c2738;
+      border: 1px solid #324660;
+      color: #fff;
+      border-radius: 3px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-family: var(--font-mono, monospace);
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .max-close-btn:hover {
+      background: var(--nasa-red, #e03c31);
+      border-color: var(--nasa-red, #e03c31);
+    }
+    .max-map-body {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+    .max-map-canvas-container {
+      flex: 1;
+      position: relative;
+      background: #05070a;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+    #maxMapCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .max-hover-hud {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(10, 15, 23, 0.92);
+      border: 1px solid #1f2c3e;
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-family: var(--font-mono, monospace);
+      font-size: 10px;
+      color: #cbd5e1;
+      pointer-events: none;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      z-index: 5;
+    }
+    .max-hover-hud .hud-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .max-hover-hud .hud-row b { color: #64748b; }
+    .canvas-floating-controls {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 5;
+    }
+    .float-btn {
+      width: 32px;
+      height: 32px;
+      background: rgba(16, 23, 35, 0.9);
+      border: 1px solid #28394f;
+      color: #f1f5f9;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono, monospace);
+      transition: all 0.15s ease;
+    }
+    .float-btn:hover {
+      background: #223249;
+      border-color: var(--data-cyan, #00e5ff);
+      color: var(--data-cyan, #00e5ff);
+    }
+    .canvas-scale-bar-container {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      font-family: var(--font-mono, monospace);
+      font-size: 10px;
+      color: #cbd5e1;
+      pointer-events: none;
+      z-index: 5;
+    }
+    #dynamicScaleLine {
+      width: 120px;
+      height: 3px;
+      background: #00e5ff;
+      margin-top: 2px;
+      border-left: 2px solid #fff;
+      border-right: 2px solid #fff;
+      box-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+    }
+    .canvas-compass-indicator {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-family: var(--font-mono, monospace);
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--data-cyan, #00e5ff);
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1;
+      z-index: 5;
+    }
+    .compass-arrow {
+      color: var(--nasa-red, #e03c31);
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+    .target-action-pill {
+      position: absolute;
+      background: rgba(14, 21, 31, 0.96);
+      border: 1px solid var(--data-cyan, #00e5ff);
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-family: var(--font-mono, monospace);
+      font-size: 10px;
+      box-shadow: 0 4px 20px rgba(0, 229, 255, 0.25);
       display: flex;
       align-items: center;
       gap: 8px;
       z-index: 10;
+      transform: translate(-50%, -120%);
+    }
+    .pill-act-btn {
+      background: #0b3d91;
+      border: 1px solid #1b53b8;
+      color: #fff;
+      border-radius: 3px;
+      padding: 4px 8px;
+      font-size: 9.5px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+    }
+    .pill-act-btn:hover { background: #134db3; }
+    .pill-close-btn {
+      background: transparent;
+      border: 0;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 11px;
+    }
+    .pill-close-btn:hover { color: #fff; }
+    .max-map-sidebar {
+      width: 330px;
+      background: #090e15;
+      border-left: 1px solid #1d293a;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .side-card {
+      background: #0e141e;
+      border: 1px solid #1e2a3c;
+      border-radius: 4px;
+      padding: 10px;
+    }
+    .side-card-title {
+      font-family: var(--font-mono, monospace);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      color: #64748b;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #1a2534;
+      padding-bottom: 4px;
+    }
+    .sidebar-rover-list { display: flex; flex-direction: column; gap: 6px; }
+    .side-rover-card {
+      background: #121a26;
+      border: 1px solid #202d3e;
+      border-radius: 3px;
+      padding: 6px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono, monospace);
+      font-size: 10px;
+    }
+    .side-rover-card.active { border-color: var(--data-cyan, #00e5ff); background: #142232; }
+    .src-meta { display: flex; flex-direction: column; gap: 2px; }
+    .src-callsign { font-weight: 800; }
+    .src-coords { font-size: 9px; color: #64748b; }
+    .src-btn {
+      background: #1a2738;
+      border: 1px solid #283b52;
+      color: #94a3b8;
+      border-radius: 2px;
+      padding: 3px 6px;
+      font-size: 9px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .src-btn:hover { background: #26384f; color: #fff; }
+    .sidebar-regions-list { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .region-tag-btn {
+      background: #111822;
+      border: 1px solid #1f2b3b;
+      border-radius: 3px;
+      padding: 6px 4px;
+      text-align: center;
+      font-size: 9.5px;
+      font-family: var(--font-mono, monospace);
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      line-height: 1.25;
+    }
+    .region-tag-btn:hover {
+      background: #192434;
+      border-color: var(--data-cyan, #00e5ff);
+      color: #fff;
+    }
+    .elevation-legend-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .legend-gradient {
+      height: 12px;
+      border-radius: 2px;
+      background: linear-gradient(to right, #0a192f, #1a5276, #2e86c1, #27ae60, #f1c40f, #e67e22, #c0392b, #f5eee6);
+      border: 1px solid #24354c;
+    }
+    .legend-labels {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono, monospace);
+      font-size: 8.5px;
+      color: #64748b;
+    }
+    .slope-legend-scale {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      margin-top: 8px;
+      font-family: var(--font-mono, monospace);
+      font-size: 9px;
+    }
+    .slope-pill {
+      padding: 3px 5px;
+      border-radius: 2px;
+      background: #121924;
+    }
+    .slope-pill.safe { color: #2ecc71; border-left: 2px solid #2ecc71; }
+    .slope-pill.mild { color: #82c91e; border-left: 2px solid #82c91e; }
+    .slope-pill.caution { color: #f1c40f; border-left: 2px solid #f1c40f; }
+    .slope-pill.hazard { color: #e74c3c; border-left: 2px solid #e74c3c; }
+    .mission-objects-box {
+      font-family: var(--font-mono, monospace);
+      font-size: 9.5px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .m-obj-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 3px 5px;
+      background: #111722;
+      border-radius: 2px;
     }
 
     /* Floating Simulation Settings Dropdown */
@@ -719,6 +1330,9 @@
   <button id="openMapPortalBtn" class="top-chip" style="cursor:pointer;background:#0d1a2d;border-color:#1e3a63;color:#e2e8f0;font-weight:700;">
     🗺️ PETA GEOLOGI
   </button>
+  <button id="openMinimapBtn" class="top-chip" style="cursor:pointer;background:#0d233a;border-color:#00e5ff;color:#00e5ff;font-weight:700;">
+    🛰️ PETA TAKTIS (M)
+  </button>
   <button id="toggleBackpackBtn" class="top-chip" style="cursor:pointer;background:#0c2236;border-color:#00e5ff;color:#00e5ff;font-weight:800;letter-spacing:0.3px;box-shadow:0 0 12px rgba(0,229,255,0.25);">
     🎒 BACKPACK LABORATORIUM
   </button>
@@ -776,6 +1390,168 @@
     <label><input id="tint" type="checkbox" checked> Pewarnaan Mars-Tone</label>
   </div>
   <button id="resetRover" style="margin-top:8px;background:#1e293b;border:1px solid #334155;color:#fff;border-radius:3px;padding:6px;width:100%;cursor:pointer;font-family:var(--font-mono);">↺ Reset Posisi Awal</button>
+</div>
+
+<!-- =========================================================================
+     TOP-RIGHT: TACTICAL MINIMAP HUD (Sebelah Kiri Robot Detail Panel)
+     ========================================================================= -->
+<div id="minimapWidget" class="minimap-widget">
+  <div class="minimap-header">
+    <div class="minimap-title-group">
+      <span class="minimap-badge">🛰️ MINIMAP TAKTIS</span>
+      <span id="miniActiveRoverName" class="minimap-rover-tag">ROV-01</span>
+    </div>
+    <div class="minimap-controls">
+      <button id="miniLayerBtn" class="mini-icon-btn" title="Ganti Lapisan Peta (Orto / Topo / Lereng / Hybrid)">🛰️</button>
+      <button id="miniCenterBtn" class="mini-icon-btn" title="Pusatkan ke Rover">🎯</button>
+      <button id="miniZoomInBtn" class="mini-icon-btn" title="Perbesar (Zoom In)">+</button>
+      <button id="miniZoomOutBtn" class="mini-icon-btn" title="Perkecil (Zoom Out)">-</button>
+      <button id="miniMaximizeBtn" class="mini-icon-btn max-btn" title="Maksimalkan Peta (M)">⛶</button>
+      <button id="miniCollapseBtn" class="mini-icon-btn" title="Sembunyikan / Buka">−</button>
+    </div>
+  </div>
+  <div id="minimapBody" class="minimap-body">
+    <canvas id="minimapCanvas"></canvas>
+    <div class="minimap-compass">N</div>
+    <div id="miniScaleBar" class="minimap-scale-bar">1 km ──</div>
+  </div>
+  <div id="minimapFooter" class="minimap-footer">
+    <span id="miniCoords">77.4509°E, 18.4446°N · -2514m</span>
+    <span class="mini-hint" id="miniExpandHint">[M] MAX</span>
+  </div>
+</div>
+
+<!-- =========================================================================
+     FULLSCREEN: MAXIMIZED TACTICAL RECONNAISSANCE & MAPPING STATION
+     ========================================================================= -->
+<div id="maximizedMapModal" class="max-map-modal" style="display:none;">
+  <header class="max-map-header">
+    <div class="max-header-left">
+      <div class="agency-badge">NASA <span>JPL</span></div>
+      <div class="map-title-box">
+        <h2 class="max-map-title">JEZERO CRATER TACTICAL SURFACE RECONNAISSANCE &amp; MAPPING STATION</h2>
+        <div class="max-map-sub">Cakupan Geografis: 17.6°–19.3° LU, 76.6°–78.3° BT · Resolusi: 40m DEM &amp; 20m CTX Orthomosaic</div>
+      </div>
+    </div>
+
+    <div class="max-header-center">
+      <div class="layer-pill-group">
+        <button class="layer-btn active" data-layer="ortho">🛰️ Citra Orto CTX</button>
+        <button class="layer-btn" data-layer="dem">🏔️ DEM Topografi</button>
+        <button class="layer-btn" data-layer="slope">📐 Kemiringan Lereng</button>
+        <button class="layer-btn" data-layer="hybrid">🌐 Orto + Kontur</button>
+      </div>
+      <label class="tint-toggle-label">
+        <input type="checkbox" id="maxTintCheck" checked> Mars Tone
+      </label>
+    </div>
+
+    <div class="max-header-right">
+      <div class="overlay-toggles">
+        <label><input type="checkbox" id="chkShowTrails" checked> Jejak Lintasan</label>
+        <label><input type="checkbox" id="chkShowRegions" checked> Wilayah Geologi</label>
+        <label><input type="checkbox" id="chkShowWaypoints" checked> Waypoint Misi</label>
+        <label><input type="checkbox" id="chkShowGrid" checked> Grid Koordinat</label>
+      </div>
+      <button id="maxMapFitBtn" class="max-action-btn" title="Lihat Seluruh Area Kawah Jezero (88×101 km)">🔍 Seluruh Peta</button>
+      <button id="maxMapCenterRoverBtn" class="max-action-btn" title="Pusatkan ke Rover Aktif">🎯 Pusatkan Rover</button>
+      <button id="maxMapCloseBtn" class="max-close-btn" title="Perkecil / Tutup Peta (M / Esc)">🗗 Perkecil (M)</button>
+    </div>
+  </header>
+
+  <div class="max-map-body">
+    <div class="max-map-canvas-container" id="maxCanvasContainer">
+      <canvas id="maxMapCanvas"></canvas>
+
+      <!-- Hover HUD Inspector -->
+      <div id="maxHoverHUD" class="max-hover-hud" style="display:none;">
+        <div class="hud-row"><b>KOORDINAT:</b> <span id="hoverLonLat">--</span></div>
+        <div class="hud-row"><b>PROJEKSI X/Y:</b> <span id="hoverProj">--</span></div>
+        <div class="hud-row"><b>ELEVASI REAL DEM:</b> <span id="hoverElev" style="color:var(--data-cyan)">--</span></div>
+        <div class="hud-row"><b>KEMIRINGAN LERENG:</b> <span id="hoverSlope">--</span></div>
+        <div class="hud-row"><b>ZONA GEOLOGI:</b> <span id="hoverRegion" style="color:#ffd166">--</span></div>
+      </div>
+
+      <!-- Floating Zoom Controls -->
+      <div class="canvas-floating-controls">
+        <button id="maxZoomInBtn" class="float-btn" title="Zoom In">+</button>
+        <button id="maxZoomOutBtn" class="float-btn" title="Zoom Out">-</button>
+        <button id="maxZoomResetBtn" class="float-btn" title="Reset Zoom">↺</button>
+      </div>
+
+      <!-- Dynamic Scale Bar & North Indicator -->
+      <div class="canvas-scale-bar-container">
+        <div id="dynamicScaleLabel">5 km</div>
+        <div id="dynamicScaleLine"></div>
+      </div>
+      <div class="canvas-compass-indicator">
+        <div class="compass-arrow">▲</div>
+        <div>N</div>
+      </div>
+
+      <!-- Click Target Action Pill -->
+      <div id="mapTargetActionPill" class="target-action-pill" style="display:none;">
+        <span id="targetPillTitle">Target: 77.45°E, 18.44°N</span>
+        <button id="targetSetWaypointBtn" class="pill-act-btn">📍 Tandai Waypoint</button>
+        <button id="targetTeleportCamBtn" class="pill-act-btn">🔭 Lihat di 3D</button>
+        <button id="targetClosePillBtn" class="pill-close-btn">✕</button>
+      </div>
+    </div>
+
+    <!-- Right Tactical Sidebar -->
+    <aside class="max-map-sidebar">
+      <!-- Section 1: Rover Swarm Telemetry -->
+      <div class="side-card">
+        <div class="side-card-title">SWARM ROVER TELEMETRI (3 UNIT)</div>
+        <div id="sidebarRoverCards" class="sidebar-rover-list"></div>
+      </div>
+
+      <!-- Section 2: 6 Geological Regions Fast-Travel -->
+      <div class="side-card">
+        <div class="side-card-title">6 FORMASI &amp; WILAYAH GEOLOGI</div>
+        <div class="sidebar-regions-list" id="sidebarRegionList"></div>
+      </div>
+
+      <!-- Section 3: Legend & Hazards -->
+      <div class="side-card">
+        <div class="side-card-title">LEGENDA ELEVASI &amp; BAHAYA LERENG</div>
+        <div class="elevation-legend-bar">
+          <div class="legend-gradient"></div>
+          <div class="legend-labels">
+            <span>-3500m</span>
+            <span>-2500m</span>
+            <span>-1500m</span>
+            <span>-476m</span>
+          </div>
+        </div>
+        <div class="slope-legend-scale">
+          <div class="slope-pill safe">■ &lt;6° Aman</div>
+          <div class="slope-pill mild">■ 6°-12° Landai</div>
+          <div class="slope-pill caution">■ 12°-18° Waspada</div>
+          <div class="slope-pill hazard">■ &gt;18° Bahaya</div>
+        </div>
+      </div>
+
+      <!-- Section 4: Mission Objects -->
+      <div class="side-card">
+        <div class="side-card-title">OBJEK &amp; STASIUN MISI</div>
+        <div id="sidebarMissionObjects" class="mission-objects-box">
+          <div class="m-obj-item">
+            <span>📍 Sampel Geologi Terkini</span>
+            <span id="sideSampleStatus" style="color:#64748b">Belum Ada</span>
+          </div>
+          <div class="m-obj-item">
+            <span>🔬 Stasiun Lab Sains</span>
+            <span id="sideLabStatus" style="color:#64748b">Belum Dibangun</span>
+          </div>
+          <div class="m-obj-item">
+            <span>🚛 Status Kargo Hermes</span>
+            <span id="sideCargoStatus" style="color:#64748b">Kosong</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
 </div>
 
 <!-- =========================================================================
@@ -925,8 +1701,8 @@
 <!-- =========================================================================
      BOTTOM QUICK KEYBOARD CONTROLS
      ========================================================================= -->
-<div id="help" style="display:none">
-  <b>Setir:</b> <kbd>W A S D</kbd> · <b>Turbo:</b> <kbd>Shift</kbd> · <b>Pilih Robot:</b> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> / <kbd>Tab</kbd> · <b>Aksi:</b> <kbd>Space</kbd> · <b>Lab:</b> <kbd>B</kbd> · <b>Transport:</b> <kbd>C</kbd>
+<div id="help">
+  <b>Setir:</b> <kbd>W A S D</kbd> · <b>Peta:</b> <kbd>M</kbd> · <b>Turbo:</b> <kbd>Shift</kbd> · <b>Pilih Robot:</b> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> / <kbd>Tab</kbd> · <b>Aksi:</b> <kbd>Space</kbd> · <b>Lab:</b> <kbd>B</kbd> · <b>Transport:</b> <kbd>C</kbd>
 </div>
 
 <script type="module" src="./src/main.js"></script>

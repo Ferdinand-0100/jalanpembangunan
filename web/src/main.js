@@ -16,6 +16,7 @@ import { VisualPerceptionSystem } from './mission/visualPerception.js';
 import { VisualPerceptionPanel } from './ui/visualPerceptionPanel.js';
 import { HistoryTracker } from './rover/historyTracker.js';
 import { LabBackpackWorkbench } from './ui/labBackpack.js';
+import { Minimap } from './ui/minimap.js';
 import { MarsGlobe3D } from './marsGlobe.js';
 import { DashboardController } from './ui/dashboardController.js';
 import { Tutorial } from './ui/tutorial.js';
@@ -24,7 +25,7 @@ import { getOlympusMonsCalderaHeights } from './terrain/olympusMonsTerrain.js';
 import { JezeroCraterExploration } from './terrain/jezeroCraterExploration.js';
 
 let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal, regionMarkers, missionSystem, jezeroExploration;
-let vpms, vpPanel, historyTracker, labBackpack;
+let vpms, vpPanel, historyTracker, labBackpack, minimap;
 let marsGlobe, dashboardController;
 let tutorial, cutscene;
 let originalHeights = null;
@@ -421,6 +422,34 @@ async function main() {
     switchSimulationTerrain(pMap);
   }
 
+  // === Tactical Minimap & Maximized Surface Reconnaissance Station ===
+  try {
+    minimap = new Minimap({
+      meta,
+      heights: data.heights,
+      hf,
+      frame,
+      texture: data.texture,
+      swarm,
+      historyTracker,
+      regionMarkers,
+      missionSystem,
+      rig,
+      hud,
+      onNavigate: (X, Y) => {},
+    });
+    window.minimap = minimap;
+  } catch (e) {
+    console.error('[Minimap] Init failed:', e);
+  }
+
+  const openMinimapBtn = document.getElementById('openMinimapBtn');
+  if (openMinimapBtn) {
+    openMinimapBtn.onclick = () => {
+      if (minimap) minimap.toggleMaximize();
+    };
+  }
+
   document.getElementById('sources').innerHTML = meta.sources.map(s => `<li><b>${s.role}:</b> ${s.file}<br><span>${s.credit}</span></li>`).join('');
   hud.setInspect(null);
   hud.hideLoading();
@@ -464,6 +493,9 @@ async function main() {
     } else if (e.code === 'KeyE') {
       // Shortcut E: Buka / Tutup Backpack Laboratorium
       if (labBackpack) labBackpack.toggle();
+    } else if (e.code === 'KeyM') {
+      // Shortcut M: Maksimalkan / Perkecil Peta Taktis & Terrain Mars
+      if (minimap) minimap.toggleMaximize();
     }
   });
 
@@ -542,6 +574,11 @@ async function main() {
         const stats = historyTracker.getTrackStats(swarm.activeIndex);
         hud.updateHistory(stats);
       }
+    }
+
+    // Update tactical minimap & maximized surface reconnaissance station
+    if (minimap) {
+      minimap.update();
     }
 
     const [lon, lat] = frame.projToLonLat(active.physics.X, active.physics.Y);
