@@ -16,9 +16,134 @@ import { VisualPerceptionSystem } from './mission/visualPerception.js';
 import { VisualPerceptionPanel } from './ui/visualPerceptionPanel.js';
 import { HistoryTracker } from './rover/historyTracker.js';
 import { LabBackpackWorkbench } from './ui/labBackpack.js';
+import { MarsGlobe3D } from './marsGlobe.js';
+import { DashboardController } from './ui/dashboardController.js';
+import { getOlympusMonsCalderaHeights } from './terrain/olympusMonsTerrain.js';
 
 let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal, regionMarkers, missionSystem;
 let vpms, vpPanel, historyTracker, labBackpack;
+let marsGlobe, dashboardController;
+let originalHeights = null;
+let currentSimMapId = 'usgs-i-1802-a';
+let pendingSimMap = null;
+
+// Helper to safely display toast notification
+function safeToast(msg) {
+  if (hud && typeof hud.showToast === 'function') {
+    hud.showToast(msg);
+  } else {
+    console.log('[Toast]', msg);
+  }
+}
+
+// 1. Initialize 3D Mars Globe
+try {
+  marsGlobe = new MarsGlobe3D('marsGlobeCanvasContainer', {
+    onHotspotClick: (hs) => {
+      if (dashboardController) {
+        dashboardController.selectMap(hs.id);
+      }
+      safeToast(`📍 Selected ${hs.name} (${hs.code})`);
+    },
+  });
+  window.marsGlobe = marsGlobe;
+} catch (err) {
+  console.error('[MarsGlobe3D] Failed to initialize:', err);
+}
+
+// 2. Initialize Dashboard Controller (Independent try-catch so launch button ALWAYS works!)
+try {
+  dashboardController = new DashboardController({
+    marsGlobe: window.marsGlobe,
+    onLaunchSimulation: (mapData) => {
+      // Dashboard fade-out is handled by DashboardController.hide()
+      // Hud & simulator panels below appear after the fade-out delay
+      setTimeout(() => {
+        // Display all simulator panels
+        const simPanels = ['topControlBar', 'simSettingsModal', 'robotDetailPanel', 'help'];
+        simPanels.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = '';
+        });
+        switchSimulationTerrain(mapData);
+      }, 500);
+    },
+    onToast: (msg) => safeToast(msg),
+  });
+  window.dashboardController = dashboardController;
+} catch (err) {
+  console.error('[DashboardController] Failed to initialize:', err);
+}
+
+function switchSimulationTerrain(mapData) {
+  const mapId = typeof mapData === 'string' ? mapData : mapData.id;
+  currentSimMapId = mapId;
+
+  if (!hf || !terrain) {
+    pendingSimMap = mapData;
+    console.log('[MarsDashboard] Simulation terrain not ready yet, queued launch for:', mapId);
+    return;
+  }
+
+  if (mapId === 'usgs-sim-3470') {
+    // 1. Build and apply real Olympus Mons Caldera DEM heights
+    const olympusHeights = getOlympusMonsCalderaHeights(meta);
+    hf.data = olympusHeights;
+    terrain.build(CONFIG.meshStride);
+
+    // 2. Spawn rovers on the flat basaltic caldera floor (+18,100 m) near center
+    const centerX = (meta.extent.left + meta.extent.right) * 0.5;
+    const centerY = (meta.extent.bottom + meta.extent.top) * 0.5;
+    if (swarm) {
+      swarm.spawnAt(centerX, centerY, 0);
+      const active = swarm.getActiveRover();
+      if (rig && active) {
+        rig.setMode('follow');
+        const w = frame.toWorld(active.physics.X, active.physics.Y, active.physics.elevation);
+        rig.placeBehind(new THREE.Vector3(w.x, w.y, w.z), active.physics.heading);
+      }
+    }
+
+    // 3. Disable Jezero regional patches so the real Olympus caldera topography is clean
+    if (regionMarkers) {
+      if (typeof regionMarkers.setMapMode === 'function') {
+        regionMarkers.setMapMode('usgs-sim-3470');
+      } else {
+        regionMarkers.setVisible(false);
+      }
+    }
+
+    // 4. Update mission system map mode if available
+    if (missionSystem && typeof missionSystem.setMapMode === 'function') {
+      missionSystem.setMapMode('usgs-sim-3470');
+    }
+    safeToast('🌋 Landed at Olympus Mons Caldera (USGS SIM 3470, Summit Elevation +18,100 m)');
+  } else {
+    // 1. Restore original Valles Marineris / Jezero heights
+    if (originalHeights) {
+      hf.data = originalHeights;
+      terrain.build(CONFIG.meshStride);
+    }
+
+    // 2. Spawn rovers at default start coordinates
+    startRovers();
+
+    // 3. Enable regional markers
+    if (regionMarkers) {
+      if (typeof regionMarkers.setMapMode === 'function') {
+        regionMarkers.setMapMode('usgs-i-1802-a');
+      } else {
+        regionMarkers.setVisible(true);
+      }
+    }
+
+    // 4. Restore mission system map mode
+    if (missionSystem && typeof missionSystem.setMapMode === 'function') {
+      missionSystem.setMapMode('usgs-i-1802-a');
+    }
+    safeToast('🚀 Landed at Valles Marineris & Tharsis (USGS I-1802A)');
+  }
+}
 
 const hud = new Hud({
   onExaggeration: v => { frame.setExaggeration(v); terrain.build(); },
@@ -34,7 +159,18 @@ const hud = new Hud({
   onTriggerTask: () => triggerMainTask(),
   onSecondaryAction: () => triggerSecondaryTask(),
   onOpenMapPortal: () => {
-    if (mapPortal) mapPortal.show();
+    if (dashboardController) {
+      // Sembunyikan panel simulator dulu, lalu buka dashboard
+      const simPanels = ['topControlBar', 'simSettingsModal', 'robotDetailPanel', 'help'];
+      simPanels.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+      dashboardController.show();
+      if (marsGlobe) marsGlobe.resize();
+    } else if (mapPortal) {
+      mapPortal.show();
+    }
   },
   onToggleHistory: (visible) => {
     if (historyTracker) historyTracker.setShowHistory(visible);
@@ -140,6 +276,7 @@ async function main() {
   }
 
   meta = data.meta;
+  originalHeights = data.heights.slice();
   hf = new Heightfield(meta, data.heights);
   frame = new GeoFrame(meta, CONFIG.verticalExaggeration);
 
@@ -177,6 +314,8 @@ async function main() {
   missionSystem.onStateChange = () => {
     hud.updateWorkflow(missionSystem, swarm.getActiveRover());
   };
+
+  const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 3, 600000);
 
   // === Visual Perception & Mission Documentation System ===
   try {
@@ -220,27 +359,43 @@ async function main() {
   marker.visible = false;
   scene.add(marker);
 
-  const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 3, 600000);
   rig = new CameraRig(camera, renderer.domElement, hf, frame);
-  input = new RoverInput(() => rig.mode);
+  input = new RoverInput(
+    () => rig.mode,
+    () => dashboardController && dashboardController.isVisible
+  );
 
   startRovers();
   updateSun();
+
+  if (pendingSimMap) {
+    const pMap = pendingSimMap;
+    pendingSimMap = null;
+    switchSimulationTerrain(pMap);
+  }
 
   document.getElementById('sources').innerHTML = meta.sources.map(s => `<li><b>${s.role}:</b> ${s.file}<br><span>${s.credit}</span></li>`).join('');
   hud.setInspect(null);
   hud.hideLoading();
 
-  // Initialize simple Map Portal
+  // Initialize simple Map Portal as secondary reference if needed
   mapPortal = new MapPortal({
     onLaunchSimulation: mapData => {
       hud.showToast(`Memasuki simulasi 3D — ${mapData.title}`);
+      switchSimulationTerrain(mapData);
     },
   });
-  mapPortal.show();
 
   // Keyboard shortcut switching between the 3 robots & mission triggers
   addEventListener('keydown', e => {
+    // If dashboard is active, don't trigger rover controls
+    if (dashboardController && dashboardController.isVisible) {
+      if (e.code === 'Escape') {
+        dashboardController.hideHelpModal();
+      }
+      return;
+    }
+
     if (['Digit1', 'Digit2', 'Digit3'].includes(e.code)) {
       const idx = parseInt(e.code.replace('Digit', ''), 10) - 1;
       selectRover(idx);

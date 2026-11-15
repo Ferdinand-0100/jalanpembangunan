@@ -327,7 +327,8 @@ export class LabBackpackWorkbench {
       this.currentArtifactMesh = null;
     }
 
-    const data = REGION_SCIENCE_DATA[specimenId];
+    const dict = this.getScienceDataDict();
+    const data = dict[specimenId] || REGION_SCIENCE_DATA[specimenId];
     if (!data) return;
 
     const group = new THREE.Group();
@@ -435,6 +436,109 @@ export class LabBackpackWorkbench {
         metalness: 0.85,
       });
       return new THREE.Mesh(geo, mat);
+    } else if (id === 'zeus_patera') {
+      // PADAT: Breksia Sesar Graben Zeus
+      const group = new THREE.Group();
+      const boxGeo = new THREE.BoxGeometry(0.38, 0.28, 0.32);
+      const boxMat = new THREE.MeshStandardMaterial({ color: 0x2b2416, roughness: 0.8, metalness: 0.3 });
+      group.add(new THREE.Mesh(boxGeo, boxMat));
+      const veinGeo = new THREE.BoxGeometry(0.39, 0.06, 0.1);
+      const veinMat = new THREE.MeshStandardMaterial({
+        color: 0xffaa00,
+        emissive: 0xff8800,
+        emissiveIntensity: 2.2,
+        metalness: 0.85,
+        roughness: 0.15,
+      });
+      group.add(new THREE.Mesh(veinGeo, veinMat));
+      return group;
+    } else if (id === 'hera_patera') {
+      // PADAT: Fragmen Basal Tebing Busur Hera
+      const geo = new THREE.CylinderGeometry(0.32, 0.42, 0.22, 6);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x331c12,
+        emissive: 0xff5522,
+        emissiveIntensity: 1.4,
+        roughness: 0.5,
+        metalness: 0.6,
+      });
+      return new THREE.Mesh(geo, mat);
+    } else if (id === 'hermes_patera') {
+      // PADAT: Pahoehoe Pematang Busur Hermes
+      const geo = new THREE.TorusKnotGeometry(0.26, 0.075, 48, 8);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x35103b,
+        emissive: 0xab47bc,
+        emissiveIntensity: 1.8,
+        roughness: 0.2,
+        metalness: 0.75,
+      });
+      return new THREE.Mesh(geo, mat);
+    } else if (id === 'dionysus_patera') {
+      // CAIR: Bejana Fumarol Gas & Belerang Dionysus
+      const group = new THREE.Group();
+      const beakerMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.35 });
+      const beaker = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.3, 0.45, 24), beakerMat);
+      group.add(beaker);
+      const fluidMat = new THREE.MeshStandardMaterial({
+        color: 0x00e5ff,
+        emissive: 0x00aacc,
+        emissiveIntensity: 1.8,
+        roughness: 0.08,
+        metalness: 0.8,
+        transparent: true,
+        opacity: 0.85,
+      });
+      const fluid = new THREE.Mesh(new THREE.CylinderGeometry(0.29, 0.28, 0.38, 24), fluidMat);
+      fluid.position.y = -0.02;
+      group.add(fluid);
+      return group;
+    } else if (id === 'athena_patera') {
+      // PADAT: Basal Pikrit Kaldera Bulat Athena
+      const geo = new THREE.OctahedronGeometry(0.36, 1);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x082b14,
+        emissive: 0x38ef7d,
+        emissiveIntensity: 2.2,
+        roughness: 0.12,
+        metalness: 0.85,
+      });
+      return new THREE.Mesh(geo, mat);
+    } else if (id === 'apollo_patera') {
+      // PADAT: Vitrofir Danau Lava Apollo
+      const geo = new THREE.DodecahedronGeometry(0.34, 0);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x260307,
+        emissive: 0xef4444,
+        emissiveIntensity: 1.8,
+        roughness: 0.08,
+        metalness: 0.9,
+      });
+      return new THREE.Mesh(geo, mat);
+    } else if (id === 'pangboche_crater') {
+      // PADAT: Kaca Impak Ejecta Pangboche
+      const group = new THREE.Group();
+      const coreGeo = new THREE.IcosahedronGeometry(0.3, 0);
+      const coreMat = new THREE.MeshStandardMaterial({
+        color: 0x222630,
+        emissive: 0xffffff,
+        emissiveIntensity: 2.4,
+        roughness: 0.12,
+        metalness: 0.95,
+      });
+      group.add(new THREE.Mesh(coreGeo, coreMat));
+      const flangeGeo = new THREE.TorusGeometry(0.34, 0.05, 16, 32);
+      const flangeMat = new THREE.MeshStandardMaterial({
+        color: 0x556677,
+        emissive: 0x88ccff,
+        emissiveIntensity: 1.5,
+        roughness: 0.2,
+        metalness: 0.9,
+      });
+      const flange = new THREE.Mesh(flangeGeo, flangeMat);
+      flange.rotation.x = Math.PI / 3;
+      group.add(flange);
+      return group;
     } else {
       // MONOLIT FLUIDA GEOTERMAL HESPERIA
       const group = new THREE.Group();
@@ -544,16 +648,23 @@ export class LabBackpackWorkbench {
   /* ---------------------------------------------------------
    * 6. RENDER DAFTAR SPESIMEN DI SIDEBAR KIRI
    * --------------------------------------------------------- */
+  getScienceDataDict() {
+    return (this.mission && typeof this.mission.getScienceDataDict === 'function')
+      ? this.mission.getScienceDataDict()
+      : REGION_SCIENCE_DATA;
+  }
+
   #refreshSidebarList() {
     const listEl = document.getElementById('labBpItemList');
     const countBadge = document.getElementById('labBpCountBadge');
     if (!listEl) return;
 
+    const dict = this.getScienceDataDict();
     let collectedCount = 0;
-    const totalCount = Object.keys(REGION_SCIENCE_DATA).length;
+    const totalCount = Object.keys(dict).length;
 
-    const html = Object.keys(REGION_SCIENCE_DATA).map(key => {
-      const item = REGION_SCIENCE_DATA[key];
+    const html = Object.keys(dict).map(key => {
+      const item = dict[key];
       const isCollected = this.isSpecimenCollected(key);
       if (isCollected) collectedCount++;
 
