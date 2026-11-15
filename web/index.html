@@ -1546,7 +1546,7 @@
 </div>
 
 <div id="app"></div>
-<div id="loading">NASA / JPL Mars Jezero Exploration Workstation Memuat Data…</div>
+<div id="loading">NASA / JPL Mars Jezero Exploration Workstation Loading Data…</div>
 <div id="toast"></div>
 
 <!-- =========================================================================
@@ -1555,29 +1555,29 @@
      ========================================================================= -->
 <div id="topNavWrapper" class="top-nav-wrapper" style="display:none;">
   <!-- Floating Action Button (FAB) to toggle toolbar -->
-  <button id="topNavFab" class="top-nav-fab active" title="Sembunyikan / Tampilkan Bilah Kontrol (H)">
+  <button id="topNavFab" class="top-nav-fab active" title="Hide / Show Control Bar (H)">
     <span class="fab-icon-symbol">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </span>
-    <span class="fab-text">TUTUP</span>
+    <span class="fab-text">CLOSE</span>
   </button>
 
   <div id="topControlBar" class="top-control-bar">
     <button id="openMapPortalBtn" class="top-chip btn-with-icon">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
-      <span>PETA GEOLOGI</span>
+      <span>GEOLOGICAL MAP</span>
     </button>
     <button id="openMinimapBtn" class="top-chip btn-cyan btn-with-icon">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></svg>
-      <span>PETA TAKTIS (M)</span>
+      <span>TACTICAL MAP (M)</span>
     </button>
     <button id="toggleBackpackBtn" class="top-chip btn-cyan btn-with-icon">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5"/><line x1="8" y1="10" x2="16" y2="10"/></svg>
-      <span>BACKPACK LABORATORIUM</span>
+      <span>LAB BACKPACK</span>
     </button>
     <button id="toggleSettingsBtn" class="top-chip btn-with-icon">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-      <span>SIMULASI &amp; KAMERA</span>
+      <span>SIMULATION &amp; CAMERA</span>
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
     <div class="top-chip telemetry-chip">
@@ -1592,32 +1592,32 @@
 <!-- Compact Simulation Settings Dropdown -->
 <div id="simSettingsModal" class="panel">
   <h3>
-    <span>Parameter Simulasi</span>
-    <button id="closeSettingsBtn" style="background:transparent;border:0;color:var(--text-dim);cursor:pointer;display:inline-flex;align-items:center;padding:2px;" title="Tutup">
+    <span>Simulation Parameters</span>
+    <button id="closeSettingsBtn" style="background:transparent;border:0;color:var(--text-dim);cursor:pointer;display:inline-flex;align-items:center;padding:2px;" title="Close">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
   </h3>
-  <label>Mode Kamera</label>
+  <label>Camera Mode</label>
   <select id="cam">
     <option value="follow">Follow Rover (Orbit/Zoom/Pan)</option>
     <option value="orbit">Free Orbit</option>
     <option value="fly">Free-Fly (WASD + Look)</option>
   </select>
 
-  <label>Mode Swarm Robot</label>
+  <label>Robot Swarm Mode</label>
   <select id="swarmMode">
-    <option value="hold" selected>Manual / Standby di Tempat</option>
-    <option value="formation">Formasi Kawal (Ikuti Rover Utama)</option>
-    <option value="autonomous">Patroli Otonom</option>
+    <option value="hold" selected>Manual / Hold Position</option>
+    <option value="formation">Escort Formation (Follow Lead Rover)</option>
+    <option value="autonomous">Autonomous Patrol</option>
   </select>
 
-  <label>Skala Visual Rover <span id="rscaleV" style="color:var(--data-cyan)">15×</span></label>
+  <label>Rover Visual Scale <span id="rscaleV" style="color:var(--data-cyan)">15×</span></label>
   <input id="rscale" type="range" min="1" max="60" value="15">
 
   <label>Vertical Exaggeration <span id="exagV" style="color:var(--data-cyan)">1.0×</span></label>
   <input id="exag" type="range" min="1" max="5" step="0.5" value="1">
 
-  <label>Resolusi Medan <span id="meshInfo" style="color:var(--text-dim)"></span></label>
+  <label>Terrain Resolution <span id="meshInfo" style="color:var(--text-dim)"></span></label>
   <select id="stride">
     <option value="8">Low (320 m)</option>
     <option value="4" selected>Medium (160 m)</option>
@@ -1625,17 +1625,17 @@
     <option value="1">Full (40 m, detail)</option>
   </select>
 
-  <label>Sudut Matahari</label>
+  <label>Sun Angle</label>
   <input id="sunEl" type="range" min="5" max="80" value="40">
   <input id="sunAz" type="range" min="0" max="360" value="135">
 
   <div style="margin-top:8px;">
-    <label><input id="slope" type="checkbox"> Slope Map (Gradien Kemiringan)</label>
-    <label><input id="tint" type="checkbox" checked> Pewarnaan Mars-Tone</label>
+    <label><input id="slope" type="checkbox"> Slope Map (Gradient Shading)</label>
+    <label><input id="tint" type="checkbox" checked> Mars-Tone Tint</label>
   </div>
   <button id="resetRover" class="btn-sec-action btn-with-icon" style="margin-top:12px;width:100%;font-weight:600;justify-content:center;">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-    <span>Reset Posisi Awal</span>
+    <span>Reset Starting Position</span>
   </button>
 </div>
 
@@ -1646,20 +1646,20 @@
   <div class="minimap-header">
     <div class="minimap-title-group">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--data-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></svg>
-      <span class="minimap-badge">MINIMAP TAKTIS</span>
+      <span class="minimap-badge">TACTICAL MINIMAP</span>
       <span id="miniActiveRoverName" class="minimap-rover-tag">ROV-01</span>
     </div>
     <div class="minimap-controls">
-      <button id="miniLayerBtn" class="mini-icon-btn" title="Ganti Lapisan Peta (Orto / Topo / Lereng / Hybrid)">
+      <button id="miniLayerBtn" class="mini-icon-btn" title="Switch Map Layer (Ortho / Topo / Slope / Hybrid)">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></svg>
       </button>
-      <button id="miniZoomInBtn" class="mini-icon-btn" title="Perbesar (Zoom In)">
+      <button id="miniZoomInBtn" class="mini-icon-btn" title="Zoom In">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
-      <button id="miniZoomOutBtn" class="mini-icon-btn" title="Perkecil (Zoom Out)">
+      <button id="miniZoomOutBtn" class="mini-icon-btn" title="Zoom Out">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
-      <button id="miniMaximizeBtn" class="mini-icon-btn max-btn" title="Maksimalkan Peta (M)">
+      <button id="miniMaximizeBtn" class="mini-icon-btn max-btn" title="Maximize Map (M)">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
       </button>
     </div>
@@ -1687,7 +1687,7 @@
       <div class="agency-badge">NASA <span>JPL</span></div>
       <div class="map-title-box">
         <h2 class="max-map-title">JEZERO CRATER TACTICAL SURFACE RECONNAISSANCE &amp; MAPPING STATION</h2>
-        <div class="max-map-sub">Cakupan Geografis: 17.6°–19.3° LU, 76.6°–78.3° BT · Resolusi: 40m DEM &amp; 20m CTX Orthomosaic</div>
+        <div class="max-map-sub">Geographic Coverage: 17.6°–19.3° N, 76.6°–78.3° E · Resolution: 40m DEM &amp; 20m CTX Orthomosaic</div>
       </div>
     </div>
 
@@ -1695,19 +1695,19 @@
       <div class="layer-pill-group">
         <button class="layer-btn active btn-with-icon" data-layer="ortho">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></svg>
-          <span>Citra Orto CTX</span>
+          <span>CTX Ortho Image</span>
         </button>
         <button class="layer-btn btn-with-icon" data-layer="dem">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>
-          <span>DEM Topografi</span>
+          <span>DEM Topography</span>
         </button>
         <button class="layer-btn btn-with-icon" data-layer="slope">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="m21.5 20-19 0"/><path d="M2.5 20 21.5 5"/><path d="M7 20a5 5 0 0 1 3.5-4.8"/></svg>
-          <span>Kemiringan Lereng</span>
+          <span>Slope Gradient</span>
         </button>
         <button class="layer-btn btn-with-icon" data-layer="hybrid">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 12.5-8.58 3.91a2 2 0 0 1-1.66 0L2 12.5"/><path d="m22 17.5-8.58 3.91a2 2 0 0 1-1.66 0L2 17.5"/></svg>
-          <span>Orto + Kontur</span>
+          <span>Ortho + Contour</span>
         </button>
       </div>
       <label class="tint-toggle-label">
@@ -1717,22 +1717,22 @@
 
     <div class="max-header-right">
       <div class="overlay-toggles">
-        <label><input type="checkbox" id="chkShowTrails" checked> Jejak Lintasan</label>
-        <label><input type="checkbox" id="chkShowRegions" checked> Wilayah Geologi</label>
-        <label><input type="checkbox" id="chkShowWaypoints" checked> Waypoint Misi</label>
-        <label><input type="checkbox" id="chkShowGrid" checked> Grid Koordinat</label>
+        <label><input type="checkbox" id="chkShowTrails" checked> Trail History</label>
+        <label><input type="checkbox" id="chkShowRegions" checked> Geological Zones</label>
+        <label><input type="checkbox" id="chkShowWaypoints" checked> Mission Waypoints</label>
+        <label><input type="checkbox" id="chkShowGrid" checked> Coordinate Grid</label>
       </div>
-      <button id="maxMapFitBtn" class="max-action-btn btn-with-icon" title="Lihat Seluruh Area Kawah Jezero (88×101 km)">
+      <button id="maxMapFitBtn" class="max-action-btn btn-with-icon" title="View Entire Jezero Crater Area (88×101 km)">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
-        <span>Seluruh Peta</span>
+        <span>Full Map</span>
       </button>
-      <button id="maxMapCenterRoverBtn" class="max-action-btn btn-with-icon" title="Pusatkan ke Rover Aktif">
+      <button id="maxMapCenterRoverBtn" class="max-action-btn btn-with-icon" title="Center on Active Rover">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>
-        <span>Pusatkan Rover</span>
+        <span>Center Rover</span>
       </button>
-      <button id="maxMapCloseBtn" class="max-close-btn btn-with-icon" title="Perkecil / Tutup Peta (M / Esc)">
+      <button id="maxMapCloseBtn" class="max-close-btn btn-with-icon" title="Minimize / Close Map (M / Esc)">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="M14 10l7-7"/><path d="M3 21l7-7"/></svg>
-        <span>Perkecil (M)</span>
+        <span>Minimize (M)</span>
       </button>
     </div>
   </header>
@@ -1743,11 +1743,11 @@
 
       <!-- Hover HUD Inspector -->
       <div id="maxHoverHUD" class="max-hover-hud" style="display:none;">
-        <div class="hud-row"><b>KOORDINAT:</b> <span id="hoverLonLat">--</span></div>
-        <div class="hud-row"><b>PROJEKSI X/Y:</b> <span id="hoverProj">--</span></div>
-        <div class="hud-row"><b>ELEVASI REAL DEM:</b> <span id="hoverElev" style="color:var(--data-cyan)">--</span></div>
-        <div class="hud-row"><b>KEMIRINGAN LERENG:</b> <span id="hoverSlope">--</span></div>
-        <div class="hud-row"><b>ZONA GEOLOGI:</b> <span id="hoverRegion" style="color:#ffd166">--</span></div>
+        <div class="hud-row"><b>COORDINATES:</b> <span id="hoverLonLat">--</span></div>
+        <div class="hud-row"><b>PROJECTION X/Y:</b> <span id="hoverProj">--</span></div>
+        <div class="hud-row"><b>REAL DEM ELEVATION:</b> <span id="hoverElev" style="color:var(--data-cyan)">--</span></div>
+        <div class="hud-row"><b>SLOPE GRADIENT:</b> <span id="hoverSlope">--</span></div>
+        <div class="hud-row"><b>GEOLOGICAL ZONE:</b> <span id="hoverRegion" style="color:#ffd166">--</span></div>
       </div>
 
       <!-- Floating Zoom Controls -->
@@ -1780,11 +1780,11 @@
         <span id="targetPillTitle">Target: 77.45°E, 18.44°N</span>
         <button id="targetSetWaypointBtn" class="pill-act-btn btn-with-icon">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
-          <span>Tandai Waypoint</span>
+          <span>Set Waypoint</span>
         </button>
         <button id="targetTeleportCamBtn" class="pill-act-btn btn-with-icon">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-          <span>Lihat di 3D</span>
+          <span>View in 3D</span>
         </button>
         <button id="targetClosePillBtn" class="pill-close-btn">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -1802,13 +1802,13 @@
 
       <!-- Section 2: 6 Geological Regions Fast-Travel -->
       <div class="side-card">
-        <div class="side-card-title">6 FORMASI &amp; WILAYAH GEOLOGI</div>
+        <div class="side-card-title">6 GEOLOGICAL FORMATIONS &amp; ZONES</div>
         <div class="sidebar-regions-list" id="sidebarRegionList"></div>
       </div>
 
       <!-- Section 3: Legend & Hazards -->
       <div class="side-card">
-        <div class="side-card-title">LEGENDA ELEVASI &amp; BAHAYA LERENG</div>
+        <div class="side-card-title">ELEVATION LEGEND &amp; SLOPE HAZARDS</div>
         <div class="elevation-legend-bar">
           <div class="legend-gradient"></div>
           <div class="legend-labels">
@@ -1819,37 +1819,37 @@
           </div>
         </div>
         <div class="slope-legend-scale">
-          <div class="slope-pill safe">■ &lt;6° Aman</div>
-          <div class="slope-pill mild">■ 6°-12° Landai</div>
-          <div class="slope-pill caution">■ 12°-18° Waspada</div>
-          <div class="slope-pill hazard">■ &gt;18° Bahaya</div>
+          <div class="slope-pill safe">■ &lt;6° Safe</div>
+          <div class="slope-pill mild">■ 6°-12° Mild</div>
+          <div class="slope-pill caution">■ 12°-18° Caution</div>
+          <div class="slope-pill hazard">■ &gt;18° Hazard</div>
         </div>
       </div>
 
       <!-- Section 4: Mission Objects -->
       <div class="side-card">
-        <div class="side-card-title">OBJEK &amp; STASIUN MISI</div>
+        <div class="side-card-title">MISSION OBJECTS &amp; STATIONS</div>
         <div id="sidebarMissionObjects" class="mission-objects-box">
           <div class="m-obj-item">
             <span style="display:flex;align-items:center;gap:6px;">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--data-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
-              <span>Sampel Geologi Terkini</span>
+              <span>Latest Geological Sample</span>
             </span>
-            <span id="sideSampleStatus" style="color:#64748b">Belum Ada</span>
+            <span id="sideSampleStatus" style="color:#64748b">None</span>
           </div>
           <div class="m-obj-item">
             <span style="display:flex;align-items:center;gap:6px;">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/></svg>
-              <span>Stasiun Lab Sains</span>
+              <span>Science Lab Station</span>
             </span>
-            <span id="sideLabStatus" style="color:#64748b">Belum Dibangun</span>
+            <span id="sideLabStatus" style="color:#64748b">Not Built</span>
           </div>
           <div class="m-obj-item">
             <span style="display:flex;align-items:center;gap:6px;">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--status-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="aerospace-icon"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-5.28a2 2 0 0 0-.586-1.414L18.414 7.3A2 2 0 0 0 17 6.72H14v11.28"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
-              <span>Status Kargo Hermes</span>
+              <span>Hermes Cargo Status</span>
             </span>
-            <span id="sideCargoStatus" style="color:#64748b">Kosong</span>
+            <span id="sideCargoStatus" style="color:#64748b">Empty</span>
           </div>
         </div>
       </div>
