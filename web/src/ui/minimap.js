@@ -1045,8 +1045,23 @@ export class Minimap {
       const w = $('minimapWidget');
       if (w) w.classList.toggle('collapsed', this.isCollapsed);
       const b = $('miniCollapseBtn');
-      if (b) b.textContent = this.isCollapsed ? '+' : '−';
+      if (b) b.innerHTML = this.isCollapsed ? ICONS.plus(11) : ICONS.minus(11);
+      b.title = this.isCollapsed ? 'Buka Minimap' : 'Sembunyikan Minimap';
     });
+    // Click on the header title area while collapsed to re-expand
+    const headerTitleGroup = document.querySelector('#minimapWidget .minimap-title-group');
+    if (headerTitleGroup) {
+      headerTitleGroup.style.cursor = 'pointer';
+      headerTitleGroup.onclick = () => {
+        if (this.isCollapsed) {
+          this.isCollapsed = false;
+          const w = $('minimapWidget');
+          if (w) w.classList.remove('collapsed');
+          const b = $('miniCollapseBtn');
+          if (b) { b.innerHTML = ICONS.minus(11); b.title = 'Sembunyikan Minimap'; }
+        }
+      };
+    }
     onClick('miniCenterBtn', () => {
       const active = this.swarm?.getActiveRover ? this.swarm.getActiveRover() : null;
       if (active?.physics) {
