@@ -45,6 +45,15 @@ export class MarsGlobe3D {
         rotY: 0.45,
         rotX: -0.22,
       },
+      'usgs-sim-3464': {
+        id: 'usgs-sim-3464',
+        lat: 18.44,
+        lon: 77.45,
+        name: 'Jezero Crater (Mars 2020)',
+        code: 'USGS SIM 3464',
+        rotY: -2.35, // Sesuaikan sudut putar bola Mars menghadap Jezero
+        rotX: -0.15,
+      },
     };
     this.activeHotspotId = 'usgs-i-1802-a';
     this.targetRotY = undefined;
