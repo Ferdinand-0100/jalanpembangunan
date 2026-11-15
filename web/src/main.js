@@ -59,12 +59,34 @@ try {
 try {
   dashboardController = new DashboardController({
     marsGlobe: window.marsGlobe,
+    onShow: () => {
+
+      if (tutorial) {
+        if (typeof tutorial.hidePrompt === 'function') tutorial.hidePrompt();
+        if (typeof tutorial.stop === 'function') tutorial.stop();
+      }
+      if (cutscene && typeof cutscene.stop === 'function') {
+        cutscene.stop();
+      }
+      const simPanels = [
+        'topNavWrapper', 'topControlBar', 'simSettingsModal',
+        'robotDetailPanel', 'help', 'minimapWidget',
+        'vpPanel', 'vpModal', 'tutorialPrompt', 'tutorialStep', 'tutorialComplete'
+      ];
+      simPanels.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+      if (window.vpPanel && typeof window.vpPanel.collapse === 'function') {
+        window.vpPanel.collapse();
+      }
+    },
     onLaunchSimulation: (mapData) => {
       // Dashboard fade-out is handled by DashboardController.hide()
       // Hud & simulator panels below appear after the fade-out delay
       setTimeout(() => {
         // Display all simulator panels
-        const simPanels = ['topNavWrapper', 'simSettingsModal', 'robotDetailPanel', 'help', 'minimapWidget'];
+        const simPanels = ['topNavWrapper', 'topControlBar', 'robotDetailPanel', 'help', 'minimapWidget', 'vpPanel'];
         simPanels.forEach(id => {
           const el = document.getElementById(id);
           if (el) el.style.display = '';
@@ -176,7 +198,18 @@ const hud = new Hud({
   onSecondaryAction: () => triggerSecondaryTask(),
   onOpenMapPortal: () => {
     if (dashboardController) {
-      const simPanels = ['topNavWrapper', 'simSettingsModal', 'robotDetailPanel', 'help', 'minimapWidget'];
+      if (tutorial) {
+        if (typeof tutorial.hidePrompt === 'function') tutorial.hidePrompt();
+        if (typeof tutorial.stop === 'function') tutorial.stop();
+      }
+      if (cutscene && typeof cutscene.stop === 'function') {
+        cutscene.stop();
+      }
+      const simPanels = [
+        'topNavWrapper', 'topControlBar', 'simSettingsModal',
+        'robotDetailPanel', 'help', 'minimapWidget',
+        'vpPanel', 'vpModal', 'tutorialPrompt', 'tutorialStep', 'tutorialComplete'
+      ];
       simPanels.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';

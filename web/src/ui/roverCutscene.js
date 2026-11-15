@@ -89,12 +89,19 @@ export class RoverCutscene {
     this._transitioning = false;
 
     // Hide simulator UI panels during cutscene
-    const panels = ['topNavWrapper', 'robotDetailPanel', 'help', 'minimapWidget'];
+    const panels = ['topNavWrapper', 'topControlBar', 'robotDetailPanel', 'help', 'minimapWidget', 'vpPanel', 'vpModal'];
     panels.forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.dataset.csHidden = el.style.display;
-      if (el) el.style.display = 'none';
+      if (el) {
+        el.dataset.csHidden = el.style.display;
+        el.style.display = 'none';
+      }
     });
+
+    // Close/collapse Visual Perception & Documentation menu
+    if (window.vpPanel && typeof window.vpPanel.collapse === 'function') {
+      window.vpPanel.collapse();
+    }
 
     // Spread rovers apart so each is clearly isolated when focused
     const rovers = this.swarm.rovers;
@@ -222,7 +229,7 @@ export class RoverCutscene {
     }, 500);
 
     // Restore simulator UI panels
-    const panels = ['topNavWrapper', 'robotDetailPanel', 'help', 'minimapWidget'];
+    const panels = ['topNavWrapper', 'topControlBar', 'robotDetailPanel', 'help', 'minimapWidget', 'vpPanel'];
     panels.forEach(id => {
       const el = document.getElementById(id);
       if (el) {
@@ -235,6 +242,37 @@ export class RoverCutscene {
     if (this.rig.controls) this.rig.controls.enabled = true;
 
     this.onComplete();
+  }
+
+  stop() {
+    if (!this.active) return;
+    this.active = false;
+
+    if (this._cardEl) {
+      this._cardEl.style.display = 'none';
+      this._cardEl.style.opacity = '0';
+    }
+
+    const rovers = this.swarm.rovers;
+    if (this._roverBasePos && rovers.length >= 3) {
+      const base = this._roverBasePos;
+      rovers[0].mesh.position.set(base.x, base.y, base.z);
+      rovers[1].mesh.position.set(base.x, base.y, base.z);
+      rovers[2].mesh.position.set(base.x, base.y, base.z);
+      this._roverBasePos = null;
+    }
+
+    if (this._letterboxTop) this._letterboxTop.style.transform = 'translateY(-100%)';
+    if (this._letterboxBot) this._letterboxBot.style.transform = 'translateY(100%)';
+
+    if (this._overlayEl) {
+      this._overlayEl.style.display = 'none';
+      this._overlayEl.style.opacity = '1';
+    }
+
+    if (this.rig && this.rig.controls) {
+      this.rig.controls.enabled = true;
+    }
   }
 
   _showSlide(index, instant = false) {
