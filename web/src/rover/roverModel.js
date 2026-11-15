@@ -111,6 +111,17 @@ export function createRoverModel(opts = {}) {
     return m;
   };
 
+  // Helper specifically for decals/plaques (never self-shadow, no acne)
+  const addDecal = (geo, mat, x, y, z, rx = 0, ry = 0, rz = 0, parent = group) => {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    if (rx || ry || rz) m.rotation.set(rx, ry, rz);
+    m.castShadow = false;
+    m.receiveShadow = false;
+    parent.add(m);
+    return m;
+  };
+
   /* ---------------------------------------------------------
    * 1. CHASSIS / WARM ELECTRONICS BOX (WEB)
    * --------------------------------------------------------- */
@@ -118,24 +129,52 @@ export function createRoverModel(opts = {}) {
   addMesh(new THREE.BoxGeometry(1.6, 0.55, 2.3), bodyWhite, 0, 0.88, 0);
 
   // Official NASA Insignia Plaques on Warm Electronics Box (WEB)
+  const wormTex = getNasaWormTexture();
+  const meatballTex = getNasaMeatballTexture();
+
   const nasaWormMat = new THREE.MeshStandardMaterial({
-    map: getNasaWormTexture(),
-    roughness: 0.3,
-    metalness: 0.15,
-  });
-  const nasaMeatballMat = new THREE.MeshStandardMaterial({
-    map: getNasaMeatballTexture(),
-    transparent: true,
-    roughness: 0.3,
-    metalness: 0.1,
+    map: wormTex,
+    roughness: 0.35,
+    metalness: 0.05,
+    emissive: 0xffffff,
+    emissiveMap: wormTex,
+    emissiveIntensity: 0.45,
+    polygonOffset: true,
+    polygonOffsetFactor: -4,
+    polygonOffsetUnits: -4,
   });
 
-  // Left & Right Chassis Side Panels (NASA Worm Logo)
-  addMesh(new THREE.PlaneGeometry(0.72, 0.22), nasaWormMat, -0.806, 0.9, -0.1, 0, -Math.PI / 2, 0);
-  addMesh(new THREE.PlaneGeometry(0.72, 0.22), nasaWormMat, 0.806, 0.9, -0.1, 0, Math.PI / 2, 0);
+  const nasaMeatballMat = new THREE.MeshStandardMaterial({
+    map: meatballTex,
+    transparent: true,
+    roughness: 0.25,
+    metalness: 0.05,
+    emissive: 0xffffff,
+    emissiveMap: meatballTex,
+    emissiveIntensity: 0.45,
+    polygonOffset: true,
+    polygonOffsetFactor: -4,
+    polygonOffsetUnits: -4,
+  });
+
+  // Left & Right Chassis Side Panels (Aerospace Placard Badge)
+  for (const sign of [-1, 1]) {
+    // Mounting bracket base plate
+    addMesh(new THREE.BoxGeometry(0.015, 0.25, 0.98), darkTitanium, sign * 0.808, 0.9, -0.05);
+    // NASA Worm Logo Placard Face
+    addDecal(new THREE.PlaneGeometry(0.94, 0.23), nasaWormMat, sign * 0.818, 0.9, -0.05, 0, sign === -1 ? -Math.PI / 2 : Math.PI / 2, 0);
+  }
+
+  // REAR CHASSIS NASA PLACARD (Prominently visible when following/driving rover!)
+  addMesh(new THREE.BoxGeometry(0.92, 0.25, 0.015), darkTitanium, 0, 0.92, 1.156);
+  addDecal(new THREE.PlaneGeometry(0.88, 0.23), nasaWormMat, 0, 0.92, 1.168, 0, 0, 0);
+
+  // Top Equipment Deck NASA Insignia Plaque (Visible from top-down 3D inspection view)
+  addDecal(new THREE.PlaneGeometry(0.76, 0.19), nasaWormMat, 0, 1.212, -0.25, -Math.PI / 2, 0, 0);
 
   // Front Chassis Bumper Badge (NASA Meatball Insignia)
-  addMesh(new THREE.PlaneGeometry(0.28, 0.28), nasaMeatballMat, 0, 0.88, -1.455, 0, Math.PI, 0);
+  addMesh(new THREE.CylinderGeometry(0.20, 0.20, 0.02, 24), darkTitanium, 0, 0.88, -1.45, Math.PI / 2, 0, 0);
+  addDecal(new THREE.PlaneGeometry(0.36, 0.36), nasaMeatballMat, 0, 0.88, -1.464, 0, Math.PI, 0);
 
   // Undercarriage skid plate (tapered bottom armor)
   addMesh(new THREE.BoxGeometry(1.3, 0.15, 2.1), darkTitanium, 0, 0.56, 0);
@@ -389,10 +428,17 @@ export function createRoverModel(opts = {}) {
       roughness: 0.2,
     });
 
+    const containerTex = getNasaContainerTexture();
     const nasaContainerMat = new THREE.MeshStandardMaterial({
-      map: getNasaContainerTexture(),
+      map: containerTex,
       roughness: 0.35,
-      metalness: 0.2,
+      metalness: 0.1,
+      emissive: 0xffffff,
+      emissiveMap: containerTex,
+      emissiveIntensity: 0.45,
+      polygonOffset: true,
+      polygonOffsetFactor: -4,
+      polygonOffsetUnits: -4,
     });
 
     // Kontainer Utama (Panjang 2.4m, Lebar 1.8m, Tinggi 1.1m)
@@ -406,7 +452,7 @@ export function createRoverModel(opts = {}) {
       // Strip Lampu LED Status Kargo
       addMesh(new THREE.BoxGeometry(0.09, 0.06, 1.9), containerGlowMat, sign * 0.91, 1.1, 0.2);
       // NASA Logistics Specimen Carrier Banner on Container Flanks
-      addMesh(new THREE.PlaneGeometry(1.6, 0.42), nasaContainerMat, sign * 0.946, 1.38, 0.2, 0, (sign === -1 ? -Math.PI / 2 : Math.PI / 2), 0);
+      addDecal(new THREE.PlaneGeometry(1.6, 0.42), nasaContainerMat, sign * 0.946, 1.38, 0.2, 0, (sign === -1 ? -Math.PI / 2 : Math.PI / 2), 0);
     }
 
     // Pintu Kargo Belakang Berengsel Hidrolik

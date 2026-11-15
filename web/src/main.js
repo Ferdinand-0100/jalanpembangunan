@@ -16,9 +16,10 @@ import { VisualPerceptionSystem } from './mission/visualPerception.js';
 import { VisualPerceptionPanel } from './ui/visualPerceptionPanel.js';
 import { HistoryTracker } from './rover/historyTracker.js';
 import { LabBackpackWorkbench } from './ui/labBackpack.js';
+import { Minimap } from './ui/minimap.js';
 
 let frame, hf, terrain, rig, swarm, sun, input, marker, meta, mapPortal, regionMarkers, missionSystem;
-let vpms, vpPanel, historyTracker, labBackpack;
+let vpms, vpPanel, historyTracker, labBackpack, minimap;
 
 const hud = new Hud({
   onExaggeration: v => { frame.setExaggeration(v); terrain.build(); },
@@ -157,6 +158,14 @@ async function main() {
   sun.shadow.normalBias = 3;
   scene.add(sun, sun.target);
 
+  const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 3, 600000);
+  rig = new CameraRig(camera, renderer.domElement, hf, frame);
+  input = new RoverInput(() => rig.mode);
+
+  marker = new THREE.Mesh(new THREE.ConeGeometry(25, 120, 12), new THREE.MeshBasicMaterial({ color: 0x00e0ff }));
+  marker.visible = false;
+  scene.add(marker);
+
   terrain = new TerrainRenderer(scene, hf, frame, data.texture);
   hud.setMeshInfo(terrain.build(CONFIG.meshStride));
 
@@ -216,16 +225,36 @@ async function main() {
     console.warn('[HistoryTracker] Init failed (non-fatal):', e.message);
   }
 
-  marker = new THREE.Mesh(new THREE.ConeGeometry(25, 120, 12), new THREE.MeshBasicMaterial({ color: 0x00e0ff }));
-  marker.visible = false;
-  scene.add(marker);
-
-  const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 3, 600000);
-  rig = new CameraRig(camera, renderer.domElement, hf, frame);
-  input = new RoverInput(() => rig.mode);
-
   startRovers();
   updateSun();
+
+  // === Tactical Minimap & Maximized Surface Reconnaissance Station ===
+  try {
+    minimap = new Minimap({
+      meta,
+      heights: data.heights,
+      hf,
+      frame,
+      texture: data.texture,
+      swarm,
+      historyTracker,
+      regionMarkers,
+      missionSystem,
+      rig,
+      hud,
+      onNavigate: (X, Y) => {},
+    });
+    window.minimap = minimap;
+  } catch (e) {
+    console.error('[Minimap] Init failed:', e);
+  }
+
+  const openMinimapBtn = document.getElementById('openMinimapBtn');
+  if (openMinimapBtn) {
+    openMinimapBtn.onclick = () => {
+      if (minimap) minimap.toggleMaximize();
+    };
+  }
 
   document.getElementById('sources').innerHTML = meta.sources.map(s => `<li><b>${s.role}:</b> ${s.file}<br><span>${s.credit}</span></li>`).join('');
   hud.setInspect(null);
@@ -262,6 +291,9 @@ async function main() {
     } else if (e.code === 'KeyE') {
       // Shortcut E: Buka / Tutup Backpack Laboratorium
       if (labBackpack) labBackpack.toggle();
+    } else if (e.code === 'KeyM') {
+      // Shortcut M: Maksimalkan / Perkecil Peta Taktis & Terrain Mars
+      if (minimap) minimap.toggleMaximize();
     }
   });
 
@@ -326,6 +358,11 @@ async function main() {
         const stats = historyTracker.getTrackStats(swarm.activeIndex);
         hud.updateHistory(stats);
       }
+    }
+
+    // Update tactical minimap & maximized surface reconnaissance station
+    if (minimap) {
+      minimap.update();
     }
 
     const [lon, lat] = frame.projToLonLat(active.physics.X, active.physics.Y);
